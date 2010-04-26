@@ -41,58 +41,15 @@ body {
 		<script language="JavaScript" type="text/javascript">
 // <![CDATA[
 if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
-RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
-	var that = this;
-	var board = {};
-	var ctx   = null;
-	var pad   = 20;
-	var body  = {};
-	var inst  = {};
-	var empty = { "row": -1, "col": -1, "box": -1  };
-	var cell  = empty;
-	var db    = "";
-	var backGrad  = null;
-	var touchGrad = null;
-	var badGrad   = null;
-	var badCommand = false;
-	var badTimeout = null;
-	var showHints  = false;
-	var blocks     = [];
-	var DB_NAME    = "ricko-sudoku";
+RICKO.SudokuModelDBStore = function(dbName, dbVersion, dbTitle) {
+	var that       = this;
+	var db         = null;	
 	var DB_VERSION = "1.0";
 	var DB_TITLE   = "Sudoku Game by rickosborne.org";
-	var DB_BYTES   = 500000;
-	var boards = {
+	var DB_BYTES   = 100000;
+	var boards     = {
 		"Wikipedia": "53  7    6  195    98    6 8   6   34  8 3  17   2   6 6    28    419  5    8  79"
 	};
-	var getEl = function(n) { return window.document.getElementById(n); };
-	var onLoad = function() {
-		body  = getEl(parentId);
-		inst  = getEl(instructionsId);
-		board = getEl(containerId);
-		ctx   = board.getContext("2d");
-		db = setupDatabase();
-		resizeBoard();
-		var gridSize = getGridSize();
-		backGrad = ctx.createLinearGradient(0,0,gridSize,gridSize);
-			backGrad.addColorStop(0, "#eeeed0");
-			backGrad.addColorStop(1.0, "#ffffff");
-		touchGrad = ctx.createLinearGradient(0,0,0,gridSize / 9);
-			touchGrad.addColorStop(0, "rgba(63,127,255,0.2)");
-			touchGrad.addColorStop(1, "rgba(63,127,255,0.5)");
-		badGrad = ctx.createLinearGradient(0,0,0,gridSize / 9);
-			badGrad.addColorStop(0, "rgba(255,127,63,0.2)");
-			badGrad.addColorStop(1, "rgba(255,127,63,0.5)");
-		board.addEventListener("change", drawBoard, true);
-		board.addEventListener("click", clickBoard, true);
-		body.addEventListener("resize", drawBoard, true);
-		window.addEventListener("resize", drawBoard, true);
-		window.addEventListener("keydown", keyBoard, true);
-		drawBoard();
-		return {
-			loadBoard: loadBoard
-		};
-	}; // onLoad
 	var sqlFailed = function(tx, e) {
 		console.log("Transaction Failed:\n" + e.message);
 		alert("Transaction Failed:\n" + e.message);
@@ -108,36 +65,12 @@ RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
 			}, sqlFailed);
 		});
 	}; // logTable
-	var loadBoard = function(boardName, overwrite) {
-		var cells = boards[boardName] || boardName || "";
-		if(cells.length != 81) {
-			console.log("Board '" + boardName + "' seems to be malformed.");
-			return false;
-		} // if wrong length
-		db.transaction(function(tx) {
-			tx.executeSql("SELECT COUNT(*) AS cellCount FROM rs_cells;", [], function(tx, r) {
-				if(overwrite || (r.rows.length != 1) || (r.rows.item(0).cellCount == 0)) {
-					tx.executeSql("DELETE FROM rs_cells;", [], null, sqlFailed);
-					var row = 1;
-					var col = 0;
-					for (var i = 0; i < 81; i++) {
-						var term = cells.charAt(i);
-						col++;
-						if(col > 9) { col = 1; row++; }
-						if(term === " ") continue;
-						var box = (Math.floor((row - 1) / 3) * 3) + Math.floor((col - 1) / 3);
-						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, term ], null, sqlFailed);
-					} // for i
-				} // if overwriting
-			}, sqlFailed);
-		}, sqlFailed, drawBoard);
-	}; // loadBoard
-	var setupDatabase = function() {
+	var setupDatabase = function(dbName) {
 		if(!window.openDatabase) {
 			alert("Your browser does not appear to support the openDatabase call from the HTML5 Database Storage API.");
 			return null;
 		} // if not database
-		var db = openDatabase(DB_NAME, DB_VERSION, DB_TITLE, DB_BYTES);
+		db = openDatabase(dbName, DB_VERSION, DB_TITLE, DB_BYTES);
 		db.transaction(function(tx) {
 			tx.executeSql("DROP VIEW IF EXISTS rs_hints;", [], null, sqlFailed);
 			var tables = [ "rs_cells", "rs_possible", "rs_board", "rs_boxes", "rs_rows", "rs_cols", "rs_terms" ];
@@ -164,7 +97,170 @@ RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
 		});
 		// logTable(db, "rs_board");
 		return db;
+	}; // setupDatabase
+	var loadBoard = function(boardName, overwrite, doneCallback) {
+		var cells = boards[boardName] || boardName || "";
+		if(cells.length != 81) {
+			console.log("Board '" + boardName + "' seems to be malformed.");
+			return false;
+		} // if wrong length
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT COUNT(*) AS cellCount FROM rs_cells;", [], function(tx, r) {
+				if(overwrite || (r.rows.length != 1) || (r.rows.item(0).cellCount == 0)) {
+					tx.executeSql("DELETE FROM rs_cells;", [], null, sqlFailed);
+					var row = 1;
+					var col = 0;
+					for (var i = 0; i < 81; i++) {
+						var term = cells.charAt(i);
+						col++;
+						if(col > 9) { col = 1; row++; }
+						if(term === " ") continue;
+						var box = (Math.floor((row - 1) / 3) * 3) + Math.floor((col - 1) / 3);
+						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, term ], null, sqlFailed);
+					} // for i
+				} // if overwriting
+			}, sqlFailed);
+		}, sqlFailed, doneCallback);
+	}; // loadBoard
+	var deleteCell = function(row, col, doneCallback) {
+		db.transaction(function(tx) {
+			tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ row, col ], doneCallback, sqlFailed);
+		});
+	}; // deleteCell
+	var updateCell = function(row, col, box, term, doneCallback, invalidCallback) {
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT row, col, box, term AS blocks FROM rs_cells WHERE ((row = ?) OR (col = ?) OR (box = ?)) AND (term = ?);", [ row, col, box, term ], function(tx, res) {
+				if(res.rows.length == 0) {
+					tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ row, col ], function(tx) {
+						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, term ], doneCallback, sqlFailed);
+					}, sqlFailed);
+				} // if one row back
+				else if((res.rows.length == 1) && (res.rows.item(0).row == row) && (res.rows.item(0).col == col)) {}
+				else {
+					var blocks = [];
+					for(var i = 0; i < res.rows.length; i++) {
+						var rec = res.rows.item(i);
+						blocks.push({ row: rec.row - 1, col: rec.col - 1 });
+					}
+					invalidCallback(blocks);
+				}
+			}, sqlFailed);
+		});
+	}; // updateCell
+	var cheatAddHints = function(doneCallback) {
+		db.transaction(function(tx) {
+			tx.executeSql("INSERT INTO rs_cells (row, col, box, term) SELECT row, col, box, term FROM rs_hints;", [], doneCallback, sqlFailed);
+		});
+	}; // cheatAddHints
+	var saveBoard = function(doneCallback) {
+		db.transaction(function(tx) {
+			tx.executeSql("DELETE FROM rs_saved;", [], function(tx) {
+				tx.executeSql("INSERT INTO rs_saved (row, col, box, term) SELECT row, col, box, term FROM rs_cells;", [], null, sqlFailed);
+			}, sqlFailed);
+		});
+		if(doneCallback) doneCallback();
+	}; // saveBoard
+	var getHints = function(doneCallback) {
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT row, col, box, term FROM rs_hints;", [], function(tx, r) {
+				var hints = [];
+				for(var i = 0; i < r.rows.length; i++) {
+					var rec = r.rows.item(i);
+					hints.push({ row: rec.row - 1, col: rec.col - 1, box: rec.box, term: rec.term });
+				} // for i
+				doneCallback(hints);
+			}, sqlFailed);
+		});
+	}; // getHints
+	var getKnowns = function(doneCallback) {
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT row, col, box, term FROM rs_cells;", [], function(tx, r) {
+				var knowns = [];
+				for(var i = 0; i < r.rows.length; i++) {
+					var rec = r.rows.item(i);
+					knowns.push({ row: rec.row - 1, col: rec.col - 1, box: rec.box, term: rec.term });
+				} // for i
+				doneCallback(knowns);
+			}, sqlFailed);
+		}); // transaction
+	}; // getKnowns
+	setupDatabase(dbName);
+	return {
+		loadBoard:     loadBoard,
+		deleteCell:    deleteCell,
+		updateCell:    updateCell,
+		cheatAddHints: cheatAddHints,
+		saveBoard:     saveBoard,
+		getHints:      getHints,
+		getKnowns:     getKnowns
 	};
+}; // SudokuModelDBStore
+RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId) {
+	var that = this;
+	var getEl = function(n) { return window.document.getElementById(n); };
+	var body  = getEl(parentId);
+	var inst  = getEl(instructionsId);
+	var board = getEl(containerId);
+	var ctx   = board.getContext("2d");
+	var pad   = 20;
+	var backGrad  = null;
+	var touchGrad = null;
+	var badGrad   = null;
+	var showHints = false;
+	var empty = { "row": -1, "col": -1, "box": -1  };
+	var cell  = empty;
+	var badCommand = false;
+	var badTimeout = null;
+	var showHints  = false;
+	var blocks     = [];
+	var gridSize   = 0;
+	var cellSize   = 0;
+	var getHints   = null;
+	var getKnowns  = null;
+	var toggleHints = function() { showHints = !showHints; };
+	var setSelectedCell = function(row, col) {
+		buzzDone();
+		if((row == -1) || (col == -1))
+			cell = empty;
+		else
+			cell = makeCell(row, col);
+		drawBoard();
+	}; // setSelectedCell
+	var getSelectedCell = function() { return { row: cell.row, col: cell.col, box: cell.box }; };
+	var setBlocks = function(blockers) {
+		blocks = [];
+		for(var i = 0; i < blockers.length; i++)
+			blocks.push(makeCell(blockers[i].row, blockers[i].col));
+	}; // setBlocks
+	var setHintsCallback = function(hintsCallback) { getHints = hintsCallback; };
+	var setKnownsCallback = function(knownsCallback) { getKnowns = knownsCallback; };
+	var resizeBoard = function() {
+		var bh = body.innerHeight || body.clientHeight || body.offsetHeight || body.scrollHeight;
+		var bw = body.innerWidth  || body.clientWidth  || body.offsetWidth  || body.scrollWidth;
+		var w = Math.floor(((bw > bh) ? bh : bw) - (pad * 2));
+		var iw = bw - w - (pad * 3.5);
+		if (iw < 200) {
+			w -= (200 - iw); 
+			iw = 200;
+		}
+		if (board.width != w) {
+			buzzDone();
+			inst.style.width = iw + "px";
+			board.width = w;
+			board.height = w;
+			gridSize = (board.width > board.height) ? board.height : board.width;
+			cellSize = gridSize / 9.0;
+			backGrad = ctx.createLinearGradient(0,0,gridSize,gridSize);
+				backGrad.addColorStop(0, "#eeeed0");
+				backGrad.addColorStop(1.0, "#ffffff");
+			touchGrad = ctx.createLinearGradient(0,0,0,cellSize);
+				touchGrad.addColorStop(0, "rgba(63,127,255,0.2)");
+				touchGrad.addColorStop(1, "rgba(63,127,255,0.5)");
+			badGrad = ctx.createLinearGradient(0,0,0,cellSize);
+				badGrad.addColorStop(0, "rgba(255,127,63,0.2)");
+				badGrad.addColorStop(1, "rgba(255,127,63,0.5)");
+		} // if resized
+	}; // resizeBoard
 	var drawTerm = function(x, y, s, t, color) {
 		x += (s * 0.1);
 		y += (s * 0.1);
@@ -197,52 +293,6 @@ RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
 			ctx.stroke();
 		ctx.restore();
 	}; // drawTerm
-	var resizeBoard = function() {
-		var bh = body.innerHeight || body.clientHeight || body.offsetHeight || body.scrollHeight;
-		var bw = body.innerWidth  || body.clientWidth  || body.offsetWidth  || body.scrollWidth;
-		var w = Math.floor(((bw > bh) ? bh : bw) - (pad * 2));
-		var iw = bw - w - (pad * 3.5);
-		if (iw < 200) {
-			w -= (200 - iw); 
-			iw = 200;
-		}
-		if (board.width != w) {
-			inst.style.width = iw + "px";
-			board.width = w;
-			board.height = w;
-		} // if resized
-	}; // resizeBoard
-	var getGridSize = function() {
-		var w = board.width;
-		var h = board.height;
-		if (w > h) return h;
-		return w;
-	}; // getBoardSize
-	var deleteCell = function(r,c) {
-		db.transaction(function(tx) {
-			tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ r, c ], drawBoard, sqlFailed);
-		});
-	}; // deleteCell
-	var updateCell = function(r,c,b,t) {
-		db.transaction(function(tx) {
-			tx.executeSql("SELECT row, col, box, term AS blocks FROM rs_cells WHERE ((row = ?) OR (col = ?) OR (box = ?)) AND (term = ?);", [ r, c, b, t ], function(tx, res) {
-				if(res.rows.length == 0) {
-					tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ r, c ], function(tx) {
-						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ r, c, b, t ], drawBoard, sqlFailed);
-					}, sqlFailed);
-				} // if one row back
-				else if((res.rows.length == 1) && (res.rows.item(0).row == r) && (res.rows.item(0).col == c)) {}
-				else {
-					var cellSize = getGridSize() / 9.0;
-					for(var i = 0; i < res.rows.length; i++) {
-						var rec = res.rows.item(i);
-						blocks.push(makeCell(rec.row - 1, rec.col - 1, cellSize));
-					}
-					buzzCell();
-				}
-			}, sqlFailed);
-		});
-	}; // updateCell
 	var buzzCell = function() {
 		badCommand = true;
 		drawBoard();
@@ -253,126 +303,40 @@ RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
 		blocks = [];
 		if(badTimeout) { clearTimeout(badTimeout); badTimeout = null; }
 	}; // buzzDone
-	var keyBoard = function(event) {
-		if(!event) event = window.event;
-		var key = (event.keyCode || event.charCode);
-		if(key == 72) {
-			buzzDone();
-			showHints = !showHints;
-			drawBoard();
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;
-		} // hints
-		if(key == 67) {
-			buzzDone();
-			db.transaction(function(tx) {
-				tx.executeSql("INSERT INTO rs_cells (row, col, box, term) SELECT row, col, box, term FROM rs_hints;", [], drawBoard, sqlFailed);
-			});
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;
-		} // cheat
-		if(key == 82) {
-			buzzDone();
-			loadBoard('Wikipedia', true);
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;
-		} // reset
-		if(key == 83) {
-			buzzDone();
-			db.transaction(function(tx) {
-				tx.executeSql("DELETE FROM rs_saved;", [], function(tx) {
-					tx.executeSql("INSERT INTO rs_saved (row, col, box, term) SELECT row, col, box, term FROM rs_cells;", [], null, sqlFailed);
-				}, sqlFailed);
-			});
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;			
-		} // save
-		if((key >= 33) && (key <= 36)) {
-			var cellSize = getGridSize() / 9.0;
-			if(key == 33) cell = makeCell(0, 8, cellSize);
-			else if(key == 34) cell = makeCell(8, 0, cellSize);
-			else if(key == 35) cell = makeCell(8, 8, cellSize);
-			else if(key == 36) cell = makeCell(0, 0, cellSize);
-			buzzDone();
-			drawBoard();
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;
-		} // home, end, etc
-		if((cell.row == -1) || (cell.box == -1) || (cell.col == -1)) return;
-		// console.log(key);
-		if((key == 8) || (key == 48) || (key == 96) || (key == 46)) {
-			buzzDone();
-			deleteCell(cell.row + 1, cell.col + 1);
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;
-		}
-		if((key >= 37) && (key <= 40)) {
-			var newCell = null;
-			if((key == 37) && (cell.col > 0)) newCell = makeCell(cell.row, cell.col - 1, cell.size);
-			else if((key == 38) && (cell.row > 0)) newCell = makeCell(cell.row - 1, cell.col, cell.size);
-			else if((key == 39) && (cell.col < 8)) newCell = makeCell(cell.row, cell.col + 1, cell.size);
-			else if((key == 40) && (cell.row < 8)) newCell = makeCell(cell.row + 1, cell.col, cell.size);
-			if(newCell != null) {
-				cell = newCell;
-				buzzDone();
-				drawBoard();
-			}
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;
-		}
-		if(((key >= 49) && (key <= 57)) || ((key >= 97) && (key <= 105))) {
-			buzzDone();
-			updateCell(cell.row + 1, cell.col + 1, cell.box, key - (key > 95 ? 96 : 48));
-			event.cancelBubble = true;
-			if(event.stopPropagation) event.stopPropagation();
-			return;
-		}
-	}; // keyBoard
 	var clickBoard = function(event) {
 		if(!event) event = window.event;
 		var x = event.clientX - board.offsetLeft;
 		var y = event.clientY - board.offsetTop;
-		var gridSide = getGridSize();
-		var boxSide = gridSide / 9.0;
-		var row = Math.floor(y / boxSide);
-		var col = Math.floor(x / boxSide);
+		var row = Math.floor(y / cellSize);
+		var col = Math.floor(x / cellSize);
 		var box = (Math.floor(row / 3) * 3) + Math.floor(col / 3);
 		if ((col >= 0) && (col <= 8) && (row >= 0) && (row <= 8) && (box >= 0) && (box <= 8) && ((row != cell.row) || (col != cell.col)))
-			cell = makeCell(row, col, boxSide);
+			cell = makeCell(row, col);
 		else
-			cell = makeCell(-1, -1, boxSide);
+			cell = makeCell(-1, -1);
 		drawBoard();
 		event.cancelBubble = true;
 		if(event.stopPropagation) event.stopPropagation();
 	}; // clickBoard
-	var makeCell = function(r,c,s) {
+	var makeCell = function(row, col) {
 		var ell = {
-			"row": r,
-			"col": c,
-			"box": r == -1 ? -1 : (Math.floor(r / 3) * 3) + Math.floor(c / 3),
-			"size": s
+			"row": row,
+			"col": col,
+			"box": row == -1 ? -1 : (Math.floor(row / 3) * 3) + Math.floor(col / 3),
+			"size": cellSize
 		};
-		if ((r != -1) && (c != -1)) {
-			ell.x1 = Math.round(c * s);
-			ell.x2 = Math.round(ell.x1 + s);
-			ell.y1 = Math.round(r * s);
-			ell.y2 = Math.round(ell.y1 + s);
-			ell.w = Math.round(s);
-			ell.h = Math.round(s);
+		if ((row != -1) && (col != -1)) {
+			ell.x1 = Math.round(col * cellSize);
+			ell.x2 = Math.round(ell.x1 + cellSize);
+			ell.y1 = Math.round(row * cellSize);
+			ell.y2 = Math.round(ell.y1 + cellSize);
+			ell.w = Math.round(cellSize);
+			ell.h = Math.round(cellSize);
 		}
 		return ell;
-	}; // cellExtents
+	}; // makeCell
 	var drawBoard = function() {
 		resizeBoard();
-		var gridSize = getGridSize();
-		var cellSize = gridSize / 9.0;
 		ctx.save();
 			// background gradient
 			ctx.fillStyle = backGrad;
@@ -381,8 +345,12 @@ RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
 		if(blocks.length > 0) {
 			ctx.save();
 				ctx.fillStyle = badGrad;
-				for(var i = 0; i < blocks.length; i++)
-					ctx.fillRect(blocks[i].x1, blocks[i].y1, blocks[i].w, blocks[i].h);
+				for(var i = 0; i < blocks.length; i++) {
+					ctx.save();
+					ctx.translate(blocks[i].x1, blocks[i].y1);
+					ctx.fillRect(0, 0, blocks[i].w, blocks[i].h);	
+					ctx.restore();
+				} // for i
 			ctx.restore();
 		} // if blockers
 		if (cell.box != -1) {
@@ -432,34 +400,127 @@ RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
 				ctx.strokeRect(2,2,gridSize-4,gridSize-4);
 			ctx.restore();
 		ctx.restore();
-		if(showHints) {
-			db.transaction(function(tx) {
-				tx.executeSql("SELECT row, col, box, term FROM rs_hints;", [], function(tx, r) {
-					for(var i = 0; i < r.rows.length; i++) {
-						var rec = r.rows.item(i);
-						var c = makeCell(rec.row - 1, rec.col - 1, cellSize);
-						drawTerm(c.x1, c.y1, c.w, rec.term, "#cccccc");
-					} // for i
-				}, sqlFailed);
-			});
-		}
-		db.transaction(function(tx) {
-			tx.executeSql("SELECT row, col, box, term FROM rs_cells;", [], function(tx, r) {
-				for(var i = 0; i < r.rows.length; i++) {
-					var rec = r.rows.item(i);
-					var c = makeCell(rec.row - 1, rec.col - 1, cellSize);
-					drawTerm(c.x1, c.y1, c.w, rec.term, r.rows.length == 81 ? "#33ff33" : "#000000");
+		if(showHints && getHints)
+			getHints(function(hints) {
+				for(var i = 0; i < hints.length; i++) {
+					var c = makeCell(hints[i].row, hints[i].col);
+					drawTerm(c.x1, c.y1, c.w, hints[i].term, "#cccccc");
 				} // for i
-			}, sqlFailed);
-		}); // transaction
+			});
+		if(getKnowns)
+			getKnowns(function(knowns) {
+				for(var i = 0; i < knowns.length; i++) {
+					var c = makeCell(knowns[i].row, knowns[i].col);
+					drawTerm(c.x1, c.y1, c.w, knowns[i].term, knowns.length == 81 ? "#33ff33" : "#000000");
+				} // for i
+			});
 	}; // drawBoard
-	// onLoad();
-	return onLoad();
+	return {
+		resizeBoard:       resizeBoard,
+		drawBoard:         drawBoard,
+		toggleHints:       toggleHints,
+		setSelectedCell:   setSelectedCell,
+		getSelectedCell:   getSelectedCell,
+		clickBoard:        clickBoard,
+		setHintsCallback:  setHintsCallback,
+		setKnownsCallback: setKnownsCallback,
+		setBlocks:         setBlocks,
+		buzzCell:          buzzCell
+	};
+}; // SudokuViewCanvas
+RICKO.SudokuBoard = function(modelObj, viewObj) {
+	var that = this;
+	var model = modelObj;
+	var view  = viewObj;
+	view.setHintsCallback(model.getHints);
+	view.setKnownsCallback(model.getKnowns);
+	view.resizeBoard();
+	view.drawBoard();
+	var loadBoard = function(boardName, overwrite) {
+		model.loadBoard(boardName, overwrite, view.drawBoard);
+	}; // loadBoard
+	var keyBoard = function(event) {
+		if(!event) event = window.event;
+		var key = (event.keyCode || event.charCode);
+		if(key == 72) {
+			view.toggleHints();
+			view.drawBoard();
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // hints
+		if(key == 67) {
+			model.cheatAddHints(view.drawBoard);
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // cheat
+		if(key == 82) {
+			loadBoard('Wikipedia', true);
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // reset
+		if(key == 83) {
+			model.saveBoard();
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;			
+		} // save
+		if((key >= 33) && (key <= 36)) {
+			if(key == 33)      view.setSelectedCell(0,8);
+			else if(key == 34) view.setSelectedCell(8,0);
+			else if(key == 35) view.setSelectedCell(8,8);
+			else if(key == 36) view.setSelectedCell(0,0);
+			view.drawBoard();
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // home, end, etc
+		var cell = view.getSelectedCell();
+		if((cell.row == -1) || (cell.box == -1) || (cell.col == -1)) return;
+		// console.log(key);
+		if((key == 8) || (key == 48) || (key == 96) || (key == 46)) {
+			model.deleteCell(cell.row + 1, cell.col + 1, view.drawBoard);
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // delete/clear/zero
+		if((key >= 37) && (key <= 40)) {
+			var newCell = null;
+			if((key == 37) && (cell.col > 0))      newCell = [ cell.row, cell.col - 1 ];
+			else if((key == 38) && (cell.row > 0)) newCell = [ cell.row - 1, cell.col ];
+			else if((key == 39) && (cell.col < 8)) newCell = [ cell.row, cell.col + 1 ];
+			else if((key == 40) && (cell.row < 8)) newCell = [ cell.row + 1, cell.col ];
+			if(newCell != null)
+				view.setSelectedCell(newCell[0], newCell[1]);
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		}
+		if(((key >= 49) && (key <= 57)) || ((key >= 97) && (key <= 105))) {
+			model.updateCell(cell.row + 1, cell.col + 1, cell.box, key - (key > 95 ? 96 : 48), view.drawBoard, function(blockers) {
+				view.setBlocks(blockers);
+				view.buzzCell();
+			});
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // digit
+	}; // keyBoard
+	board.addEventListener("change", view.drawBoard, true);
+	board.addEventListener("click", view.clickBoard, true);
+	body.addEventListener("resize", view.drawBoard, true);
+	window.addEventListener("resize", view.drawBoard, true);
+	window.addEventListener("keydown", keyBoard, true);
+	return {
+		loadBoard: loadBoard
+	};
 } // SudokuBoard
 // ]]>
 		</script>
 	</head>
-	<body onload="sudokuBoard = new RICKO.SudokuBoard('board','body','inst');sudokuBoard.loadBoard('Wikipedia', false);" id="body" onresize="sudokuBoard.drawBoard();" onresizeend="sudokuBoard.drawBoard();">
+	<body onload="sudokuBoard = new RICKO.SudokuBoard(new RICKO.SudokuModelDBStore('ricko-sudoku'), new RICKO.SudokuViewCanvas('board','body','inst'));sudokuBoard.loadBoard('Wikipedia', false);" id="body" onresize="sudokuBoard.drawBoard();" onresizeend="sudokuBoard.drawBoard();">
 		<canvas id="board">
 			<p>It looks like your browser doesn't support the <kbd>canvas</kbd> element.  Sorry!</p>
 		</canvas>
