@@ -133,6 +133,10 @@ RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
 		}, sqlFailed, drawBoard);
 	}; // loadBoard
 	var setupDatabase = function() {
+		if(!window.openDatabase) {
+			alert("Your browser does not appear to support the openDatabase call from the HTML5 Database Storage API.");
+			return null;
+		} // if not database
 		var db = openDatabase(DB_NAME, DB_VERSION, DB_TITLE, DB_BYTES);
 		db.transaction(function(tx) {
 			tx.executeSql("DROP VIEW IF EXISTS rs_hints;", [], null, sqlFailed);
