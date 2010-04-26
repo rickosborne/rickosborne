@@ -1,0 +1,39 @@
+This is a perl script I wrote to help me convert a directory of CD-ripped
+MP3 files into an iPod-compatible M4B file.  It depends on a number of 
+free programs that I won't outline here -- you'll have to dig through the
+source.  With a little tweaking, it does work on Windows, Linux, and OSX.
+
+Since iPods don't like M4B files longer than ~5.5hrs, this script tries to
+combine the MP3 files in such a way as to get approximately equi-time files
+without going over that limit.  I'm not interested in solving the Knapsack
+Problem, so it's not the brightest algorithm, and generally requires some
+hand-holding.
+
+It will also use the appropriate tools to create chapter marks for each MP3,
+or with the --noempty or --skipre options, for each meaningful MP3 title.
+
+If you have a JPEG image in the current directory, it will try to use it as
+cover art.
+
+General workflow:
+ * Run the script once to see where the guesstimated splits are.
+ * Add --skipre to not chapterize in the wrong places
+ * Add --splits to make sure you don't split in the middle of a chapter
+
+For best results, name your parent directory 'Artist (Year) Album'.  It'll
+try to get Artist, Year, and Album from the ID3 tags, but on multi-disc sets
+you'll be lucky if some of the discs aren't mis-coded.
+
+
+Usage:
+audiobookify.pl
+  --performer 'name'
+  --margin 1.1        Modify the wiggle room left in files.
+  --splits '1,3,5'    Split for new M4B files at specific MP3s (chapters, etc).
+  --noempty           Don't make chapter marks for files with empty titles.
+  --quality 80        Quantization quality for FFMPEG.
+  --skipre 'regex'    Regular expression of MP3 titles to ignore (not chapters)
+
+
+TODO:
+ * Make the splits smart enough to not split on an ignored track.
