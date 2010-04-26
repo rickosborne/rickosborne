@@ -1,6 +1,6 @@
-This is a perl script I wrote to help me convert a directory of CD-ripped
-MP3 files into an iPod-compatible M4B file.  It depends on a number of 
-free programs that I won't outline here -- you'll have to dig through the
+Audiobookify is a perl script I wrote to help me convert a directory of
+CD-ripped MP3 files into an iPod-compatible M4B file.  It depends on a number
+of free programs that I won't outline here -- you'll have to dig through the
 source.  With a little tweaking, it does work on Windows, Linux, and OSX.
 
 Since iPods don't like M4B files longer than ~5.5hrs, this script tries to
@@ -37,3 +37,10 @@ audiobookify.pl
 
 TODO:
  * Make the splits smart enough to not split on an ignored track.
+
+OTHER TOOLS
+
+There are a few other Perl scripts that I've whipped up to convert CUE files
+to POD files, etc.  They were sort of the alpha versions of audiobookify and
+are preserved here for posterity.
+
