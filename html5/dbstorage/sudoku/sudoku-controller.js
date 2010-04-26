@@ -7,7 +7,8 @@
  */
 
 // Create/use the RICKO namespace, to avoid collisions with any other libraries
-if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
+if (typeof RICKO === "undefined" || !RICKO) { var RICKO = {}; }
+if (typeof console === "undefined" || !console) { var console = { log: function(msg) { alert(msg); } }; }
 
 /**
  * I am the primary object definition for the controller.
@@ -47,7 +48,9 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 	 * @param {Object} event	The key press event.
 	 */
 	function keyBoard (event) {
-		if(!event) event = window.event;
+		if (!event) {
+			event = window.event;
+		}
 		var key = (event.keyCode || event.charCode);
 		var cell = view.getSelectedCell();
 		var done = false;
@@ -68,13 +71,15 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 			done = true;
 		} // save
 		else if((key >= 33) && (key <= 36)) {
-			if(key == 33)      view.setSelectedCell(0,8);
-			else if(key == 34) view.setSelectedCell(8,0);
-			else if(key == 35) view.setSelectedCell(8,8);
-			else if(key == 36) view.setSelectedCell(0,0);
+			if(key == 33)      { view.setSelectedCell(0,8); }   
+			else if(key == 34) { view.setSelectedCell(8,0); }
+			else if(key == 35) { view.setSelectedCell(8,8); }
+			else if(key == 36) { view.setSelectedCell(0,0); }
 			done = true;
 		} // home, end, etc
-		else if((cell.row == -1) || (cell.box == -1) || (cell.col == -1)) return;
+		else if((cell.row == -1) || (cell.box == -1) || (cell.col == -1)) {
+			return;
+		}
 		// console.log(key);
 		else if((key == 8) || (key == 48) || (key == 96) || (key == 46)) {
 			model.deleteCell(cell.row + 1, cell.col + 1, updateDigits);
@@ -82,12 +87,13 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 		} // delete/clear/zero
 		else if((key >= 37) && (key <= 40)) {
 			var newCell = null;
-			if((key == 37) && (cell.col > 0))      newCell = [ cell.row, cell.col - 1 ];
-			else if((key == 38) && (cell.row > 0)) newCell = [ cell.row - 1, cell.col ];
-			else if((key == 39) && (cell.col < 8)) newCell = [ cell.row, cell.col + 1 ];
-			else if((key == 40) && (cell.row < 8)) newCell = [ cell.row + 1, cell.col ];
-			if(newCell != null)
+			if((key == 37) && (cell.col > 0))      { newCell = [ cell.row, cell.col - 1 ]; }
+			else if((key == 38) && (cell.row > 0)) { newCell = [ cell.row - 1, cell.col ]; }
+			else if((key == 39) && (cell.col < 8)) { newCell = [ cell.row, cell.col + 1 ]; }
+			else if((key == 40) && (cell.row < 8)) { newCell = [ cell.row + 1, cell.col ]; }
+			if (newCell !== null) {
 				view.setSelectedCell(newCell[0], newCell[1]);
+			}
 			done = true;
 		} // arrows
 		else if(((key >= 49) && (key <= 57)) || ((key >= 97) && (key <= 105))) {
@@ -96,8 +102,9 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 		} // digit
 		if (done) {
 			event.cancelBubble = true;
-			if (event.stopPropagation) 
+			if (event.stopPropagation) {
 				event.stopPropagation();
+			}
 		}
 	} // keyBoard
 	
@@ -107,7 +114,7 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 	window.addEventListener("keydown", keyBoard, true);
 	model.getBoards(function(boardNames){
 		view.setBoards(boardNames, function(boardName){
-			loadBoard(boardName, true)
+			loadBoard(boardName, true);
 		});
 	});
 	
@@ -117,4 +124,4 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 	return {
 		loadBoard: loadBoard
 	};
-} // SudokuBoard
+}; // SudokuBoard

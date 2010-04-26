@@ -8,6 +8,7 @@
 
 // Create/use the RICKO namespace, to avoid collisions with any other libraries
 if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
+if(typeof console === "undefined" || !console) { var console = { log: function(msg) { alert(msg); } }; }
 
 /**
  * I am the primary object definition for the view.  As the Canvas is
@@ -22,8 +23,7 @@ if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
  * @todo	The instructions element management is a bit of a hack.
  */
 RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsId) {
-	var that = this;
-	function getEl(n) { return window.document.getElementById(n); };
+	function getEl(n) { return window.document.getElementById(n); }
 	var body       = getEl(parentId);
 	var inst       = getEl(instructionsId);
 	var container  = getEl(containerId);
@@ -45,7 +45,6 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 	var cell       = empty;
 	var badCommand = false;
 	var badTimeout = null;
-	var showHints  = false;
 	var blocks     = [];
 	var knowns     = [];
 	var hints      = [];
@@ -58,7 +57,7 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 	/**
 	 * Turn on/off hint visibility.
 	 */
-	function toggleHints () { showHints = !showHints; drawDigits(); };
+	function toggleHints () { showHints = !showHints; drawDigits(); }
 	
 	/**
 	 * Make the given cell the "cursor", highlighting it.
@@ -67,10 +66,12 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 	 * @param {Integer} col	Number of the column, in 0-base, with 0 being the leftmost row.
 	 */
 	function setSelectedCell(row, col) {
-		if((row == -1) || (col == -1))
+		if ((row == -1) || (col == -1)) {
 			cell = empty;
-		else
+		}
+		else {
 			cell = makeCell(row, col);
+		}
 		drawLights();
 	} // setSelectedCell
 	
@@ -87,8 +88,9 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 	 */
 	function setBlocks (blockers) {
 		blocks = [];
-		for(var i = 0; i < blockers.length; i++)
+		for (var i = 0; i < blockers.length; i++) {
 			blocks.push(makeCell(blockers[i].row, blockers[i].col));
+		} // for i
 		badCommand = true;
 		badTimeout = setTimeout(function() {
 			badCommand = false;
@@ -116,8 +118,9 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 	 */
 	function setHints (hintCells) {
 		hints = hintCells;
-		if (showHints)
+		if (showHints) {
 			drawDigits();
+		} // if showHints
 	} // setKnowns
 	
 	/**
@@ -127,13 +130,23 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 	 */
 	function setPossible (possibleCells) {
 		possible = possibleCells;
-		if (showHints)
+		if (showHints) {
 			drawDigits();
+		} // if showHints
 	} // setKnowns
 	
 	function setBoards (boardNames, onClick) {
-		while(boards.lastChild)
+		while (boards.lastChild) {
 			boards.removeChild(boards.lastChild);
+		} // while boards has children
+		var clickFunc = function(event) {
+			if (!event) {
+				event = window.event;
+			}
+			var boardName = unescape(event.target.hash.substring(1,this.href.length));
+			onClick(boardName);
+			return false;
+		};
 		for(var i = 0; i < boardNames.length; i++) {
 			var li = document.createElement("li");
 			var a = document.createElement("a");
@@ -141,7 +154,7 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 			a.href = '#' + boardNames[i];
 			a.appendChild(document.createTextNode(boardNames[i]));
 			boards.appendChild(li);
-			a.addEventListener('click', function(event) { if(!event) event = window.event; var boardName = unescape(event.target.hash.substring(1,this.href.length)); onClick(boardName); return false; } );
+			a.addEventListener('click', clickFunc);
 		} // for i
 	} // setBoards
 	
@@ -201,8 +214,8 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 		y += (s * 0.1);
 		s *= 0.8;
 		bctx.save();
-			if (t == 9) { // cheat by drawing a rotated 6
-				t = 6;
+			if (t == "9") { // cheat by drawing a rotated 6
+				t = "6";
 				bctx.translate(x + s, y + s);
 				bctx.scale(s / -16, s / -16);
 			} else {
@@ -215,15 +228,15 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 			bctx.lineWidth   = 1.15;
 			bctx.beginPath();
 			switch(t) {
-				case 1: bctx.moveTo(6, 3); bctx.lineTo(8, 2); bctx.lineTo(8, 14); break;
-				case 2: bctx.moveTo(5, 5); bctx.arc(8, 5, 3, Math.PI, Math.PI / 5, false); bctx.lineTo(5, 14); bctx.lineTo(11, 14);  break;
-				case 3: bctx.moveTo(5.25, 5.25); bctx.arc(8, 5, 2.75, Math.PI, Math.PI * 7 / 16, false); bctx.arc(8, 11, 3, Math.PI * -7 / 16, Math.PI, false); break;
-				case 4: bctx.moveTo(13, 9); bctx.lineTo(3, 9); bctx.lineTo(9, 2); bctx.lineTo(9, 14); break;
-				case 5: bctx.moveTo(12, 2); bctx.lineTo(6, 2); bctx.lineTo(4.5, 6); bctx.arc(8, 9.5, 4.5, Math.PI * -3 / 4, Math.PI * 3 / 4, false); break;
-				case 6: bctx.moveTo(10, 2); bctx.lineTo(5.5, 8); bctx.arc(8, 10.5, 3.5, Math.PI * -4 / 5, Math.PI * -2.5 / 5, true); break;
-				case 7: bctx.moveTo(5, 2); bctx.lineTo(11, 2); bctx.lineTo(5, 14); bctx.moveTo(7, 7.5); bctx.lineTo(9, 8); break;
-				case 8: bctx.arc(8, 4.6, 2.6, Math.PI * 5 / 8, Math.PI * 3 / 8, false); bctx.arc(8, 10, 3.4, Math.PI * 2 / -8, Math.PI * 10 / 8, false); bctx.closePath(); break;
-			}; // switch t
+				case "1": bctx.moveTo(6, 3); bctx.lineTo(8, 2); bctx.lineTo(8, 14); break;
+				case "2": bctx.moveTo(5, 5); bctx.arc(8, 5, 3, Math.PI, Math.PI / 5, false); bctx.lineTo(5, 14); bctx.lineTo(11, 14);  break;
+				case "3": bctx.moveTo(5.25, 5.25); bctx.arc(8, 5, 2.75, Math.PI, Math.PI * 7 / 16, false); bctx.arc(8, 11, 3, Math.PI * -7 / 16, Math.PI, false); break;
+				case "4": bctx.moveTo(13, 9); bctx.lineTo(3, 9); bctx.lineTo(9, 2); bctx.lineTo(9, 14); break;
+				case "5": bctx.moveTo(12, 2); bctx.lineTo(6, 2); bctx.lineTo(4.5, 6); bctx.arc(8, 9.5, 4.5, Math.PI * -3 / 4, Math.PI * 3 / 4, false); break;
+				case "6": bctx.moveTo(10, 2); bctx.lineTo(5.5, 8); bctx.arc(8, 10.5, 3.5, Math.PI * -4 / 5, Math.PI * -2.5 / 5, true); break;
+				case "7": bctx.moveTo(5, 2); bctx.lineTo(11, 2); bctx.lineTo(5, 14); bctx.moveTo(7, 7.5); bctx.lineTo(9, 8); break;
+				case "8": bctx.arc(8, 4.6, 2.6, Math.PI * 5 / 8, Math.PI * 3 / 8, false); bctx.arc(8, 10, 3.4, Math.PI * 2 / -8, Math.PI * 10 / 8, false); bctx.closePath(); break;
+			} // switch t
 			bctx.stroke();
 		bctx.restore();
 	} // drawTerm
@@ -235,7 +248,9 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 	 * @todo	Should this be in the controller?  Or maybe just have the controller pass in the (x,y)?
 	 */
 	function clickBoard (event) {
-		if(!event) event = window.event;
+		if (!event) {
+			event = window.event;
+		}
 		var target = event.target || event.toElement || event.srcElement;
 		// if(target.tagName.toLowerCase() != "canvas") return;
 		var x = event.clientX - target.offsetLeft;
@@ -243,12 +258,16 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 		var row = Math.floor(y / cellSize);
 		var col = Math.floor(x / cellSize);
 		var box = (Math.floor(row / 3) * 3) + Math.floor(col / 3);
-		if ((col >= 0) && (col <= 8) && (row >= 0) && (row <= 8) && (box >= 0) && (box <= 8) && ((row != cell.row) || (col != cell.col)))
+		if ((col >= 0) && (col <= 8) && (row >= 0) && (row <= 8) && (box >= 0) && (box <= 8) && ((row != cell.row) || (col != cell.col))) {
 			cell = makeCell(row, col);
-		else
+		}
+		else {
 			cell = makeCell(-1, -1);
+		}
 		event.cancelBubble = true;
-		if(event.stopPropagation) event.stopPropagation();
+		if (event.stopPropagation) {
+			event.stopPropagation();
+		}
 		drawLights();
 	} // clickBoard
 	
@@ -401,13 +420,14 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsI
 			var c = makeCell(knowns[i].row, knowns[i].col);
 			drawTerm(c.x1, c.y1, c.w, knowns[i].term, knowns.length == 81 ? "#33ff33" : "#000000");
 		} // for i
-	}; // drawDigits
+	} // drawDigits
 	
 	/*
 	 * Begin constructor code.
 	 */
-	while(container.lastChild)
+	while (container.lastChild) {
 		container.removeChild(container.lastChild);
+	}
 	light = document.createElement("canvas");
 	grid  = document.createElement("canvas");
 	board = document.createElement("canvas");

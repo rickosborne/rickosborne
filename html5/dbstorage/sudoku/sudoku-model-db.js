@@ -7,7 +7,8 @@
  */
 
 // Create/use the RICKO namespace, to avoid collisions with any other libraries
-if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
+if(typeof RICKO === "undefined" || !RICKO) { var RICKO = {}; }
+if(typeof console === "undefined" || !console) { var console = { log: function(msg) { alert(msg); } }; }
 
 /**
  * I am the primary object definition for the model.  With the exception of my
@@ -20,7 +21,6 @@ if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
  * @constructor
  */
 RICKO.SudokuModelDBStore = function(dbName) {
-	var that       = this;
 	var db         = null;	
 	var DB_VERSION = "1.0";
 	var DB_TITLE   = "Sudoku Game by Rick Osborne";
@@ -59,8 +59,9 @@ RICKO.SudokuModelDBStore = function(dbName) {
 			tx.executeSql("SELECT * FROM " + tableName + ";", [], function(tx, r) {
 				console.log("Table " + tableName + " (" + r.rows.length + "):");
 				var rows = [];
-				for(var i = 0; i < r.rows.length; i++)
+				for (var i = 0; i < r.rows.length; i++) {
 					rows.push(r.rows.item(i));
+				} // for i
 				console.log(rows);
 			}, sqlFailed);
 		});
@@ -85,7 +86,7 @@ RICKO.SudokuModelDBStore = function(dbName) {
 		} // if wrong length
 		db.transaction(function(tx) {
 			tx.executeSql("SELECT COUNT(*) AS cellCount FROM rs_cells;", [], function(tx, r) {
-				if(overwrite || (r.rows.length != 1) || (r.rows.item(0).cellCount == 0)) {
+				if(overwrite || (r.rows.length != 1) || (r.rows.item(0).cellCount === 0)) {
 					tx.executeSql("DELETE FROM rs_cells;", [], null, sqlFailed);
 					var row = 1;
 					var col = 0;
@@ -93,7 +94,9 @@ RICKO.SudokuModelDBStore = function(dbName) {
 						var term = cells.charAt(i);
 						col++;
 						if(col > 9) { col = 1; row++; }
-						if(term === " ") continue;
+						if ((term < "1") || (term > "9")) {
+							continue;
+						} // if not a digit
 						var box = (Math.floor((row - 1) / 3) * 3) + Math.floor((col - 1) / 3);
 						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, term ], null, sqlFailed);
 					} // for i
@@ -128,13 +131,15 @@ RICKO.SudokuModelDBStore = function(dbName) {
 	 * @param {Integer} 	term           	The 1-based digit to put in the cell.  Valid digits are (1-9).
 	 * @param {Function}	doneCallback   	Next step once the cell has been successfully updated.
 	 * @param {Function}	invalidCallback	Next step if the cell cannot be updated with the given digit.
+	 * 
+	 * @todo The SELECT UNION prevents digits beyond the basic rules of the game, as it uses some strategy.  Is this going too far?
 	 */
 	function updateCell (row, col, box, term, doneCallback, invalidCallback) {
 		db.transaction(function(tx) {
-			tx.executeSql("SELECT row, col, box, term AS blocks FROM rs_cells WHERE ((row = ?) OR (col = ?) OR (box = ?)) AND (term = ?) UNION ALL SELECT b.row, b.col, b.box, p.term FROM rs_pointing AS p INNER JOIN rs_possible3 AS b ON ((p.row = b.row) OR (p.col = b.col)) AND (p.box = b.box) AND (p.term = b.term) WHERE ((p.row = ?) OR (p.col = ?)) AND (p.box <> ?) AND (p.term = ?);", [ row, col, box, term, row, col, box, term ], function(tx, res) {
-				if(res.rows.length == 0) {
+			tx.executeSql("SELECT row, col, box, term AS blocks FROM rs_cells WHERE ((row = ?) OR (col = ?) OR (box = ?)) AND (term = ?) UNION ALL SELECT b.row, b.col, b.box, p.term FROM rs_pointing AS p INNER JOIN rs_possible3 AS b ON ((p.row = b.row) OR (p.col = b.col)) AND (p.box = b.box) AND (p.term = b.term) WHERE ((p.row = ?) OR (p.col = ?)) AND (p.box <> ?) AND (p.term = ?);", [ row, col, box, "" + term, row, col, box, "" + term ], function(tx, res) {
+				if(res.rows.length === 0) {
 					tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ row, col ], function(tx) {
-						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, term ], doneCallback, sqlFailed);
+						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, "" + term ], doneCallback, sqlFailed);
 					}, sqlFailed);
 				} // if one row back
 				else if((res.rows.length == 1) && (res.rows.item(0).row == row) && (res.rows.item(0).col == col)) {
@@ -144,7 +149,7 @@ RICKO.SudokuModelDBStore = function(dbName) {
 					var blocks = [];
 					for(var i = 0; i < res.rows.length; i++) {
 						var rec = res.rows.item(i);
-						blocks.push({ row: rec.row == null ? -1 : rec.row - 1, col: rec.col == null ? -1 : rec.col - 1 });
+						blocks.push({ row: rec.row === null ? -1 : rec.row - 1, col: rec.col === null ? -1 : rec.col - 1 });
 					}
 					invalidCallback(blocks);
 				}
@@ -242,8 +247,11 @@ RICKO.SudokuModelDBStore = function(dbName) {
 	function getBoards(doneCallback) {
 		setTimeout(function() {
 			var boardNames = [];
-			for(var n in boards)
-				boardNames.push(n);
+			for (var n in boards) {
+				if (boards.hasOwnProperty(n)) {
+					boardNames.push(n);
+				} // if not in the prototype
+			} // for n
 			doneCallback(boardNames);
 		}, 1);
 	} // getBoards
@@ -265,12 +273,14 @@ RICKO.SudokuModelDBStore = function(dbName) {
 	 * due to the nature of the game, it's just as easy to drop and recreate everything each time.
 	 */
 	db.transaction(function(tx) {
-		var views = [ "rs_possible4", "rs_possible3", "rs_hints", "rs_pointing", "rs_possible2" ];
-		for(var i = 0; i < views.length; i++)
+		var views = [ "rs_possible4", "rs_twofers", "rs_possible3", "rs_hints", "rs_pointing", "rs_possible2" ];
+		for (var i = 0; i < views.length; i++) {
 			tx.executeSql("DROP VIEW IF EXISTS " + views[i] + ";", [], null, sqlFailed);
+		} // for i
 		var tables = [ "rs_cells", "rs_possible", "rs_board", "rs_boxes", "rs_rows", "rs_cols", "rs_terms" ];
-		for(var i = 0; i < tables.length; i++)
+		for (var i = 0; i < tables.length; i++) {
 			tx.executeSql("DROP TABLE IF EXISTS " + tables[i] + ";", [], null, sqlFailed);
+		} // for i
 		tx.executeSql("CREATE TABLE rs_terms (term CHAR(1) NOT NULL PRIMARY KEY);", [], null, sqlFailed);
 		tx.executeSql("CREATE TABLE rs_rows  (row  INTEGER NOT NULL PRIMARY KEY);", [], null, sqlFailed);
 		tx.executeSql("CREATE TABLE rs_cols  (col  INTEGER NOT NULL PRIMARY KEY);", [], null, sqlFailed);
@@ -282,11 +292,11 @@ RICKO.SudokuModelDBStore = function(dbName) {
 			tx.executeSql("INSERT INTO rs_boxes (box)  VALUES (?);", [ i - 1 ], null, sqlFailed);
 		} // for i
 		tx.executeSql("CREATE TABLE rs_board (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box));", [], null, sqlFailed);
-		tx.executeSql("INSERT INTO rs_board (row, col, box) SELECT row, col, (((row - 1) / 3) * 3) + ((col - 1) / 3) FROM rs_rows, rs_cols", [], null, sqlFailed);
-		tx.executeSql("CREATE TABLE rs_possible (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col, term), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
+		tx.executeSql("INSERT INTO rs_board (row, col, box) SELECT ROW, col, (CAST(((ROW - 1) / 3) AS INTEGER) * 3) + CAST((col - 1) / 3 AS INTEGER) FROM rs_rows, rs_cols", [], null, sqlFailed);
+		tx.executeSql("CREATE TABLE rs_possible (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term CHAR(1) NOT NULL, PRIMARY KEY (row, col, term), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
 		tx.executeSql("INSERT INTO rs_possible (row, col, box, term) SELECT row, col, box, term FROM rs_board, rs_terms;");
-		tx.executeSql("CREATE TABLE rs_cells (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
-		tx.executeSql("CREATE TABLE IF NOT EXISTS rs_saved (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
+		tx.executeSql("CREATE TABLE rs_cells (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term CHAR(1) NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
+		tx.executeSql("CREATE TABLE IF NOT EXISTS rs_saved (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term CHAR(1) NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
 		// Try to load any saved game
 		tx.executeSql("INSERT INTO rs_cells (row, col, box, term) SELECT row, col, box, term FROM rs_saved;", [], null, sqlFailed);
 		// This view eliminates possibilities where known cells with the same term are in the same row, column, or box
@@ -295,10 +305,12 @@ RICKO.SudokuModelDBStore = function(dbName) {
 		tx.executeSql("CREATE VIEW rs_pointing AS SELECT CASE WHEN MIN(row) = MAX(row) THEN MIN(row) END AS row, CASE WHEN MIN(col) = MAX(col) THEN MIN(col) END AS col, box, term FROM rs_possible2 GROUP BY box, term HAVING ((COUNT(*) = 2) OR (COUNT(*) = 3)) AND ((MIN(row) = MAX(row)) OR (MIN(col) = MAX(col)));", [], null, sqlFailed);
 		// This view eliminates possibilities that are in the same row or column as a pointing pair or triplet, but different box 
 		tx.executeSql("CREATE VIEW rs_possible3 AS SELECT p2.* FROM rs_possible2 AS p2 LEFT JOIN rs_pointing AS n ON ((p2.row = n.row) OR (p2.col = n.col)) AND (p2.term = n.term) AND (p2.box <> n.box) WHERE (n.term IS NULL);", [], null, sqlFailed);
+		// This view finds cells with exactly 2 possible digits
+		tx.executeSql("CREATE VIEW rs_twofers AS SELECT row + (1.0 / col) AS id, row, col, MIN(box) AS box, MIN(term) AS term1, MAX(term) AS term2, COUNT(*) AS c FROM rs_possible3 GROUP BY row, col HAVING c = 2;", [], null, sqlFailed);
 		// This view finds terms that are the sole possibility for a cell
 		tx.executeSql("CREATE VIEW rs_hints AS SELECT row, col, MIN(box) AS box, MIN(term) AS term FROM rs_possible3 GROUP BY row, col HAVING COUNT(*) = 1;", [], null, sqlFailed);
 		// This view finds remaining possibilities and classifies them as hints (sole possibility) or not
-		tx.executeSql("CREATE VIEW rs_possible4 AS SELECT p.row, p.col, p.box, p.term, CASE WHEN h.term IS NULL THEN 0 ELSE 1 END AS isHint FROM rs_possible3 AS p LEFT JOIN rs_hints AS h ON (p.row = h.row) AND (p.col = h.col);", [], null, sqlFailed)
+		tx.executeSql("CREATE VIEW rs_possible4 AS SELECT p.row, p.col, p.box, p.term, CASE WHEN h.term IS NULL THEN 0 ELSE 1 END AS isHint FROM rs_possible3 AS p LEFT JOIN rs_hints AS h ON (p.row = h.row) AND (p.col = h.col);", [], null, sqlFailed);
 	});
 	
 	/*
