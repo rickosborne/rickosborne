@@ -1,0 +1,8 @@
+This is a Sudoku game built atop HTML5's DBStorage API.  A working version
+can be used at:
+
+http://rickosborne.org/html5-dbstorage-sudoku/
+
+It requires a browser that supports the HTML5 DBStorage API, as well as the
+Canvas element.  As of this writing, this includes Opera 10.5 and WebKit,
+but not Firefox 3.6 or Internet Explorer.
