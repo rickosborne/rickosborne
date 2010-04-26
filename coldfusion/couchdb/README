@@ -1,0 +1,56 @@
+This is a simple CFC interface to a CouchDB instance.
+
+
+Basic usage:
+
+<!--- connect --->
+<cfset couch = createObject("model.couchdb").init("localhost", 5984)>
+<cfdump var="#couch.db('nikeplus')#">
+
+<!--- fetch/create/update --->
+<cfset testDoc = couch.docFromId("test")>
+<cfif not structKeyExists(testDoc, "_id")>
+	<cfset testDoc = {
+		"_id" = "test",
+		"message" = "This is a test document"
+	}>
+	<cfset testDoc = couch.docInsert(doc = testDoc)>
+</cfif>
+<cfdump var="#couch.docCopy('test','test2')#">
+<cfset testDoc["updated"] = now()>
+<cfdump var="#couch.docUpdate(doc = testDoc)#">
+
+<!--- query --->
+<cfdump var="#couch.viewAllDocsBySeqQuery(includeDocs = true, limit = 3, descending = true)#">
+
+<!--- attachments --->
+<cfif (not structKeyExists(testDoc, "_attachments")) or (not structKeyExists(testDoc._attachments, "head.png"))>
+	<cffile action="readbinary" file="head.png" variable="png">
+	<cfdump var="#couch.attachmentInsert(testDoc._id, 'head.png', 'image/png', png, testDoc._rev)#">
+<cfelseif testDoc._attachments["head.png"].length neq 8894>
+	<cffile action="readbinary" file="ricko.png" variable="png">
+	<cfdump var="#couch.attachmentUpdate(testDoc._id, 'head.png', 'image/png', png, testDoc._rev)#">
+<cfelse>
+	<cfdump var="#couch.attachmentDelete(testDoc._id, 'head.png', testDoc._rev)#">
+</cfif>
+<cfset imgName = listFirst(structKeyList(testDoc._attachments))>
+<cfset img = couch.docAttachment("test", imgName)>
+<cfset imgLen = testDoc._attachments[imgName].length>
+<cfheader name="Content-Disposition" value="inline; filename=#imgName#">
+<cfheader name="Content-Length" value="#imgLen#">
+<cfcontent type="#testDoc._attachments[imgName].content_type#" reset="true" variable="#img#">
+<cfdump var="#couch.docAttachmentsQuery(testDoc)#">
+
+<!--- cleanup/compact --->
+<cfdump var="#couch.viewCleanup()#">
+<cfdump var="#couch.viewCompact('workouts')#">
+<cfdump var="#couch.viewActiveTasks()#">
+
+<!--- temporary views --->
+<cfset tempView = structNew()>
+<cfset tempView["map"] = "function(doc) { if(doc.empedID && doc.duration) emit(doc._id, doc); }">
+<cfdump var="#couch.viewTemporary(viewData = tempView, limit = 3)#">
+<cfdump var="#couch.docViewsQuery()#">
+<cfset results = couch.viewDesign(viewName = 'workouts', functionName = 'byGoalType', limit = 15, startKey = [ "Distance", "2010-" ], endKey = [ "Distance ", "" ], reduce = false, inclusiveEnd = false)>
+<cfdump var="#couch.queryFromResults(results = results, followStructs = -1)#">
+
