@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+		<title>Sudoku with the HTML5 Database Storage API</title>
+		<style type="text/css">
+html, body, h1 {
+	margin: 0;
+	padding: 0;
+}
+html {
+	background-color: #555;
+	position: relative;
+}
+body {
+	background-color: #555;
+	color: black;
+	font-family: "Lucida Grande", Calibri, Tahoma, Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 16px;
+	height: 100%;
+	width: 100%;
+	border: none;
+	position: fixed;
+}
+#board {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+}
+#inst {
+	position: fixed;
+	top: 4px;
+	right: 4px;
+	background-color: white;
+	padding: 0.75em;
+	width: 40px;
+	border: 1px solid #ccc;
+}
+		</style>
+		<script language="JavaScript" type="text/javascript">
+// <![CDATA[
+if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
+RICKO.SudokuBoard = function(containerId, parentId, instructionsId) {
+	var that = this;
+	var board = {};
+	var ctx   = null;
+	var pad   = 20;
+	var body  = {};
+	var inst  = {};
+	var empty = { "row": -1, "col": -1, "box": -1  };
+	var cell  = empty;
+	var db    = "";
+	var backGrad  = null;
+	var touchGrad = null;
+	var badGrad   = null;
+	var badCommand = false;
+	var badTimeout = null;
+	var showHints  = false;
+	var blocks     = [];
+	var DB_NAME    = "ricko-sudoku";
+	var DB_VERSION = "1.0";
+	var DB_TITLE   = "Sudoku Game by rickosborne.org";
+	var DB_BYTES   = 500000;
+	var boards = {
+		"Wikipedia": "53  7    6  195    98    6 8   6   34  8 3  17   2   6 6    28    419  5    8  79"
+	};
+	var getEl = function(n) { return window.document.getElementById(n); };
+	var onLoad = function() {
+		body  = getEl(parentId);
+		inst  = getEl(instructionsId);
+		board = getEl(containerId);
+		ctx   = board.getContext("2d");
+		db = setupDatabase();
+		resizeBoard();
+		var gridSize = getGridSize();
+		backGrad = ctx.createLinearGradient(0,0,gridSize,gridSize);
+			backGrad.addColorStop(0, "#eeeed0");
+			backGrad.addColorStop(1.0, "#ffffff");
+		touchGrad = ctx.createLinearGradient(0,0,0,gridSize / 9);
+			touchGrad.addColorStop(0, "rgba(63,127,255,0.2)");
+			touchGrad.addColorStop(1, "rgba(63,127,255,0.5)");
+		badGrad = ctx.createLinearGradient(0,0,0,gridSize / 9);
+			badGrad.addColorStop(0, "rgba(255,127,63,0.2)");
+			badGrad.addColorStop(1, "rgba(255,127,63,0.5)");
+		board.addEventListener("change", drawBoard, true);
+		board.addEventListener("click", clickBoard, true);
+		body.addEventListener("resize", drawBoard, true);
+		window.addEventListener("resize", drawBoard, true);
+		window.addEventListener("keydown", keyBoard, true);
+		drawBoard();
+		return {
+			loadBoard: loadBoard
+		};
+	}; // onLoad
+	var sqlFailed = function(tx, e) {
+		console.log("Transaction Failed:\n" + e.message);
+		alert("Transaction Failed:\n" + e.message);
+	}; // sqlFailed
+	var logTable = function(db, n) {
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT * FROM " + n + ";", [], function(tx, r) {
+				console.log("Table " + n + " (" + r.rows.length + "):");
+				var rows = [];
+				for(var i = 0; i < r.rows.length; i++)
+					rows.push(r.rows.item(i));
+				console.log(rows);
+			}, sqlFailed);
+		});
+	}; // logTable
+	var loadBoard = function(boardName, overwrite) {
+		var cells = boards[boardName] || boardName || "";
+		if(cells.length != 81) {
+			console.log("Board '" + boardName + "' seems to be malformed.");
+			return false;
+		} // if wrong length
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT COUNT(*) AS cellCount FROM rs_cells;", [], function(tx, r) {
+				if(overwrite || (r.rows.length != 1) || (r.rows.item(0).cellCount == 0)) {
+					tx.executeSql("DELETE FROM rs_cells;", [], null, sqlFailed);
+					var row = 1;
+					var col = 0;
+					for (var i = 0; i < 81; i++) {
+						var term = cells.charAt(i);
+						col++;
+						if(col > 9) { col = 1; row++; }
+						if(term === " ") continue;
+						var box = (Math.floor((row - 1) / 3) * 3) + Math.floor((col - 1) / 3);
+						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, term ], null, sqlFailed);
+					} // for i
+				} // if overwriting
+			}, sqlFailed);
+		}, sqlFailed, drawBoard);
+	}; // loadBoard
+	var setupDatabase = function() {
+		var db = openDatabase(DB_NAME, DB_VERSION, DB_TITLE, DB_BYTES);
+		db.transaction(function(tx) {
+			tx.executeSql("DROP VIEW IF EXISTS rs_hints;", [], null, sqlFailed);
+			var tables = [ "rs_cells", "rs_possible", "rs_board", "rs_boxes", "rs_rows", "rs_cols", "rs_terms" ];
+			for(var i = 0; i < tables.length; i++)
+				tx.executeSql("DROP TABLE IF EXISTS " + tables[i] + ";", [], null, sqlFailed);
+			tx.executeSql("CREATE TABLE rs_terms (term CHAR(1) NOT NULL PRIMARY KEY);", [], null, sqlFailed);
+			tx.executeSql("CREATE TABLE rs_rows  (row  INTEGER NOT NULL PRIMARY KEY);", [], null, sqlFailed);
+			tx.executeSql("CREATE TABLE rs_cols  (col  INTEGER NOT NULL PRIMARY KEY);", [], null, sqlFailed);
+			tx.executeSql("CREATE TABLE rs_boxes (box  INTEGER NOT NULL PRIMARY KEY);", [], null, sqlFailed);
+			for(var i = 1; i <= 9; i++) {
+				tx.executeSql("INSERT INTO rs_terms (term) VALUES (?);", [ "" + i ], null, sqlFailed);
+				tx.executeSql("INSERT INTO rs_rows  (row)  VALUES (?);", [ i ], null, sqlFailed);
+				tx.executeSql("INSERT INTO rs_cols  (col)  VALUES (?);", [ i ], null, sqlFailed);
+				tx.executeSql("INSERT INTO rs_boxes (box)  VALUES (?);", [ i - 1 ], null, sqlFailed);
+			} // for i
+			tx.executeSql("CREATE TABLE rs_board (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box));", [], null, sqlFailed);
+			tx.executeSql("INSERT INTO rs_board (row, col, box) SELECT row, col, (((row - 1) / 3) * 3) + ((col - 1) / 3) FROM rs_rows, rs_cols", [], null, sqlFailed);
+			tx.executeSql("CREATE TABLE rs_possible (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col, term), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
+			tx.executeSql("INSERT INTO rs_possible (row, col, box, term) SELECT row, col, box, term FROM rs_board, rs_terms;");
+			tx.executeSql("CREATE TABLE rs_cells (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
+			tx.executeSql("CREATE TABLE IF NOT EXISTS rs_saved (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
+			tx.executeSql("INSERT INTO rs_cells (row, col, box, term) SELECT row, col, box, term FROM rs_saved;", [], null, sqlFailed);
+			tx.executeSql("CREATE VIEW rs_hints AS SELECT p.row, p.col, MIN(p.box) AS box, MIN(p.term) AS term FROM rs_possible AS p LEFT JOIN rs_cells AS c ON ((p.row = c.row) AND (p.term = c.term)) OR ((p.col = c.col) AND (p.term = c.term)) OR ((p.box = c.box) AND (p.term = c.term)) OR ((p.row = c.row) AND (p.col = c.col)) WHERE (c.term IS NULL) GROUP BY p.row, p.col HAVING COUNT(*) = 1;", [], null, sqlFailed);
+		});
+		// logTable(db, "rs_board");
+		return db;
+	};
+	var drawTerm = function(x, y, s, t, color) {
+		x += (s * 0.1);
+		y += (s * 0.1);
+		s *= 0.8;
+		ctx.save();
+			if (t == 9) {
+				t = 6;
+				// ctx.rotate(Math.PI);
+				ctx.translate(x + s, y + s);
+				ctx.scale(s / -16, s / -16);
+			} else {
+				ctx.translate(x, y);
+				ctx.scale(s / 16, s / 16);
+			}
+			ctx.strokeStyle = color;
+			ctx.lineCap     = "round";
+			ctx.lineJoin    = "miter";
+			ctx.lineWidth   = 1.15;
+			ctx.beginPath();
+			switch(t) {
+				case 1: ctx.moveTo(6, 3); ctx.lineTo(8, 2); ctx.lineTo(8, 14); break;
+				case 2: ctx.moveTo(5, 5); ctx.arc(8, 5, 3, Math.PI, Math.PI / 5, false); ctx.lineTo(5, 14); ctx.lineTo(11, 14);  break;
+				case 3: ctx.moveTo(5.25, 5.25); ctx.arc(8, 5, 2.75, Math.PI, Math.PI * 7 / 16, false); ctx.arc(8, 11, 3, Math.PI * -7 / 16, Math.PI, false); break;
+				case 4: ctx.moveTo(13, 9); ctx.lineTo(3, 9); ctx.lineTo(9, 2); ctx.lineTo(9, 14); break;
+				case 5: ctx.moveTo(12, 2); ctx.lineTo(6, 2); ctx.lineTo(4.5, 6); ctx.arc(8, 9.5, 4.5, Math.PI * -3 / 4, Math.PI * 3 / 4, false); break;
+				case 6: ctx.moveTo(10, 2); ctx.lineTo(5.5, 8); ctx.arc(8, 10.5, 3.5, Math.PI * -4 / 5, Math.PI * -2.5 / 5, true); break;
+				case 7: ctx.moveTo(5, 2); ctx.lineTo(11, 2); ctx.lineTo(5, 14); ctx.moveTo(7, 7.5); ctx.lineTo(9, 8); break;
+				case 8: ctx.arc(8, 4.6, 2.6, Math.PI * 5 / 8, Math.PI * 3 / 8, false); ctx.arc(8, 10, 3.4, Math.PI * 2 / -8, Math.PI * 10 / 8, false); ctx.closePath(); break;
+			}; // switch t
+			ctx.stroke();
+		ctx.restore();
+	}; // drawTerm
+	var resizeBoard = function() {
+		var bh = body.innerHeight || body.clientHeight || body.offsetHeight || body.scrollHeight;
+		var bw = body.innerWidth  || body.clientWidth  || body.offsetWidth  || body.scrollWidth;
+		var w = Math.floor(((bw > bh) ? bh : bw) - (pad * 2));
+		var iw = bw - w - (pad * 3.5);
+		if (iw < 200) {
+			w -= (200 - iw); 
+			iw = 200;
+		}
+		if (board.width != w) {
+			inst.style.width = iw + "px";
+			board.width = w;
+			board.height = w;
+		} // if resized
+	}; // resizeBoard
+	var getGridSize = function() {
+		var w = board.width;
+		var h = board.height;
+		if (w > h) return h;
+		return w;
+	}; // getBoardSize
+	var deleteCell = function(r,c) {
+		db.transaction(function(tx) {
+			tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ r, c ], drawBoard, sqlFailed);
+		});
+	}; // deleteCell
+	var updateCell = function(r,c,b,t) {
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT row, col, box, term AS blocks FROM rs_cells WHERE ((row = ?) OR (col = ?) OR (box = ?)) AND (term = ?);", [ r, c, b, t ], function(tx, res) {
+				if(res.rows.length == 0) {
+					tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ r, c ], function(tx) {
+						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ r, c, b, t ], drawBoard, sqlFailed);
+					}, sqlFailed);
+				} // if one row back
+				else if((res.rows.length == 1) && (res.rows.item(0).row == r) && (res.rows.item(0).col == c)) {}
+				else {
+					var cellSize = getGridSize() / 9.0;
+					for(var i = 0; i < res.rows.length; i++) {
+						var rec = res.rows.item(i);
+						blocks.push(makeCell(rec.row - 1, rec.col - 1, cellSize));
+					}
+					buzzCell();
+				}
+			}, sqlFailed);
+		});
+	}; // updateCell
+	var buzzCell = function() {
+		badCommand = true;
+		drawBoard();
+		badTimeout = setTimeout(function() { buzzDone(); drawBoard(); }, 500);
+	}; // buzzCell
+	var buzzDone = function() {
+		badCommand = false;
+		blocks = [];
+		if(badTimeout) { clearTimeout(badTimeout); badTimeout = null; }
+	}; // buzzDone
+	var keyBoard = function(event) {
+		if(!event) event = window.event;
+		var key = (event.keyCode || event.charCode);
+		if(key == 72) {
+			buzzDone();
+			showHints = !showHints;
+			drawBoard();
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // hints
+		if(key == 67) {
+			buzzDone();
+			db.transaction(function(tx) {
+				tx.executeSql("INSERT INTO rs_cells (row, col, box, term) SELECT row, col, box, term FROM rs_hints;", [], drawBoard, sqlFailed);
+			});
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // cheat
+		if(key == 82) {
+			buzzDone();
+			loadBoard('Wikipedia', true);
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // reset
+		if(key == 83) {
+			buzzDone();
+			db.transaction(function(tx) {
+				tx.executeSql("DELETE FROM rs_saved;", [], function(tx) {
+					tx.executeSql("INSERT INTO rs_saved (row, col, box, term) SELECT row, col, box, term FROM rs_cells;", [], null, sqlFailed);
+				}, sqlFailed);
+			});
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;			
+		} // save
+		if((key >= 33) && (key <= 36)) {
+			var cellSize = getGridSize() / 9.0;
+			if(key == 33) cell = makeCell(0, 8, cellSize);
+			else if(key == 34) cell = makeCell(8, 0, cellSize);
+			else if(key == 35) cell = makeCell(8, 8, cellSize);
+			else if(key == 36) cell = makeCell(0, 0, cellSize);
+			buzzDone();
+			drawBoard();
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		} // home, end, etc
+		if((cell.row == -1) || (cell.box == -1) || (cell.col == -1)) return;
+		// console.log(key);
+		if((key == 8) || (key == 48) || (key == 96) || (key == 46)) {
+			buzzDone();
+			deleteCell(cell.row + 1, cell.col + 1);
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		}
+		if((key >= 37) && (key <= 40)) {
+			var newCell = null;
+			if((key == 37) && (cell.col > 0)) newCell = makeCell(cell.row, cell.col - 1, cell.size);
+			else if((key == 38) && (cell.row > 0)) newCell = makeCell(cell.row - 1, cell.col, cell.size);
+			else if((key == 39) && (cell.col < 8)) newCell = makeCell(cell.row, cell.col + 1, cell.size);
+			else if((key == 40) && (cell.row < 8)) newCell = makeCell(cell.row + 1, cell.col, cell.size);
+			if(newCell != null) {
+				cell = newCell;
+				buzzDone();
+				drawBoard();
+			}
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		}
+		if(((key >= 49) && (key <= 57)) || ((key >= 97) && (key <= 105))) {
+			buzzDone();
+			updateCell(cell.row + 1, cell.col + 1, cell.box, key - (key > 95 ? 96 : 48));
+			event.cancelBubble = true;
+			if(event.stopPropagation) event.stopPropagation();
+			return;
+		}
+	}; // keyBoard
+	var clickBoard = function(event) {
+		if(!event) event = window.event;
+		var x = event.clientX - board.offsetLeft;
+		var y = event.clientY - board.offsetTop;
+		var gridSide = getGridSize();
+		var boxSide = gridSide / 9.0;
+		var row = Math.floor(y / boxSide);
+		var col = Math.floor(x / boxSide);
+		var box = (Math.floor(row / 3) * 3) + Math.floor(col / 3);
+		if ((col >= 0) && (col <= 8) && (row >= 0) && (row <= 8) && (box >= 0) && (box <= 8) && ((row != cell.row) || (col != cell.col)))
+			cell = makeCell(row, col, boxSide);
+		else
+			cell = makeCell(-1, -1, boxSide);
+		drawBoard();
+		event.cancelBubble = true;
+		if(event.stopPropagation) event.stopPropagation();
+	}; // clickBoard
+	var makeCell = function(r,c,s) {
+		var ell = {
+			"row": r,
+			"col": c,
+			"box": r == -1 ? -1 : (Math.floor(r / 3) * 3) + Math.floor(c / 3),
+			"size": s
+		};
+		if ((r != -1) && (c != -1)) {
+			ell.x1 = Math.round(c * s);
+			ell.x2 = Math.round(ell.x1 + s);
+			ell.y1 = Math.round(r * s);
+			ell.y2 = Math.round(ell.y1 + s);
+			ell.w = Math.round(s);
+			ell.h = Math.round(s);
+		}
+		return ell;
+	}; // cellExtents
+	var drawBoard = function() {
+		resizeBoard();
+		var gridSize = getGridSize();
+		var cellSize = gridSize / 9.0;
+		ctx.save();
+			// background gradient
+			ctx.fillStyle = backGrad;
+			ctx.fillRect(0,0,gridSize,gridSize);
+		ctx.restore();
+		if(blocks.length > 0) {
+			ctx.save();
+				ctx.fillStyle = badGrad;
+				for(var i = 0; i < blocks.length; i++)
+					ctx.fillRect(blocks[i].x1, blocks[i].y1, blocks[i].w, blocks[i].h);
+			ctx.restore();
+		} // if blockers
+		if (cell.box != -1) {
+			// selected cell
+			ctx.save();
+			ctx.fillStyle = badCommand ? badGrad : touchGrad;
+			ctx.translate(cell.x1, cell.y1);
+			ctx.fillRect(0, 0, cell.w, cell.h);
+			ctx.restore();
+		} // if selected cell
+		ctx.save();
+			// lines
+			ctx.strokeStyle = "#000000";
+			ctx.lineCap     = "butt";
+			ctx.lineJoin    = "miter";
+			ctx.save();
+				// cell lines
+				ctx.linewidth = 2;
+				ctx.beginPath();
+				for(var i = 1; i < 9; i++) {
+					ctx.moveTo(i * cellSize, 0);
+					ctx.lineTo(i * cellSize, gridSize);
+					ctx.moveTo(0, i * cellSize);
+					ctx.lineTo(gridSize, i * cellSize);
+				} // for i
+				ctx.closePath();
+				ctx.stroke();
+			ctx.restore();
+			ctx.save();
+				// box lines
+				ctx.lineWidth = 4;
+				ctx.beginPath();
+				ctx.moveTo(gridSize / 3, 0);
+				ctx.lineTo(gridSize / 3, gridSize);
+				ctx.moveTo(gridSize * 2 / 3, 0);
+				ctx.lineTo(gridSize * 2 / 3, gridSize);
+				ctx.moveTo(0, gridSize / 3);
+				ctx.lineTo(gridSize, gridSize / 3);
+				ctx.moveTo(0, gridSize * 2 / 3, 0);
+				ctx.lineTo(gridSize, gridSize * 2 / 3);
+				ctx.closePath();
+				ctx.stroke();
+			ctx.restore();
+			ctx.save();
+				// heavy border
+				ctx.lineWidth = 4;
+				ctx.strokeRect(2,2,gridSize-4,gridSize-4);
+			ctx.restore();
+		ctx.restore();
+		if(showHints) {
+			db.transaction(function(tx) {
+				tx.executeSql("SELECT row, col, box, term FROM rs_hints;", [], function(tx, r) {
+					for(var i = 0; i < r.rows.length; i++) {
+						var rec = r.rows.item(i);
+						var c = makeCell(rec.row - 1, rec.col - 1, cellSize);
+						drawTerm(c.x1, c.y1, c.w, rec.term, "#cccccc");
+					} // for i
+				}, sqlFailed);
+			});
+		}
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT row, col, box, term FROM rs_cells;", [], function(tx, r) {
+				for(var i = 0; i < r.rows.length; i++) {
+					var rec = r.rows.item(i);
+					var c = makeCell(rec.row - 1, rec.col - 1, cellSize);
+					drawTerm(c.x1, c.y1, c.w, rec.term, r.rows.length == 81 ? "#33ff33" : "#000000");
+				} // for i
+			}, sqlFailed);
+		}); // transaction
+	}; // drawBoard
+	// onLoad();
+	return onLoad();
+} // SudokuBoard
+// ]]>
+		</script>
+	</head>
+	<body onload="sudokuBoard = new RICKO.SudokuBoard('board','body','inst');sudokuBoard.loadBoard('Wikipedia', false);" id="body" onresize="sudokuBoard.drawBoard();" onresizeend="sudokuBoard.drawBoard();">
+		<canvas id="board">
+			<p>It looks like your browser doesn't support the <kbd>canvas</kbd> element.  Sorry!</p>
+		</canvas>
+		<div id="inst">
+			<h1>Sudoku + HTML5</h1>
+			<p>Standard <a href="http://en.wikipedia.org/wiki/Sudoku">Sudoku rules</a> apply.</p>
+			<p>Click on a cell to select it, then press a digit to write it down.</p>
+			<ul>
+				<li><strong>Arrows, Home, End, PgUp, PgDn</strong>: Navigate</li>
+				<li><strong>Delete, Bksp, 0</strong>: Erase</li>
+				<li><strong>H</strong>: Hints</li>
+				<li><strong>C</strong>: Cheat</li>
+				<li><strong>R</strong>: Reset</li>
+				<li><strong>S</strong>: Save</li>
+			</ul>
+			<p>This implementation is Copyright 2010 by <a href="http://rickosborne.org/">Rick Osborne</a>, all rights reserved.</p>
+		</div>
+	</body>
+</html>
