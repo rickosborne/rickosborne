@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# This hook script modified by Rick Osborne from the original
+# hook script in the Git distribution.  The licenses from the
+# Git distribution apply to this script.
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# If you want to allow non-ascii filenames set this variable to true.
+allownonascii=$(git config hooks.allownonascii)
+
+if [ "$allownonascii" != "true" ] &&
+	test "$(git diff --name-only --cached | grep -Eve '^[a-zA-Z0-9 /_.]+$')"
+then
+	echo "Error: Attempt to add a non-ascii file name:"
+	git diff --name-only --cached | grep -Eve '^[a-zA-Z0-9 /_.]+$'
+	echo
+	echo "This can cause problems if you want to work"
+	echo "with people on other platforms."
+	echo
+	echo "You will not be able to commit this file as-is."
+	echo "Rename your file to use: a-z, A-Z, 0-9, _, ."
+	echo
+	exit 1
+fi
+
+exec git diff-index --check --cached $against --
