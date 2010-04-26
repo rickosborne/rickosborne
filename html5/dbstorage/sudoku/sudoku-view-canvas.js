@@ -21,31 +21,35 @@ if(typeof RICKO == "undefined" || !RICKO) { var RICKO = {}; }
  * 
  * @todo	The instructions element management is a bit of a hack.
  */
-RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId) {
+RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId, boardsId) {
 	var that = this;
 	function getEl(n) { return window.document.getElementById(n); };
-	var body      = getEl(parentId);
-	var inst      = getEl(instructionsId);
-	var container = getEl(containerId);
-	var board     = null;
-	var grid      = null;
-	var light     = null;
-	var bctx      = null;
-	var lctx      = null;
-	var gctx      = null;
-	var pad       = 20;
-	var backGrad  = null;
-	var touchGrad = null;
-	var badGrad   = null;
-	var showHints = false;
-	var empty = { "row": -1, "col": -1, "box": -1  };
-	var cell  = empty;
+	var body       = getEl(parentId);
+	var inst       = getEl(instructionsId);
+	var container  = getEl(containerId);
+	var boards     = getEl(boardsId);
+	// Canvas elements
+	var board      = null;
+	var grid       = null;
+	var light      = null;
+	// Drawing contexts
+	var bctx       = null;
+	var lctx       = null;
+	var gctx       = null;
+	var pad        = 20;
+	var backGrad   = null;
+	var touchGrad  = null;
+	var badGrad    = null;
+	var showHints  = false;
+	var empty      = { "row": -1, "col": -1, "box": -1  };
+	var cell       = empty;
 	var badCommand = false;
 	var badTimeout = null;
 	var showHints  = false;
 	var blocks     = [];
 	var knowns     = [];
 	var hints      = [];
+	var possible   = [];
 	var gridSize   = 0;
 	var cellSize   = 0;
 	var getHints   = null;
@@ -115,6 +119,31 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId) {
 		if (showHints)
 			drawDigits();
 	} // setKnowns
+	
+	/**
+	 * Set the cells that have possible values.
+	 * 
+	 * @param {Array} possibleCells	The cells that have possible values.  Each cell is in the format { row: Integer, col: Integer, term: Integer }.
+	 */
+	function setPossible (possibleCells) {
+		possible = possibleCells;
+		if (showHints)
+			drawDigits();
+	} // setKnowns
+	
+	function setBoards (boardNames, onClick) {
+		while(boards.lastChild)
+			boards.removeChild(boards.lastChild);
+		for(var i = 0; i < boardNames.length; i++) {
+			var li = document.createElement("li");
+			var a = document.createElement("a");
+			li.appendChild(a);
+			a.href = '#' + boardNames[i];
+			a.appendChild(document.createTextNode(boardNames[i]));
+			boards.appendChild(li);
+			a.addEventListener('click', function(event) { if(!event) event = window.event; var boardName = unescape(event.target.hash.substring(1,this.href.length)); onClick(boardName); return false; } );
+		} // for i
+	} // setBoards
 	
 	/**
 	 * Detect the new size of the canvas element, making adjustment to the
@@ -224,7 +253,7 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId) {
 	} // clickBoard
 	
 	/**
-	 * Private method to figure calculate all of the extra drawing information
+	 * Private method to calculate all of the extra drawing information
 	 * for the cell at the given row and column.
 	 * 
 	 * @param {Integer} row	The number of the row, with 0 being the topmost row.
@@ -239,11 +268,33 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId) {
 		};
 		if ((row != -1) && (col != -1)) {
 			ell.x1 = Math.round(col * cellSize);
-			ell.x2 = Math.round(ell.x1 + cellSize);
 			ell.y1 = Math.round(row * cellSize);
-			ell.y2 = Math.round(ell.y1 + cellSize);
 			ell.w = Math.round(cellSize);
 			ell.h = Math.round(cellSize);
+		}
+		return ell;
+	} // makeCell
+	
+	/**
+	 * Private method to calculate all of the extra drawing information
+	 * for the possibile digit in the cell at the given row and column.
+	 * 
+	 * @param {Integer} row 	The number of the row, with 0 being the topmost row.
+	 * @param {Integer} col 	The number of the column, with 0 being the leftmost column.
+	 * @param {Integer} term	The number of the digit, in the range 1..9
+	 */
+	function makePossible (row, col, term) {
+		var ell = {
+			"row": row,
+			"col": col,
+			"box": row == -1 ? -1 : (Math.floor(row / 3) * 3) + Math.floor(col / 3),
+			"size": cellSize / 3.0
+		};
+		if ((row != -1) && (col != -1)) {
+			ell.x1 = Math.round((col * cellSize) + (ell.size * ((term - 1) % 3)));
+			ell.y1 = Math.round((row * cellSize) + (ell.size * Math.floor((term - 1) / 3.0)));
+			ell.w = Math.round(cellSize / 3.0);
+			ell.h = Math.round(cellSize / 3.0);
 		}
 		return ell;
 	} // makeCell
@@ -333,12 +384,18 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId) {
 	function drawDigits () {
 		// resizeBoard();
 		board.width = board.width;  // magic incantation that clears the canvas
-		if(showHints)
+		if (showHints) {
 			// cells with hint values in a lighter color
-			for(var i = 0; i < hints.length; i++) {
+			for (var i = 0; i < hints.length; i++) {
 				var c = makeCell(hints[i].row, hints[i].col);
 				drawTerm(c.x1, c.y1, c.w, hints[i].term, "#cccccc");
 			} // for i
+			// cells with possible values
+			for (var i = 0; i < possible.length; i++) {
+				var c = makePossible(possible[i].row, possible[i].col, possible[i].term);
+				drawTerm(c.x1, c.y1, c.w, possible[i].term, "#cccccc");
+			} // for i
+		}
 		// cells with known values
 		for(var i = 0; i < knowns.length; i++) {
 			var c = makeCell(knowns[i].row, knowns[i].col);
@@ -375,5 +432,7 @@ RICKO.SudokuViewCanvas = function(containerId, parentId, instructionsId) {
 		setHints:          setHints,
 		setKnowns:         setKnowns,
 		setBlocks:         setBlocks,
+		setPossible:       setPossible,
+		setBoards:         setBoards
 	};
 }; // SudokuViewCanvas

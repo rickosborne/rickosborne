@@ -29,11 +29,17 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 	 * @param {Boolean}	overwrite	Overwrite the board if it has cell data?
 	 */
 	function loadBoard (boardName, overwrite) {
-		model.loadBoard(boardName, overwrite, function() {
-			model.getKnowns(view.setKnowns);
-			model.getHints(view.setHints);
-		});
+		model.loadBoard(boardName, overwrite, updateDigits);
 	} // loadBoard
+	
+	/**
+	 * Update all of the digits with their latest values from the model.
+	 */
+	function updateDigits() {
+		model.getKnowns(view.setKnowns);
+		model.getHints(view.setHints);
+		model.getPossible(true, view.setPossible);
+	} // updateDigits
 	
 	/**
 	 * Handle keyboard events
@@ -50,10 +56,7 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 			done = true;
 		} // hints
 		else if(key == 67) {
-			model.cheatAddHints(function() {
-				model.getKnowns(view.setKnowns);
-				model.getHints(view.setHints);
-			});
+			model.cheatAddHints(updateDigits);
 			done = true;
 		} // cheat
 		else if(key == 82) {
@@ -74,10 +77,7 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 		else if((cell.row == -1) || (cell.box == -1) || (cell.col == -1)) return;
 		// console.log(key);
 		else if((key == 8) || (key == 48) || (key == 96) || (key == 46)) {
-			model.deleteCell(cell.row + 1, cell.col + 1, function() {
-				model.getKnowns(view.setKnowns);
-				model.getHints(view.setHints);
-			});
+			model.deleteCell(cell.row + 1, cell.col + 1, updateDigits);
 			done = true;
 		} // delete/clear/zero
 		else if((key >= 37) && (key <= 40)) {
@@ -91,10 +91,7 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 			done = true;
 		} // arrows
 		else if(((key >= 49) && (key <= 57)) || ((key >= 97) && (key <= 105))) {
-			model.updateCell(cell.row + 1, cell.col + 1, cell.box, key - (key > 95 ? 96 : 48), function() {
-				model.getKnowns(view.setKnowns);
-				model.getHints(view.setHints);
-			}, view.setBlocks);
+			model.updateCell(cell.row + 1, cell.col + 1, cell.box, key - (key > 95 ? 96 : 48), updateDigits, view.setBlocks);
 			done = true;
 		} // digit
 		if (done) {
@@ -108,6 +105,11 @@ RICKO.SudokuBoard = function(modelObj, viewObj) {
 	 * Begin constructor code.
 	 */
 	window.addEventListener("keydown", keyBoard, true);
+	model.getBoards(function(boardNames){
+		view.setBoards(boardNames, function(boardName){
+			loadBoard(boardName, true)
+		});
+	});
 	
 	/*
 	 * Return only references to the public methods.

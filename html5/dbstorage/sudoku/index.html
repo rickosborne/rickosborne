@@ -12,7 +12,7 @@
 function sudokuLoad() {
 	new RICKO.SudokuBoard(
 		new RICKO.SudokuModelDBStore('ricko-sudoku'),
-		new RICKO.SudokuViewCanvas('board','body','inst')
+		new RICKO.SudokuViewCanvas('board','body','inst','boardNames')
 	).loadBoard('Wikipedia', false);
 } // onLoad
 /* ]]> */
@@ -33,6 +33,10 @@ function sudokuLoad() {
 				<li><strong>C</strong>: Cheat</li>
 				<li><strong>R</strong>: Reset</li>
 				<li><strong>S</strong>: Save</li>
+			</ul>
+			<p>Load a board:</p>
+			<ul id="boardNames">
+				
 			</ul>
 			<p>This implementation is Copyright 2010 by <a href="http://rickosborne.org/">Rick Osborne</a>, all rights reserved.</p>
 		</div>

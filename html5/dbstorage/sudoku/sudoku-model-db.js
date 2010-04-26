@@ -31,7 +31,10 @@ RICKO.SudokuModelDBStore = function(dbName) {
 	 * @todo	Do we want to store these in a table instead of as literals?
 	 */
 	var boards     = {
-		"Wikipedia": "53  7    6  195    98    6 8   6   34  8 3  17   2   6 6    28    419  5    8  79"
+		"Wikipedia"       : "53  7    6  195    98    6 8   6   34  8 3  17   2   6 6    28    419  5    8  79",
+		"Near Worst Case" : "              3 85  1 2       5 7     4   1   9       5      73  2 1        4   9",
+		"Star Burst Leo"  : "9  1 4  2 8  6  7          4       1 7     3 3       7          3  7  8 1  2 9  4",
+		"Empty"           : "                                                                                 "
 	};
 	
 	/**
@@ -128,7 +131,7 @@ RICKO.SudokuModelDBStore = function(dbName) {
 	 */
 	function updateCell (row, col, box, term, doneCallback, invalidCallback) {
 		db.transaction(function(tx) {
-			tx.executeSql("SELECT row, col, box, term AS blocks FROM rs_cells WHERE ((row = ?) OR (col = ?) OR (box = ?)) AND (term = ?);", [ row, col, box, term ], function(tx, res) {
+			tx.executeSql("SELECT row, col, box, term AS blocks FROM rs_cells WHERE ((row = ?) OR (col = ?) OR (box = ?)) AND (term = ?) UNION ALL SELECT b.row, b.col, b.box, p.term FROM rs_pointing AS p INNER JOIN rs_possible3 AS b ON ((p.row = b.row) OR (p.col = b.col)) AND (p.box = b.box) AND (p.term = b.term) WHERE ((p.row = ?) OR (p.col = ?)) AND (p.box <> ?) AND (p.term = ?);", [ row, col, box, term, row, col, box, term ], function(tx, res) {
 				if(res.rows.length == 0) {
 					tx.executeSql("DELETE FROM rs_cells WHERE (row = ?) AND (col = ?);", [ row, col ], function(tx) {
 						tx.executeSql("INSERT INTO rs_cells (row, col, box, term) VALUES (?, ?, ?, ?);", [ row, col, box, term ], doneCallback, sqlFailed);
@@ -141,7 +144,7 @@ RICKO.SudokuModelDBStore = function(dbName) {
 					var blocks = [];
 					for(var i = 0; i < res.rows.length; i++) {
 						var rec = res.rows.item(i);
-						blocks.push({ row: rec.row - 1, col: rec.col - 1 });
+						blocks.push({ row: rec.row == null ? -1 : rec.row - 1, col: rec.col == null ? -1 : rec.col - 1 });
 					}
 					invalidCallback(blocks);
 				}
@@ -197,7 +200,7 @@ RICKO.SudokuModelDBStore = function(dbName) {
 	 * Return the values that are written (known) on the game board.
 	 * Rows and columns are converted to 0-base (0-8) from the 1-base (1-9) stored in the database.
 	 * 
-	 * @param {Object} doneCallback	Next step once the values have been fetched.
+	 * @param {Function} doneCallback	Next step once the values have been fetched.
 	 */
 	function getKnowns (doneCallback) {
 		db.transaction(function(tx) {
@@ -211,6 +214,39 @@ RICKO.SudokuModelDBStore = function(dbName) {
 			}, sqlFailed);
 		}); // transaction
 	} // getKnowns
+	
+	/**
+	 * Return the digits that could possibly be written on the game board.
+	 * Rows and columns are converted to 0-base (0-8) from the 1-base (1-9) stored in the database.
+	 * 
+	 * @param {Function} doneCallback	Next step once the values have been fetched.
+	 */
+	function getPossible (excludeHints, doneCallback) {
+		db.transaction(function(tx) {
+			tx.executeSql("SELECT row, col, box, term, isHint FROM rs_possible4 " + (excludeHints ? "WHERE (isHint = 0)" : "") + " ORDER BY 1, 2;", [], function(tx, r) {
+				var possible = [];
+				for(var i = 0; i < r.rows.length; i++) {
+					var rec = r.rows.item(i);
+					possible.push({ row: rec.row - 1, col: rec.col - 1, box: rec.box, term: rec.term, isHint: rec.isHint == 1 });
+				} // for i
+				doneCallback(possible);
+			}, sqlFailed);
+		}); // transaction
+	} // getPossible
+	
+	/**
+	 * Return a list of built-in board names.
+	 * 
+	 * @param {Function} doneCallback	Next set once the board names have been fetched.
+	 */
+	function getBoards(doneCallback) {
+		setTimeout(function() {
+			var boardNames = [];
+			for(var n in boards)
+				boardNames.push(n);
+			doneCallback(boardNames);
+		}, 1);
+	} // getBoards
 	
 	/*
 	 * Constructor code begins here.
@@ -229,7 +265,9 @@ RICKO.SudokuModelDBStore = function(dbName) {
 	 * due to the nature of the game, it's just as easy to drop and recreate everything each time.
 	 */
 	db.transaction(function(tx) {
-		tx.executeSql("DROP VIEW IF EXISTS rs_hints;", [], null, sqlFailed);
+		var views = [ "rs_possible4", "rs_possible3", "rs_hints", "rs_pointing", "rs_possible2" ];
+		for(var i = 0; i < views.length; i++)
+			tx.executeSql("DROP VIEW IF EXISTS " + views[i] + ";", [], null, sqlFailed);
 		var tables = [ "rs_cells", "rs_possible", "rs_board", "rs_boxes", "rs_rows", "rs_cols", "rs_terms" ];
 		for(var i = 0; i < tables.length; i++)
 			tx.executeSql("DROP TABLE IF EXISTS " + tables[i] + ";", [], null, sqlFailed);
@@ -249,8 +287,18 @@ RICKO.SudokuModelDBStore = function(dbName) {
 		tx.executeSql("INSERT INTO rs_possible (row, col, box, term) SELECT row, col, box, term FROM rs_board, rs_terms;");
 		tx.executeSql("CREATE TABLE rs_cells (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
 		tx.executeSql("CREATE TABLE IF NOT EXISTS rs_saved (row INTEGER NOT NULL, col INTEGER NOT NULL, box INTEGER NOT NULL, term INTEGER NOT NULL, PRIMARY KEY (row, col), FOREIGN KEY (row) REFERENCES rs_rows (row), FOREIGN KEY (col) REFERENCES rs_cols (col), FOREIGN KEY (box) REFERENCES rs_boxes (box), FOREIGN KEY (term) REFERENCES rs_terms (term));", [], null, sqlFailed);
+		// Try to load any saved game
 		tx.executeSql("INSERT INTO rs_cells (row, col, box, term) SELECT row, col, box, term FROM rs_saved;", [], null, sqlFailed);
-		tx.executeSql("CREATE VIEW rs_hints AS SELECT p.row, p.col, MIN(p.box) AS box, MIN(p.term) AS term FROM rs_possible AS p LEFT JOIN rs_cells AS c ON ((p.row = c.row) AND (p.term = c.term)) OR ((p.col = c.col) AND (p.term = c.term)) OR ((p.box = c.box) AND (p.term = c.term)) OR ((p.row = c.row) AND (p.col = c.col)) WHERE (c.term IS NULL) GROUP BY p.row, p.col HAVING COUNT(*) = 1;", [], null, sqlFailed);
+		// This view eliminates possibilities where known cells with the same term are in the same row, column, or box
+		tx.executeSql("CREATE VIEW rs_possible2 AS SELECT p.row, p.col, p.box, p.term FROM rs_possible AS p LEFT JOIN rs_cells AS c ON ((p.row = c.row) AND (p.term = c.term)) OR ((p.col = c.col) AND (p.term = c.term)) OR ((p.box = c.box) AND (p.term = c.term)) OR ((p.row = c.row) AND (p.col = c.col)) WHERE (c.term IS NULL);", [], null, sqlFailed);
+		// This view finds possible terms in a box that are all in the same row or column 
+		tx.executeSql("CREATE VIEW rs_pointing AS SELECT CASE WHEN MIN(row) = MAX(row) THEN MIN(row) END AS row, CASE WHEN MIN(col) = MAX(col) THEN MIN(col) END AS col, box, term FROM rs_possible2 GROUP BY box, term HAVING ((COUNT(*) = 2) OR (COUNT(*) = 3)) AND ((MIN(row) = MAX(row)) OR (MIN(col) = MAX(col)));", [], null, sqlFailed);
+		// This view eliminates possibilities that are in the same row or column as a pointing pair or triplet, but different box 
+		tx.executeSql("CREATE VIEW rs_possible3 AS SELECT p2.* FROM rs_possible2 AS p2 LEFT JOIN rs_pointing AS n ON ((p2.row = n.row) OR (p2.col = n.col)) AND (p2.term = n.term) AND (p2.box <> n.box) WHERE (n.term IS NULL);", [], null, sqlFailed);
+		// This view finds terms that are the sole possibility for a cell
+		tx.executeSql("CREATE VIEW rs_hints AS SELECT row, col, MIN(box) AS box, MIN(term) AS term FROM rs_possible3 GROUP BY row, col HAVING COUNT(*) = 1;", [], null, sqlFailed);
+		// This view finds remaining possibilities and classifies them as hints (sole possibility) or not
+		tx.executeSql("CREATE VIEW rs_possible4 AS SELECT p.row, p.col, p.box, p.term, CASE WHEN h.term IS NULL THEN 0 ELSE 1 END AS isHint FROM rs_possible3 AS p LEFT JOIN rs_hints AS h ON (p.row = h.row) AND (p.col = h.col);", [], null, sqlFailed)
 	});
 	
 	/*
@@ -263,6 +311,8 @@ RICKO.SudokuModelDBStore = function(dbName) {
 		cheatAddHints: cheatAddHints,
 		saveBoard:     saveBoard,
 		getHints:      getHints,
-		getKnowns:     getKnowns
+		getKnowns:     getKnowns,
+		getPossible:   getPossible,
+		getBoards:     getBoards
 	};
 }; // SudokuModelDBStore
