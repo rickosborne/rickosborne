@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+		<title>Sudoku with the HTML5 Database Storage API</title>
+		<link rel="stylesheet" href="sudoku.css" type="text/css" />
+		<script src="sudoku-model-db.js" type="text/javascript" language="JavaScript"></script>
+		<script src="sudoku-view-canvas.js" type="text/javascript" language="JavaScript"></script>
+		<script src="sudoku-controller.js" type="text/javascript" language="JavaScript"></script>
+		<script language="JavaScript" type="text/javascript">
+/* <![CDATA[ */
+function sudokuLoad() {
+	new RICKO.SudokuBoard(
+		new RICKO.SudokuModelDBStore('ricko-sudoku'),
+		new RICKO.SudokuViewCanvas('board','body','inst','boardNames')
+	).loadBoard('Wikipedia', false);
+} // onLoad
+/* ]]> */
+		</script>
+	</head>
+	<body id="body" onload="sudokuLoad()">
+		<div id="board">
+			<p>It looks like your browser doesn't support the <kbd>canvas</kbd> element.  Sorry!</p>
+		</div>
+		<div id="inst">
+			<h1>Sudoku + HTML5</h1>
+			<p>Standard <a href="http://en.wikipedia.org/wiki/Sudoku">Sudoku rules</a> apply.</p>
+			<p>Click on a cell to select it, then press a digit to write it down.</p>
+			<ul>
+				<li><strong>Arrows, Home, End, PgUp, PgDn</strong>: Navigate</li>
+				<li><strong>Delete, Bksp, 0</strong>: Erase</li>
+				<li><strong>H</strong>: Hints</li>
+				<li><strong>C</strong>: Cheat</li>
+				<li><strong>R</strong>: Reset</li>
+				<li><strong>S</strong>: Save</li>
+			</ul>
+			<p>Load a board:</p>
+			<ul id="boardNames">
+				
+			</ul>
+			<p>This implementation is Copyright 2010 by <a href="http://rickosborne.org/">Rick Osborne</a>, all rights reserved.</p>
+		</div>
+	</body>
+</html>
