@@ -1,0 +1,6 @@
+Here are some utilities I've come up with in my work with CouchDB.
+
+wordpress-to-json.sql :: Format Wordpress Posts, Categories, and Authors
+  as JSON for insertion into CouchDB.
+
+
