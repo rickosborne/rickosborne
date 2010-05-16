@@ -7,13 +7,13 @@ SELECT CONCAT(
   '"tags": [', COALESCE((SELECT GROUP_CONCAT(DISTINCT CONCAT('"',t.slug,'"') SEPARATOR ', ') FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON (tt.taxonomy = 'post_tag') AND (tr.term_taxonomy_id = tt.term_taxonomy_id) INNER JOIN wp_terms AS t ON (t.term_id = tt.term_id) WHERE (tr.object_id = p.ID)), ''), '], ',
   '"author": ', post_author, ', ',
   '"posted": "', post_date, '", ',
-  '"posted_gmt": "', post_date_gmt, '", ',
+  '"posted_gmt": "', DATE_FORMAT(post_date_gmt, '%Y/%m/%d %T +0000'), '", ',
   '"content": "', REPLACE(REPLACE(REPLACE(REPLACE(post_content, '\\', '\\\\'), '"', '\\"'), '=\\"/', '=\\"http://rickosborne.org/'), '\r\n', '\\n'), '", ',
   '"title": "', REPLACE(REPLACE(post_title, '\\', '\\\\'), '"', '\\"'), '", ',
   '"status": "', post_status, '", ',
   '"name": "', post_name, '", ',
   '"modified": "', post_modified, '", ',
-  '"modified_gmt": "', post_modified_gmt, '", ',
+  '"modified_gmt": "', DATE_FORMAT(post_modified_gmt, '%Y/%m/%d %T +0000'), '", ',
   '"guid": "', guid, '", ',
   '"type": "', post_type, '"',
   '}') AS json
@@ -49,5 +49,5 @@ SELECT CONCAT('{',
   '"nicename": "', category_nicename, '",',
   '"type": "category"'
   '}') AS json
-FROM wp_categories AS c
+FROM wp_categories AS c;
 
