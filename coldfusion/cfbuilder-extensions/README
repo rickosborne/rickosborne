@@ -1,0 +1,2 @@
+preblock : Convert the selected text to a <pre> block, suitable for
+    syntax-highlighted blog posts, including class name sniffing.
