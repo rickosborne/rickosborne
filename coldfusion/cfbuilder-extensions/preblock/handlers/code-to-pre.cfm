@@ -10,7 +10,9 @@ className = "";
 if (selText contains '<cf') { className = "coldfusion"; }
 else if(reFindNoCase(selText, '(SELECT|DELETE)[[:space:]].*[[:space:]]FROM[[:space:]]|INSERT[[:space:]]+INTO|UPDATE[[:space:]].*[[:space:]]SET[[:space:]]') gt 0) { className = "sql"; }
 else if(reFindNoCase(selText, '<[a-z]+[ >]') gt 0) { className = "html"; }
-newText = '<pre' & (className neq '' ? ' class="#className#"' : '') & '>' & replaceList(selText,"&,<,>","&amp;,&lt;,&gt;") & '</pre>';
+newText = '<pre';
+if (className neq '') { newText = newText & ' class="#className#"'; }
+newText = newText & '>' & replaceList(selText,"&,<,>","&amp;,&lt;,&gt;") & '</pre>';
 </cfscript>
 <cfcatch>
 	<cfset newText = "Error: " & cfcatch.message>
