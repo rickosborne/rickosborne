@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<application>
+	<name>PreBlock</name>
+	<author>Rick Osborne</author>
+	<version>0.1</version>
+	<email></email>
+	<description><![CDATA[ Escape all HTML entities and wrap the code in a &lt;pre&gt; block. ]]></description>
+	<license><![CDATA[ This extension is licensed under the <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/us/">Creative Commons Attribution Noncommercial ShareAlike</a> (by-nc-sa) license.  Make sure you understand the terms of this license before you continue! ]]></license>
+	<handlers>
+		<handler id="codeToPre" type="CFM" filename="code-to-pre.cfm" />
+		<handler id="preToCode" type="CFM" filename="pre-to-code.cfm" />
+	</handlers>
+	<menucontributions>
+		<contribution target="editor">
+			<menu name="PreBlock">
+				<!-- <filters>
+					<filter type="file" />
+				</filters> -->
+				<action name="Escape Code to PRE" handlerid="codeToPre" showresponse="true">
+				</action>
+				<action name="Unescape PRE to Code" handlerid="preToCode" showresponse="true">
+				</action>
+			</menu>
+		</contribution>
+	</menucontributions>	
+</application>
