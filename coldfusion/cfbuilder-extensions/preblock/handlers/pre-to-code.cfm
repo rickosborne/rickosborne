@@ -1,4 +1,4 @@
-﻿<cfheader name="Content-Type" value="text/xml">
+<cfheader name="Content-Type" value="text/xml">
 
 <cfparam name="Form.ideEventInfo" default="" type="string">
 <cftry>
@@ -6,8 +6,13 @@
 ide = Form.ideEventInfo;
 data = xmlParse(ide);
 selText = trim(data.event.ide.editor.selection.text.xmlText);
-newText = reReplaceNoCase(selText, '^<pre[^>]*>|</pre>$', "", "ALL");
-newText = replaceList(newText, '&lt;,&gt;,&amp;','<,>,&');
+className = "";
+if (selText contains '<cf') { className = "coldfusion"; }
+else if(reFindNoCase(selText, '(SELECT|DELETE)[[:space:]].*[[:space:]]FROM[[:space:]]|INSERT[[:space:]]+INTO|UPDATE[[:space:]].*[[:space:]]SET[[:space:]]') gt 0) { className = "sql"; }
+else if(reFindNoCase(selText, '<[a-z]+[ >]') gt 0) { className = "html"; }
+newText = '<pre';
+if (className neq '') { newText = newText & ' class="#className#"'; }
+newText = newText & '>' & replaceList(selText,"&,<,>","&amp;,&lt;,&gt;") & '</pre>';
 </cfscript>
 <cfcatch>
 	<cfset newText = "Error: " & cfcatch.message>
