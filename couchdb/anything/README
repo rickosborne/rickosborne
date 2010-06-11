@@ -1,0 +1,8 @@
+Anything, based on Apache CouchDB
+
+Anything is a database for people that are organized, but don't want to have
+to care about databases.  It leverages the schema-free flexibility of the
+Apache CouchDB document database and a self-hosting web front end to enable
+users to build their own database to store ... well, anything.
+
+
