@@ -1,0 +1,9 @@
+/*
+ * Layout: Structure
+ */
+
+body {
+    max-width: 50em;
+    margin: 0 auto;
+    padding: 2em;
+}
