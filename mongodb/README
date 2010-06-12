@@ -1,0 +1,26 @@
+I'm experimenting with a distributed data mining system that reads
+from a DB2/400-based JDEdwards/EnterpriseOne system, dumps the
+data into a very flat MongoDB database, and then dynamically builds
+group() and Map/Reduce functions based on what type of report the
+user wants to see.  I'm curious to see if it's more viable than
+the current MSSQL-based solution.
+
+I'd *really* like to set up a system where there's one MongoDB
+master server, then all of the company PCs are set up to be dumb
+MongoDB slaves.  When the user boots their PC in the morning, it
+automagically syncs up to the latest docs.  In this way, every
+user of the system contributes to the distributed power of the
+system.  The data to be queired is not high-traffic, so I don't
+think the sync costs would do too much to a GigE LAN ... I hope.
+
+But ... MongoDB replSets are still alpha code, so it may not see
+the light of day.
+
+It's absolutely positively not production-worthy.
+
+e1-to-mongodb.pl
+   Import tab-delimited data dumps into flat MongoDB collections.
+*.spec
+   Table column definitions to help the data translation.
+e1-spec.sql
+   Build the .spec file and SELECT query for a given table.

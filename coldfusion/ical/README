@@ -1,0 +1,12 @@
+This is a barebones iCal (.ics) reader/writer.  If you are interested in
+using iCal files from ColdFusion, you should probably try Ray Camden's
+CFC first:
+
+    http://www.coldfusionjedi.com/index.cfm?mode=entry&entry=156B0486-DE50-D5B5-E39E3E69B325163D
+
+If you are determined to use this one, it requires a template ICS file
+to kick-start it.  One has been provided here, and you should probably
+customize it.
+
+The handling of timezones is a mess.  If you want to use them, you'll
+need to hack it in.

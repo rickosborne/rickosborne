@@ -1,0 +1,20 @@
+MFITM	NUMERIC	8	 	YES	IdentifierShortItem
+MFLITM	VARCHAR			YES	Identifier2ndItem
+MFAITM	VARCHAR			YES	Identifier3rdItem
+MFMCU	VARCHAR			YES	CostCenter
+MFDRQJ	DATE			YES	DateRequestedJulian
+MFAN8	NUMERIC	8	 	YES	AddressNumber
+MFUORG	NUMERIC	15	2	YES	UnitsTransactionQty
+MFAEXP	NUMERIC	15	2	YES	AmountExtendedPrice
+MFFAM	NUMERIC	15	2	YES	ForecastAmount
+MFFQT	NUMERIC	15	2	YES	ForecastQuantity
+MFTYPF	VARCHAR			YES	ForecastType
+MFDCTO	VARCHAR			YES	OrderType
+MFBPFC	CHAR			YES	BypassForcingYN
+MFRVIS	CHAR			YES	Revised
+MFUPMJ	DATE			YES	DateUpdated
+MFUSER	VARCHAR			YES	UserId
+MFJOBN	VARCHAR			YES	WorkStationId
+MFPID	VARCHAR			YES	ProgramId
+MFYR	NUMERIC	2	0	YES	CalendarYear
+MFTDAY	NUMERIC	6	 	YES	TimeOfDay

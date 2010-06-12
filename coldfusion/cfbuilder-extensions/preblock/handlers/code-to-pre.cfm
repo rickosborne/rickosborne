@@ -1,4 +1,4 @@
-﻿<cfheader name="Content-Type" value="text/xml">
+<cfheader name="Content-Type" value="text/xml">
 
 <cfparam name="Form.ideEventInfo" default="" type="string">
 <cftry>
