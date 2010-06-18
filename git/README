@@ -1,0 +1,17 @@
+Various utilities to help with git:
+
+gitignore
+	Template .gitignore
+
+gitlog2csv-DDL.sql
+	DDL for tables for holding a git log
+
+gitlog2csv.pl
+	Perl script to convert a git log to comma-delimited text
+
+pre-commit
+	Hook script to ensure Win/Mac compatible file names
+
+post-checkout
+	Hook script to fix file mod times on checkout or branch change
+
