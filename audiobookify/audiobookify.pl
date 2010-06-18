@@ -222,7 +222,6 @@ if ($isWin) {
 	print BAT1 qq!mv *.m4b ~/Audiobooks/\n!;
 }
 close(BAT1);
-# close(BAT2);
 
 unless ($isWin) {
 	system(qq!chmod +x 'Encode ! . escapeSingle($parentdir) . qq!.sh'!);
@@ -252,6 +251,10 @@ sub splitTracksAtGivens {
 
 sub splitTracksAtChapters {
 	my ($tracks, $splits, $counts) = @_;
+	if($isWin) {
+		open(WRAP,">Wrap Chapters.bat");
+		print WRAP qq!\@echo off\nmkdir wrapped\n!;
+	}
 	my $chapterLength = 0;
 	my $lastChapter = [];
 	my @chapterLengths;
@@ -275,15 +278,19 @@ sub splitTracksAtChapters {
 	push(@chapterLengths, $chapterLength);
 	# group chapters into files
 	my ($splitLength, $newSplitLength, $origErr, $newErr) = (0, 0);
+	my $chapterNum = 0;
+	my $splitNum = 1;
 	foreach my $chapter (@chapterTracks) {
 		$chapterLength = shift(@chapterLengths);
 		$newSplitLength = $splitLength + $chapterLength;
 		$origErr = abs($targetseconds - $splitLength);
 		$newErr = abs($targetseconds - $newSplitLength);
+		$chapterNum++;
 		if (($newSplitLength > $targetseconds) && (($splitLength > $maxseconds) || ($newErr > $origErr))) {
 			$splitLength = $chapterLength;
 			push(@{$splits}, []);
 			push(@{$counts}, 0);
+			$splitNum++;
 		} else {
 			$splitLength = $newSplitLength;
 		}
@@ -291,7 +298,29 @@ sub splitTracksAtChapters {
 			push(@{$splits->[-1]}, $track);
 		}
 		$counts->[-1]++;
+		if ($isWin) {
+			my $chapZero = substr("00$chapterNum", -2);
+			if (scalar(@{$chapter}) == 1) {
+				print WRAP "copy " . $chapter->[0]->{'FILE'} . qq! "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
+			} elsif (scalar(@{$chapter}) > 1) {
+				print WRAP qq!"$apps\\mp3wrap.exe" "$splitNum-$chapZero"!;
+				foreach my $track (@{$chapter}) {
+					print WRAP ' "' . escapeSingle($track->{'FILE'}) . '"';
+				}
+				print WRAP "\n";
+			}
+			foreach my $track (@{$chapter}) {
+				print WRAP qq!move "! . escapeSingle($track->{'FILE'}) . qq!" wrapped\n!;
+			}
+			my $safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
+			print WRAP qq!"$apps\\tag.exe" --remove "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
+			print WRAP qq!"$apps\\tag.exe" --title "$safeTitle" "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
+		}
 	} # foreach chapter
+	if ($isWin) {
+		print WRAP "move Encode*.bat wrapped\nmove *.csv wrapped\nmove *.pod wrapped\n";
+		close(WRAP);
+	}
 } # splitTracksAtChapters
 
 sub formatPart {
@@ -326,6 +355,7 @@ sub leadzero {
 
 sub escapeSingle {
 	my ($s) = @_;
+	return($s) unless(defined($s));
 	if ($isWin) {
 		$s =~ s/"/""/g;
 	} else {
