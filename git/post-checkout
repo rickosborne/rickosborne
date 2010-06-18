@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Fixes mtimes to commit times on checkout and branch-switch
+
+# Original code by book:
+# http://use.perl.org/~BooK/journal/39932
+# http://github.com/book/git-gadgets
+
+git log --name-only --date=iso --reverse --pretty=format:%at | perl -00ln -e '($d,@f)=split/\n/;$d{$_}=$d for grep{-e}@f' -e '}{utime undef,$d{$_},$_ for keys%d'
