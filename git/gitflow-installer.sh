@@ -25,6 +25,27 @@ SCRIPT_FILES="git-flow-init git-flow-feature git-flow-hotfix git-flow-release gi
 SUBMODULE_FILE="gitflow-shFlags"
 
 case "$1" in
+	uninstall)
+		echo "Uninstalling git-flow from $INSTALL_PREFIX"
+		if [ -d "$INSTALL_PREFIX" ] ; then
+			for script_file in $SCRIPT_FILES ; do
+				echo "rm -vf $INSTALL_PREFIX/$script_file"
+				rm -vf "$INSTALL_PREFIX/$script_file"
+			done
+		else
+			echo "The '$INSTALL_PREFIX' directory was not found."
+			echo "Do you need to set INSTALL_PREFIX ?"
+		fi
+		exit
+		;;
+	help)
+		echo "Usage: [environment] gitflow-installer.sh [install|uninstall]"
+		echo "Environment:"
+		echo "   INSTALL_PREFIX=$INSTALL_PREFIX"
+		echo "   REPO_HOME=$REPO_HOME"
+		echo "   REPO_NAME=$REPO_NAME"
+		exit
+		;;
 	install)
 		echo "Installing git-flow to $INSTALL_PREFIX"
 		if [[ -d "$REPO_NAME" && -d "$REPO_NAME/.git" ]] ; then
@@ -43,7 +64,6 @@ case "$1" in
 			git submodule update
 			cd "$lastcwd"
 		fi
-		# git --git-dir "$REPO_NAME" checkout master
 		install -v -d -m 0755 "$INSTALL_PREFIX"
 		for exec_file in $EXEC_FILES ; do
 			install -v -m 0755 "$REPO_NAME/$exec_file" "$INSTALL_PREFIX"
@@ -51,27 +71,6 @@ case "$1" in
 		for script_file in $SCRIPT_FILES ; do
 			install -v -m 0644 "$REPO_NAME/$script_file" "$INSTALL_PREFIX"
 		done
-		exit
-		;;
-	uninstall)
-		echo "Uninstalling git-flow from $INSTALL_PREFIX"
-		if [ -d "$INSTALL_PREFIX" ] ; then
-			for script_file in $SCRIPT_FILES ; do
-				echo "rm -vf $INSTALL_PREFIX/$script_file"
-				rm -vf "$INSTALL_PREFIX/$script_file"
-			done
-		else
-			echo "The '$INSTALL_PREFIX' directory was not found."
-			echo "Do you need to set INSTALL_PREFIX ?"
-		fi
-		exit
-		;;
-	*)
-		echo "Usage: [environment] gitflow-installer.sh [install|uninstall]"
-		echo "Environment:"
-		echo "   INSTALL_PREFIX=$INSTALL_PREFIX"
-		echo "   REPO_HOME=$REPO_HOME"
-		echo "   REPO_NAME=$REPO_NAME"
 		exit
 		;;
 esac
