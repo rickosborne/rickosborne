@@ -28,7 +28,7 @@ case "$1" in
 	uninstall)
 		echo "Uninstalling git-flow from $INSTALL_PREFIX"
 		if [ -d "$INSTALL_PREFIX" ] ; then
-			for script_file in $SCRIPT_FILES ; do
+			for script_file in $SCRIPT_FILES $EXEC_FILES ; do
 				echo "rm -vf $INSTALL_PREFIX/$script_file"
 				rm -vf "$INSTALL_PREFIX/$script_file"
 			done
