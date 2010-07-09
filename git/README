@@ -1,5 +1,8 @@
 Various utilities to help with git:
 
+gitflow-installer.sh
+	A make-less installer for gitflow, intended for people without gcc, etc.
+
 gitignore
 	Template .gitignore
 
