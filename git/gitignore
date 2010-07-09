@@ -4,13 +4,19 @@
 # exclude patterns (uncomment them if you want to use them):
 # *.[oa]
 # *~
+
+# Mac
 .DS_Store
-.project
-config
+
+# Temp
 *~
 ~*
+*.tmp
+
+# Eclipse
+.project
+config
 settings.xml
 org.eclipse.*
 .settings
-*.tmp
-
+.buildpath
