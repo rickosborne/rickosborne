@@ -24,6 +24,8 @@ EXEC_FILES="git-flow"
 SCRIPT_FILES="git-flow-init git-flow-feature git-flow-hotfix git-flow-release git-flow-support git-flow-version gitflow-common gitflow-shFlags"
 SUBMODULE_FILE="gitflow-shFlags"
 
+echo "### gitflow no-make installer ###"
+
 case "$1" in
 	uninstall)
 		echo "Uninstalling git-flow from $INSTALL_PREFIX"
@@ -46,7 +48,7 @@ case "$1" in
 		echo "   REPO_NAME=$REPO_NAME"
 		exit
 		;;
-	install)
+	*)
 		echo "Installing git-flow to $INSTALL_PREFIX"
 		if [[ -d "$REPO_NAME" && -d "$REPO_NAME/.git" ]] ; then
 			echo "Using existing repo: $REPO_NAME"
