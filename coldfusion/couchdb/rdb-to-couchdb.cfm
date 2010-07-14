@@ -1,4 +1,4 @@
-﻿<cfsetting enablecfoutputonly="true">
+﻿<cfsetting enablecfoutputonly="true" requesttimeout="600">
 
 <cfset thisPage=CGI.SCRIPT_NAME>
 <cfparam name="URL.dsn" default="" type="string">
@@ -87,7 +87,7 @@
 	SELECT column_name, type_name FROM columns WHERE is_primarykey = 'YES' ORDER BY ordinal_position
 	</cfquery>
 	<cfquery name="example" datasource="#dsn#" maxrows="#max(1,maxRows)#">
-	SELECT * FROM #tableName#
+	SELECT * FROM #dbName#.#tableName#
 	</cfquery>
 	<cffunction name="singularify" returntype="string">
 		<cfargument name="word" type="string" required="true">
@@ -99,11 +99,16 @@
 	</cffunction>
 	<cfset singleName = singularify(tableName)>
 	<cfset colMap = {}>
+	<!---<cfdump var="#columns#">--->
+	<cfset pkMap = {}>
 	<cfloop query="columns">
 		<cfif singleName eq left(column_name, len(singleName))>
 			<cfset colMap[column_name] = lcase(replace(mid(column_name, len(singleName) + 1, len(column_name)), "_", "", "ALL"))>
 		<cfelse>
 			<cfset colMap[column_name] = lcase(replace(column_name, "_", "", "ALL"))>
+		</cfif>
+		<cfif (referenced_primarykey_table neq "n/a")>
+			<cfset pkMap[column_name] = singularify(listLast(referenced_primarykey_table, "_"))>
 		</cfif>
 	</cfloop>
 	<cfset fkMap = []>
@@ -163,17 +168,22 @@
 		<cfloop query="columns">
 			<cfset fieldName = colMap[columns.column_name]>
 			<cfset fieldVal = example[columns.column_name][example.currentRow]>
-			<cfswitch expression="#columns.type_name#">
-				<cfcase value="BIT">
-					<cfset fieldVal = (fieldVal neq 0) ? true : false>
-				</cfcase>
-				<cfcase value="DATETIME">
-					<cfset fieldVal = prettyDate(fieldVal)>
-				</cfcase>
-				<cfcase value="INT,INTEGER,SMALLINT,TINYINT,INT UNSIGNED" delimiters=",">
-					<cfset fieldVal = int(fieldVal)>
-				</cfcase>
-			</cfswitch>
+			<cfif fieldVal neq "">
+				<cfswitch expression="#columns.type_name#">
+					<cfcase value="BIT">
+						<cfset fieldVal = (fieldVal neq 0) ? true : false>
+					</cfcase>
+					<cfcase value="DATETIME">
+						<cfset fieldVal = prettyDate(fieldVal)>
+					</cfcase>
+					<cfcase value="INT,INTEGER,SMALLINT,TINYINT,INT UNSIGNED" delimiters=",">
+						<cfset fieldVal = int(fieldVal)>
+					</cfcase>
+				</cfswitch>
+				<cfif structKeyExists(pkMap, columns.column_name)>
+					<cfset fieldVal = pkMap[columns.column_name] & ":" & fieldVal>
+				</cfif>
+			</cfif>
 			<cfset data[fieldName] = fieldVal>
 		</cfloop>
 		<cfloop array="#fkMap#" index="fkInfo">
@@ -184,7 +194,7 @@
 			</cfif>
 			<cfquery name="keys" datasource="#dsn#">
 			SELECT DISTINCT #valueList(fkInfo.pk.column_name)#<cfif structKeyExists(fkInfo, "key")>, #fkInfo.key#</cfif>
-			FROM #fkInfo.table#
+			FROM #dbName#.#fkInfo.table#
 			WHERE (#fkInfo.fcolumn# = <cfqueryparam value="#example[fkInfo.pcolumn][example.currentRow]#">)
 			</cfquery>
 			<cfloop query="keys">
@@ -202,6 +212,7 @@
 		</cfloop>
 		<!---<cfoutput><pre>#serializeJson(data)#</pre></cfoutput>--->
 		<cfif (maxRows eq 0)>
+			<cfoutput><p><a href="#thisPage#?#htmlEditFormat(CGI.QUERY_STRING)#&amp;maxRows=99999">Make it happen.</a></p></cfoutput>
 			<cfdump var="#data#" top="3">
 		<cfelse>
 			<cfset doc = couch.docFromId(data["_id"])>
