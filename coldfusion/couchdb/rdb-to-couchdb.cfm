@@ -101,15 +101,42 @@
 	<cfset singleName = singularify(tableName)>
 	<cfset colMap = {}>
 	<cfset pkMap = {}>
+	<cfset crlf = chr(13) & chr(10)>
+	<cfset tab = chr(9)>
+	<cfset cfc = 'component extends="CouchDBDocument" accessors="true" {' & crlf>
+	<cfset typeFromDB = {
+		"INT" = "numeric",
+		"BIGINT" = "numeric",
+		"CHAR" = "string",
+		"DECIMAL" = "numeric",
+		"LONGTEXT" = "string",
+		"VARCHAR" = "string",
+		"DATETIME" = "date",
+		"BIT" = "boolean"
+	}>
 	<cfloop query="columns">
 		<cfif singleName eq left(column_name, len(singleName))>
-			<cfset colMap[column_name] = fieldFromColumn(mid(column_name, len(singleName) + 1, len(column_name)))>
+			<cfset fieldName = fieldFromColumn(mid(column_name, len(singleName) + 1, len(column_name)))>
 		<cfelse>
-			<cfset colMap[column_name] = fieldFromColumn(column_name)>
+			<cfset fieldName = fieldFromColumn(column_name)>
 		</cfif>
+		<cfset colMap[column_name] = fieldName>
 		<cfif (referenced_primarykey_table neq "n/a")>
 			<cfset pkMap[column_name] = singularify(listLast(referenced_primarykey_table, "_"))>
 		</cfif>
+		<cfset cfType = typeFromDB[listFirst(type_name," ")]>
+		<cfset prop = tab & 'property name="#fieldName#" type="#cfType#" default="#column_default_value#" notnull="' & (is_nullable eq "yes" ? "false" : "true") & '" required="' & (is_nullable eq "yes" ? "false" : "true") & '"'>
+		<cfif (type_name CONTAINS "char")>
+			<cfset prop &= ' length="#column_size#"'>
+		</cfif>
+		<cfif type_name CONTAINS "decimal">
+			<cfset prop &= ' precision="#decimal_digits#"'>
+		</cfif>
+		<cfif (is_primarykey eq "yes")>
+			<cfset prop &= ' fieldtype="id"'>
+		</cfif>
+		<cfset prop &= ";" & crlf>
+		<cfset cfc &= prop>
 	</cfloop>
 	<cfset fkMap = []>
 	<cfset fkFields = {}>
@@ -210,11 +237,14 @@
 			</cfloop>
 			<cfset data[fkInfo.field] = fkKeys>
 		</cfloop>
-		<!---<cfoutput><pre>#serializeJson(data)#</pre></cfoutput>--->
+		<cfset cfc &= "}">
 		<cfif (maxRows eq 0)>
-			<cfoutput><p><a href="#thisPage#?#htmlEditFormat(CGI.QUERY_STRING)#&amp;maxRows=99999">Make it happen.</a></p></cfoutput>
+			<cfoutput>
+			<p><a href="#thisPage#?#htmlEditFormat(CGI.QUERY_STRING)#&amp;maxRows=99999">Make it happen.</a></p>
+			<pre style="overflow:auto">#htmlEditFormat(cfc)#</pre>
 			<cfdump var="#data#" top="3">
 			<cfdump var="#columns#">
+			</cfoutput>
 		<cfelse>
 			<cfset doc = couch.docFromId(data["_id"])>
 			<cfif not structKeyExists(doc, "_id")>
