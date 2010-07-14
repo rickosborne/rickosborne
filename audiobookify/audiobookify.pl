@@ -326,6 +326,7 @@ sub leadzero {
 
 sub escapeSingle {
 	my ($s) = @_;
+	return($s) unless(defined($s));
 	if ($isWin) {
 		$s =~ s/"/""/g;
 	} else {
