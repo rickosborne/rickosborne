@@ -34,6 +34,10 @@
 	<cfreturn $request("", structNew(), "GET")>
 </cffunction>
 
+<cffunction name="allDbs" access="public" returntype="array">
+	<cfreturn $request("_all_dbs", [], "GET")>
+</cffunction>
+
 <cffunction name="version" access="public" returntype="string">
 	<cfset var wel = welcome()>
 	<cfif structKeyExists(wel, "version") and isSimpleValue(wel.version)>
