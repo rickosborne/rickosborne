@@ -43,6 +43,7 @@
 </ul>
 	</cfoutput>
 <cfelseif (dsn eq "")>
+	<!---<cfset createObject("component","cfide.adminapi.administrator").login("your admin password")>--->
 	<cfset sources = CreateObject("component","cfide.adminapi.datasource").getDatasources()>
 	<cfoutput>
 <p>Choose a datasource:</p>
@@ -80,6 +81,7 @@
 	<cfset couch.db(couchDb)>
 	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="foreign" type="foreignkeys">
 	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="columns" type="columns">
+	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="indexes" type="index">
 	<cfquery name="primary" dbtype="query">
 	SELECT column_name, type_name FROM columns WHERE is_primarykey = 'YES' ORDER BY ordinal_position
 	</cfquery>
@@ -96,33 +98,64 @@
 	</cffunction>
 	<cffunction name="fieldFromColumn" returntype="string">
 		<cfargument name="col" type="string" required="true">
-		<cfreturn lcase(replace(right(col, 3) eq "_id" ? left(col, len(col) - 3) : col, "_", "", "ALL"))>
+		<cfreturn lcase(replace((right(col, 3) eq "_id") and (len(col) gt 3) ? left(col, len(col) - 3) : col, "_", "", "ALL"))>
+	</cffunction>
+	<cffunction name="couchSave" returntype="void">
+		<cfargument name="data" type="struct" required="true">
+		<cfargument name="overwrite" type="boolean" default="false">
+		<cfset doc = couch.docFromId(arguments.data["_id"])>
+		<cfif structKeyExists(doc, "_id") and (not overwrite)>
+			<cfoutput><p>Skipping #htmlEditFormat(data["_id"])#.</p></cfoutput>
+		<cfelseif structKeyExists(doc, "_rev")>
+			<cfset data["_rev"] = doc["_rev"]>
+			<cfset rev = couch.docUpdate(data)>
+			<cfif structKeyExists(rev, "rev") and structKeyExists(rev, "id")>
+				<cfoutput><p>Updated #rev.id# as #rev.rev#.</p></cfoutput>
+			<cfelse>
+				<cfdump var="#rev#" label="#data['_id']#">
+			</cfif>
+		<cfelse>
+			<cfset rev = couch.docInsert(data)>
+			<cfif structKeyExists(rev, "rev") and structKeyExists(rev, "id")>
+				<cfoutput><p>Inserted #rev.id# as #rev.rev#.</p></cfoutput>
+			<cfelse>
+				<cfdump var="#rev#" label="#data['_id']#">
+			</cfif>
+		</cfif>
 	</cffunction>
 	<cfset singleName = singularify(tableName)>
 	<cfset colMap = {}>
 	<cfset pkMap = {}>
+	<cfset rowFromCol = {}>
 	<cfset crlf = chr(13) & chr(10)>
 	<cfset tab = chr(9)>
 	<cfset cfc = 'component extends="CouchDBDocument" accessors="true" {' & crlf>
 	<cfset typeFromDB = {
-		"INT" = "numeric",
-		"SMALLINT" = "numeric",
-		"TINYINT" = "numeric",
-		"BIGINT" = "numeric",
-		"CHAR" = "string",
-		"DECIMAL" = "numeric",
-		"LONGTEXT" = "string",
-		"ENUM" = "string",
-		"TEXT" = "string",
-		"TINYTEXT" = "string",
-		"VARCHAR" = "string",
-		"DATETIME" = "date",
+		"BIT"       = "boolean",
+		"BIGINT"    = "numeric",
+		"CHAR"      = "string",
+		"DATETIME"  = "date",
+		"DECIMAL"   = "numeric",
+		"ENUM"      = "string",
+		"INT"       = "numeric",
+		"LONGTEXT"  = "string",
+		"SMALLINT"  = "numeric",
+		"TEXT"      = "string",
 		"TIMESTAMP" = "date",
-		"BIT" = "boolean"
+		"TINYINT"   = "numeric",
+		"TINYTEXT"  = "string",
+		"VARCHAR"   = "string"
 	}>
+	<cfset colPrefix = " ">
+	<cfif (primary.recordCount eq 1) and (right(primary.column_name, 3) eq "_id") and (len(primary.column_name) gt 3)>
+		<cfset colPrefix = left(primary.column_name, len(primary.column_name) - 3)>
+	</cfif>
 	<cfloop query="columns">
+		<cfset rowFromCol[column_name] = currentRow>
 		<cfif singleName eq left(column_name, len(singleName))>
 			<cfset fieldName = fieldFromColumn(mid(column_name, len(singleName) + 1, len(column_name)))>
+		<cfelseif (left(column_name, len(colPrefix)) eq colPrefix) and (len(colPrefix) lt len(column_name))>
+			<cfset fieldName = fieldFromColumn(mid(column_name, len(colPrefix) + 1, len(column_name)))>
 		<cfelse>
 			<cfset fieldName = fieldFromColumn(column_name)>
 		</cfif>
@@ -144,8 +177,54 @@
 		<cfset prop &= ";" & crlf>
 		<cfset cfc &= prop>
 	</cfloop>
+	<cffunction name="makeView" returntype="string">
+		<cfargument name="docType" type="string" required="true">
+		<cfargument name="colNames" type="string" required="true">
+		<cfargument name="dataType" type="string" required="false" default="">
+		<cfset var ixColumns = listToArray(arguments.colNames, ", ")>
+		<cfset var less = "<">
+		<cfsavecontent variable="local.viewjs"><cfoutput>
+function (doc) {
+	if (doc.Type == '#jsStringFormat(arguments.docType)#') {
+		<cfif (arguments.colNames eq "")>
+		emit(null, doc);
+		<cfelseif (arrayLen(ixColumns) gt 1)>
+		emit([
+			<cfloop from="1" to="#arrayLen(ixColumns)#" index="local.ixColNum">
+				<cfif (ixColNum gt 1)>, </cfif>
+				doc.#colMap[trim(ixColumns[ixColNum])]#
+			</cfloop>
+		], null);
+		<cfelseif (not structKeyExists(colMap, ixColumns[1]))>
+			<cfif (arguments.dataType eq "array")>
+		for (var i = 0; i #less# doc.#ixColumns[1]#.length; i++) {
+			emit(doc._id, { '_id': doc.#ixColumns[1]#[i] }, null);
+		}
+			<cfelse>
+		for (var i in doc.#ixColumns[1]#) {
+			emit(doc._id, { '_id': i }, null);
+		}
+			</cfif>
+		<cfelseif structKeyExists(rowFromCol, ixColumns[1]) and (columns.is_foreignkey[rowFromCol[ixColumns[1]]] eq "yes")>
+		emit(doc.#colMap[ixColumns[1]]#, { '_id': doc.#colMap[ixColumns[1]]#});
+		<cfelse>
+		emit(doc.#colMap[ixColumns[1]]#, null);
+		</cfif>
+	}
+}
+		</cfoutput></cfsavecontent>
+		<cfreturn replaceList(trim(viewjs), "#chr(13)#,#chr(9)#,#chr(10)#", ",,")>
+	</cffunction>
+	<cfset ixViews = {
+		"all" = {
+			"map" = makeView(singleName, "")
+		}
+	}>
+	<cfloop query="indexes">
+		<cfset ixViews[lcase(trim(replaceList(indexes.index_name, "IX_,FK_,PK_",",,,")))] = { "map" = makeView(singleName, indexes.column_name) }>
+	</cfloop>
 	<cfset fkMap = []>
-	<cfset fkFields = {}>
+	<cfset fkFields = { "type" = "type" }>
 	<cfloop query="foreign">
 		<cfset fieldName = lcase(listLast(foreign.fktable_name, "_"))>
 		<cfif structKeyExists(fkFields, fieldName)>
@@ -193,8 +272,24 @@
 		<cfset arrayAppend(fkMap, fkInfo)>
 		<cfset fkFields[fieldName] = arrayLen(fkMap)>
 	</cfloop>
+	<cfloop array="#fkMap#" index="fkInfo">
+		<cfif not structKeyExists(ixViews, fkInfo.field)>
+			<!---<cfdump var="#fkInfo#">--->
+			<cfset ixViews[fkInfo.field] = { "map" = makeView(singleName, fkInfo.field, structKeyExists(fkInfo, "key") ? "struct" : "array") }>
+		</cfif>
+	</cfloop>
+	<cfset design = {
+		"_id"      = "_design/#singleName#",
+		"language" = "javascript",
+		"views"    = ixViews
+	}>
+	<cfdump var="#design#">
+	<cfset couchSave(design, maxrows gt 0)>
 	<cfloop query="example">
-		<cfset data = { "_id" = singleName }>
+		<cfset data = {
+			"_id"   = singleName,
+			"Type" = singleName
+		}>
 		<cfloop query="primary">
 			<cfset data["_id"] &= ":" & example[primary.column_name][example.currentRow]>
 		</cfloop>
@@ -252,17 +347,7 @@
 			<cfdump var="#columns#">
 			</cfoutput>
 		<cfelse>
-			<cfset doc = couch.docFromId(data["_id"])>
-			<cfif not structKeyExists(doc, "_id")>
-				<cfset rev = couch.docInsert(data)>
-				<cfif structKeyExists(rev, "rev") and structKeyExists(rev, "id")>
-					<cfoutput><p>Inserted #rev.id# as #rev.rev#.</p></cfoutput>
-				<cfelse>
-					<cfdump var="#rev#" label="#data['_id']#">
-				</cfif>
-			<cfelse>
-				<cfoutput><p>Skipping #htmlEditFormat(data["_id"])#.</p></cfoutput>
-			</cfif>
+			<cfset couchSave(data, true)>
 		</cfif>
 		<cfflush>
 	</cfloop>

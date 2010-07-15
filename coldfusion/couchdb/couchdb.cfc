@@ -49,7 +49,7 @@
 <cffunction name="docFromId" access="public" returntype="struct">
 	<cfargument name="_id" type="string" required="true">
 	<cfargument name="_rev" type="string" required="false" default="">
-	<cfset var path = Variables.couchDBURL & urlEncodedFormat(arguments._id)>
+	<cfset var path = Variables.couchDBURL & $safeID(arguments._id)>
 	<cfif Arguments._rev neq "">
 		<cfset path = path & "?rev=" & urlEncodedFormat(arguments._rev)>
 	</cfif>
@@ -60,7 +60,7 @@
 	<cfargument name="_id" type="string" required="true">
 	<cfargument name="fileName" type="string" required="true">
 	<cfset var attach = $request(
-		path = Variables.couchDBURL & urlEncodedFormat(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName),
+		path = Variables.couchDBURL & $safeID(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName),
 		default = ""
 	)>
 	<cfif isInstanceOf(attach, "java.io.ByteArrayOutputStream")>
@@ -101,7 +101,7 @@
 	<cfargument name="contentType" type="string" required="true">
 	<cfargument name="data" type="any" required="true">
 	<cfargument name="_rev" type="string" required="false" default="">
-	<cfset var path = Variables.couchDBURL & urlEncodedFormat(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName)>
+	<cfset var path = Variables.couchDBURL & $safeID(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName)>
 	<cfif structKeyExists(Arguments, "_rev")>
 		<cfset path = path & "?rev=" & urlEncodedFormat(Arguments._rev)>
 	</cfif>
@@ -120,7 +120,7 @@
 	<cfargument name="data" type="any" required="true">
 	<cfargument name="_rev" type="string" required="true">
 	<cfreturn $request(
-		path = Variables.couchDBURL & urlEncodedFormat(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName) & "?rev=" & urlEncodedFormat(Arguments._rev),
+		path = Variables.couchDBURL & $safeID(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName) & "?rev=" & urlEncodedFormat(Arguments._rev),
 		method = "PUT",
 		contentType = Arguments.contentType,
 		body = Arguments.data
@@ -132,14 +132,14 @@
 	<cfargument name="fileName" type="string" required="true">
 	<cfargument name="_rev" type="string" required="true">
 	<cfreturn $request(
-		path = Variables.couchDBURL & urlEncodedFormat(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName) & "?rev=" & urlEncodedFormat(Arguments._rev),
+		path = Variables.couchDBURL & $safeID(Arguments._id) & "/" & urlEncodedFormat(Arguments.fileName) & "?rev=" & urlEncodedFormat(Arguments._rev),
 		method = "DELETE"
 	)>
 </cffunction>
 
 <cffunction name="docRevsInfo" access="public" returntype="struct">
 	<cfargument name="_id" type="string" required="true">
-	<cfreturn $request(Variables.couchDBURL & urlEncodedFormat(Arguments._id) & "?revs_info=true")>
+	<cfreturn $request(Variables.couchDBURL & $safeID(Arguments._id) & "?revs_info=true")>
 </cffunction>
 
 <cffunction name="docRevsInfoQuery" access="public" returntype="query">
@@ -164,7 +164,7 @@
 	<cfif structKeyExists(Arguments, "_revs") and isArray(Arguments._revs)>
 		<cfset openRevs = urlEncodedFormat(serializeJSON(Arguments._revs))>
 	</cfif>
-	<cfreturn $request(Variables.couchDBURL & urlEncodedFormat(Arguments._id) & "?open_revs=" & openRevs)>
+	<cfreturn $request(Variables.couchDBURL & $safeID(Arguments._id) & "?open_revs=" & openRevs)>
 </cffunction>
 
 <cffunction name="docInsert" access="public" returntype="struct">
@@ -179,7 +179,7 @@
 	</cfif>
 	<cfif id neq "">
 		<cfset Arguments.doc["_id"] = id>
-		<cfset path = path & urlEncodedFormat(id)>
+		<cfset path = path & $safeID(id)>
 		<cfset method = "PUT">
 	</cfif>
 	<cfif Arguments.batch>
@@ -207,7 +207,7 @@
 	<cfargument name="_id" type="string" required="true">
 	<cfargument name="_rev" type="string" required="true">
 	<cfreturn $request(
-		path = Variables.couchDBURL & urlEncodedFormat(Arguments._id) & "?rev=" & urlEncodedFormat(Arguments._rev),
+		path = Variables.couchDBURL & $safeID(Arguments._id) & "?rev=" & urlEncodedFormat(Arguments._rev),
 		method = "DELETE"
 	)>
 </cffunction>
@@ -562,6 +562,7 @@
 		<cfset args.charSet = "us-ascii">
 	</cfif>--->
 	<cftry>
+		<!---<cfdump var="#args#">--->
 		<cfhttp attributeCollection="#args#">
 			<cfif (Arguments.method eq "POST") or (Arguments.method eq "PUT")>
 				<cfhttpparam type="header" name="Content-Type" value="#Arguments.contentType#">
@@ -597,6 +598,11 @@
 	</cfcatch>
 	</cftry>
 	<cfreturn ret>
+</cffunction>
+
+<cffunction name="$safeID" access="private" returntype="string">
+	<cfargument name="id" type="string" default="">
+	<cfreturn (left(arguments.id, 1) eq "_" ? arguments.id : urlEncodedFormat(arguments.id))>
 </cffunction>
 
 </cfcomponent>
