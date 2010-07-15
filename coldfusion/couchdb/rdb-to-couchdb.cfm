@@ -6,7 +6,8 @@
 <cfparam name="URL.table" default="" type="string">
 <cfparam name="URL.couchHost" default="" type="string">
 <cfparam name="URL.couchPort" default="" type="string">
-<cfparam name="URL.couchDb" default="" type="string">
+<cfparam name="URL.couchUser" default="" type="string">
+<cfparam name="URL.couchPass" default="" type="string">
 <cfparam name="URL.couchDb" default="" type="string">
 <cfparam name="URL.maxRows" default="0" type="string">
 <cfset dsn = trim(URL.dsn)>
@@ -14,6 +15,8 @@
 <cfset tableName = trim(URL.table)>
 <cfset couchHost = trim(URL.couchHost)>
 <cfset couchPort = trim(URL.couchPort)>
+<cfset couchUser = trim(URL.couchUser)>
+<cfset couchPass = trim(URL.couchPass)>
 <cfset couchDb = trim(URL.couchDb)>
 <cfset maxRows = trim(URL.maxRows)>
 
@@ -29,11 +32,13 @@
 <cfform action="#thisPage#" method="get">
 	<label for="couchHost">CouchDB Host:</label> <cfinput type="text" size="32" name="couchHost" id="couchHost" required="true" validate="regular_expression" pattern="^([-a-zA-Z0-9]+.)*[-a-zA-Z0-9]+$" message="Please input a valid hostname"> <br />
 	<label for="couchPort">CouchDB Port:</label> <cfinput type="text" size="6" name="couchPort" id="couchPort" required="true" validate="integer" message="Please input a valid port number" value="5984"> <br />
+	<label for="couchUser">CouchDB User:</label> <cfinput type="text" size="32" name="couchUser" id="couchUser"> <br />
+	<label for="couchPass">CouchDB Pass:</label> <cfinput type="password" size="32" name="couchPass" id="couchPass"> <br />
 	<input type="submit" value="Continue" />
 </cfform>
 	</cfoutput>
 <cfelseif (couchDb eq "")>
-	<cfset dbs = new CouchDB(couchHost, couchPort).allDbs()>
+	<cfset dbs = new CouchDB(couchHost, couchPort, couchUser, couchPass).allDbs()>
 	<cfoutput>
 <p>Choose a target CouchDB database:</p>
 <ul>
@@ -77,7 +82,7 @@
 </ul>
 	</cfoutput>
 <cfelse>
-	<cfset couch = new CouchDB(couchHost, couchPort)>
+	<cfset couch = new CouchDB(couchHost, couchPort, couchUser, couchPass)>
 	<cfset couch.db(couchDb)>
 	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="foreign" type="foreignkeys">
 	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="columns" type="columns">
@@ -185,7 +190,7 @@
 		<cfset var less = "<">
 		<cfsavecontent variable="local.viewjs"><cfoutput>
 function (doc) {
-	if (doc.Type == '#jsStringFormat(arguments.docType)#') {
+	if (doc.Type === '#jsStringFormat(arguments.docType)#') {
 		<cfif (arguments.colNames eq "")>
 		emit(null, doc);
 		<cfelseif (arrayLen(ixColumns) gt 1)>
@@ -205,10 +210,10 @@ function (doc) {
 			emit(doc._id, { '_id': i }, null);
 		}
 			</cfif>
-		<cfelseif structKeyExists(rowFromCol, ixColumns[1]) and (columns.is_foreignkey[rowFromCol[ixColumns[1]]] eq "yes")>
-		emit(doc.#colMap[ixColumns[1]]#, { '_id': doc.#colMap[ixColumns[1]]#});
+		<!--- <cfelseif structKeyExists(rowFromCol, ixColumns[1]) and (columns.is_foreignkey[rowFromCol[ixColumns[1]]] eq "yes")>
+		emit(doc.#colMap[ixColumns[1]]#, { '_id': doc.#colMap[ixColumns[1]]#}); --->
 		<cfelse>
-		emit(doc.#colMap[ixColumns[1]]#, null);
+		emit(doc.#colMap[ixColumns[1]]#, doc);
 		</cfif>
 	}
 }
