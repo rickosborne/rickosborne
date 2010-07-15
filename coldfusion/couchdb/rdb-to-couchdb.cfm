@@ -184,6 +184,7 @@
 	</cfloop>
 	<cffunction name="makeView" returntype="string">
 		<cfargument name="docType" type="string" required="true">
+		<cfargument name="viewName" type="string" required="true">
 		<cfargument name="colNames" type="string" required="true">
 		<cfargument name="dataType" type="string" required="false" default="">
 		<cfset var ixColumns = listToArray(arguments.colNames, ", ")>
@@ -192,41 +193,64 @@
 function (doc) {
 	if (doc.Type === '#jsStringFormat(arguments.docType)#') {
 		<cfif (arguments.colNames eq "")>
+		/*
+		all documents, no key
+		SELECT * FROM #docType#
+		http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#
+		*/
 		emit(null, doc);
 		<cfelseif (arrayLen(ixColumns) gt 1)>
+		/*
+		fetch by composite key
+		SELECT * FROM #docType# WHERE (#listChangeDelims(colNames, " = '...') AND ()")# = '...')
+		Add a reduce function to change to:
+			SELECT #colNames#, AGG(...) FROM #docType# GROUP BY #colNames#
+		http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startKey=[val#repeatString(",val",arrayLen(ixColumns)-1)#]&endKey=[#repeatString(",val",arrayLen(ixColumns)-1)#]
+		*/
 		emit([
 			<cfloop from="1" to="#arrayLen(ixColumns)#" index="local.ixColNum">
 				<cfif (ixColNum gt 1)>, </cfif>
 				doc.#colMap[trim(ixColumns[ixColNum])]#
 			</cfloop>
-		], null);
+		], doc);
 		<cfelseif (not structKeyExists(colMap, ixColumns[1]))>
+		/*
+		join via subdocument
+		SELECT ... FROM #docType# JOIN #ixColumns[1]# ON (...) WHERE (_id = :_id)
+		http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startKey='#docType#:_id'&endKey='#docType#:_id'&include_docs=true
+		*/
 			<cfif (arguments.dataType eq "array")>
 		for (var i = 0; i #less# doc.#ixColumns[1]#.length; i++) {
-			emit(doc._id, { '_id': doc.#ixColumns[1]#[i] }, null);
+			emit(doc._id, { '_id': doc.#ixColumns[1]#[i] });
 		}
 			<cfelse>
 		for (var i in doc.#ixColumns[1]#) {
-			emit(doc._id, { '_id': i }, null);
+			emit(doc._id, { '_id': i });
 		}
 			</cfif>
 		<!--- <cfelseif structKeyExists(rowFromCol, ixColumns[1]) and (columns.is_foreignkey[rowFromCol[ixColumns[1]]] eq "yes")>
 		emit(doc.#colMap[ixColumns[1]]#, { '_id': doc.#colMap[ixColumns[1]]#}); --->
 		<cfelse>
+		/*
+		get document via field
+		SELECT * FROM #docType# WHERE #ixColumns[1]# = :param
+		http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startKey=':param'&endKey=':param'
+		*/
 		emit(doc.#colMap[ixColumns[1]]#, doc);
 		</cfif>
 	}
 }
 		</cfoutput></cfsavecontent>
-		<cfreturn replaceList(trim(viewjs), "#chr(13)#,#chr(9)#,#chr(10)#", ",,")>
+		<cfreturn reReplace(trim(viewjs), "(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)[ #chr(9)#]*(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)", "#chr(13)##chr(10)#", "ALL")>
 	</cffunction>
 	<cfset ixViews = {
 		"all" = {
-			"map" = makeView(singleName, "")
+			"map" = makeView(singleName, "all", "")
 		}
 	}>
 	<cfloop query="indexes">
-		<cfset ixViews[lcase(trim(replaceList(indexes.index_name, "IX_,FK_,PK_",",,,")))] = { "map" = makeView(singleName, indexes.column_name) }>
+		<cfset viewName = lcase(trim(replaceList(indexes.index_name, "IX_,FK_,PK_",",,,")))>
+		<cfset ixViews[viewName] = { "map" = makeView(singleName, viewName, indexes.column_name) }>
 	</cfloop>
 	<cfset fkMap = []>
 	<cfset fkFields = { "type" = "type" }>
@@ -280,7 +304,8 @@ function (doc) {
 	<cfloop array="#fkMap#" index="fkInfo">
 		<cfif not structKeyExists(ixViews, fkInfo.field)>
 			<!---<cfdump var="#fkInfo#">--->
-			<cfset ixViews[fkInfo.field] = { "map" = makeView(singleName, fkInfo.field, structKeyExists(fkInfo, "key") ? "struct" : "array") }>
+			<cfset viewName = fkInfo.field>
+			<cfset ixViews[viewName] = { "map" = makeView(singleName, viewName, fkInfo.field, structKeyExists(fkInfo, "key") ? "struct" : "array") }>
 		</cfif>
 	</cfloop>
 	<cfset design = {
