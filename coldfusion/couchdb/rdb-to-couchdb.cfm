@@ -106,12 +106,18 @@
 	<cfset cfc = 'component extends="CouchDBDocument" accessors="true" {' & crlf>
 	<cfset typeFromDB = {
 		"INT" = "numeric",
+		"SMALLINT" = "numeric",
+		"TINYINT" = "numeric",
 		"BIGINT" = "numeric",
 		"CHAR" = "string",
 		"DECIMAL" = "numeric",
 		"LONGTEXT" = "string",
+		"ENUM" = "string",
+		"TEXT" = "string",
+		"TINYTEXT" = "string",
 		"VARCHAR" = "string",
 		"DATETIME" = "date",
+		"TIMESTAMP" = "date",
 		"BIT" = "boolean"
 	}>
 	<cfloop query="columns">
