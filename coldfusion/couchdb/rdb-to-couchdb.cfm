@@ -305,6 +305,9 @@ function (doc) {
 		<cfif not structKeyExists(ixViews, fkInfo.field)>
 			<!---<cfdump var="#fkInfo#">--->
 			<cfset viewName = fkInfo.field>
+			<cfif (left(viewName, len(colPrefix)) eq colPrefix) and (len(viewName) gt len(colPrefix))>
+				<cfset viewName = mid(viewName, len(colPrefix) + 1, len(viewName))>
+			</cfif>
 			<cfset ixViews[viewName] = makeView(singleName, viewName, fkInfo.field, structKeyExists(fkInfo, "key") ? "struct" : "array")>
 		</cfif>
 	</cfloop>
