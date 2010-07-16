@@ -206,7 +206,7 @@ function (doc) {
 				"SELECT * FROM #docType# WHERE (#listChangeDelims(colNames, " = '...') AND ()")# = '...')",
 				"SELECT #colNames#, AGG(...) FROM #docType# GROUP BY #colNames#"
 			]>
-			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startKey=[val#repeatString(',val',arrayLen(ixColumns)-1)#]&endKey=[#repeatString(',val',arrayLen(ixColumns)-1)#]">
+			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startkey=[val#repeatString(',val',arrayLen(ixColumns)-1)#]&endkey=[#repeatString(',val',arrayLen(ixColumns)-1)#]">
 		emit([
 			<cfloop from="1" to="#arrayLen(ixColumns)#" index="local.ixColNum">
 				<cfif (ixColNum gt 1)>, </cfif>
@@ -216,7 +216,7 @@ function (doc) {
 		<cfelseif (not structKeyExists(colMap, ixColumns[1]))>
 			<cfset info = "Fetch related documents, as with an inner join">
 			<cfset sql = "SELECT #ixColumns[1]#.* FROM #ixColumns[1]# INNER JOIN #docType# ON (...) WHERE (_id = :_id)">
-			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startKey='#docType#:_id'&endKey='#docType#:_id'&include_docs=true">
+			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startkey=""#docType#:_id""&endkey=""#docType#:_id""&include_docs=true">
 			<cfif (arguments.dataType eq "array")>
 		for (var i = 0; i #less# doc.#ixColumns[1]#.length; i++) {
 			emit(doc._id, { '_id': doc.#ixColumns[1]#[i] });
@@ -229,15 +229,16 @@ function (doc) {
 		<!--- <cfelseif structKeyExists(rowFromCol, ixColumns[1]) and (columns.is_foreignkey[rowFromCol[ixColumns[1]]] eq "yes")>
 		emit(doc.#colMap[ixColumns[1]]#, { '_id': doc.#colMap[ixColumns[1]]#}); --->
 		<cfelse>
-			<cfset info = "Get documents by a single field">
+			<cfset fkPrefix = structKeyExists(rowFromCol, ixColumns[1]) and (columns.is_foreignkey[rowFromCol[ixColumns[1]]] eq "yes") ? singularify(columns.referenced_primarykey_table[rowFromCol[ixColumns[1]]]) & ":" : "">
+			<cfset info = "Fetch documents by a single field">
 			<cfset sql = "SELECT * FROM #docType# WHERE #ixColumns[1]# = :param">
-			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startKey=':param'&endKey=':param'">
+			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startkey=""#fkPrefix#value""&endkey=""#fkPrefix#value""">
 		emit(doc.#colMap[ixColumns[1]]#, doc);
 		</cfif>
 	}
 }
 		</cfoutput></cfsavecontent>
-		<cfset viewjs = reReplace(trim(viewjs), "(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)[ #chr(9)#]*(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)", "#chr(13)##chr(10)#", "ALL")> 
+		<cfset viewjs = reReplace(trim(viewjs), "(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)[ #chr(9)#]*(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)", "#chr(13)##chr(10)#", "ALL")>
 		<cfreturn {
 			"map"  = viewjs,
 			"sql"  = sql,
