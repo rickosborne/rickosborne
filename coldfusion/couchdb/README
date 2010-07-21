@@ -1,4 +1,15 @@
-This is a simple CFC interface to a CouchDB instance.
+rdb-to-couchdb.cfm
+	Migration tool for relational data to CouchDB.  It uses DB
+	introspection to analyze the columns, keys, and indexes of a
+	relational table and creates a logical JSON structure for
+	CouchDB.  It also creates a design document with view functions
+	to emulate the queries suggested by the indexes and foreign
+	keys.  It will then migrate each record in the table to the
+	CouchDB of your choosing.  It runs on powdered unicorn horns
+	and faerie dust.
+
+couchdb.cfc
+	A simple CFC interface to a CouchDB instance.
 
 
 Basic usage:
