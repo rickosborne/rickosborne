@@ -1,0 +1,208 @@
+@charset "UTF-8";
+@import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold|Cardo|Cantarell);
+/**
+ * COLOR  OFFWHT  TEXT    TITLE   LINK    FILL
+ * brown                  #c8c6c2 #918c85 #23180a
+ * orange #eedec7 #ddbd8e #c98520 #5d3d0e #2e1e07
+ * yellow #f3efce #e7de9d #cfbd3a #675e1d #332f0e
+ * red    #eecec4 #dc9c88 #b83811 #5c1c08 #2e0e04
+ */
+ 
+html {
+	background: #23180a url(shirt.jpg) left top repeat;
+}
+
+body {
+	font-size: 111.11%;
+	font-family: Cardo, Cambria, 'Times New Roman', 'Times Roman', serif;
+	margin: 0 auto;
+	max-width: 50em;
+	background-position: fixed;
+}
+
+div, p, ul, li, ol, dl, dt, dd, h1, h2, h3, h4, h5, h6, article, aside, header, footer, form {
+	margin: 0;
+	padding: 0;
+	text-indent: 0;
+	border: none;
+	font-size: 100%;
+	line-height: 1.5em;
+}
+
+#masthead, h1, h2, h3, h4, h5, h6, .nav a {
+	font-family: 'Yanone Kaffeesatz', Candara, Calibri, sans;
+	font-weight: normal;
+}
+
+#masthead {
+	font-size: 300%;
+	color: #ddbd8e;
+	letter-spacing: 0.1em;
+	text-shadow: #5d3d0e -1px -1px 1px;
+	opacity: 0.75;
+	text-align: right;
+}
+
+#content {
+	background-image: url(darken-blurry.png);
+	padding: 1.5em;
+	color: #e7de9d;
+}
+
+.article {
+	max-width: 30em;
+	float: left;
+	background-image: url(darken-blurry.png);
+	padding: 1.5em 1.5em;
+}
+
+.aside, .nav {
+	max-width: 15em;
+	margin-left: 34.5em;
+	padding: 1.5em 0;
+	color: #dc9c88;
+	clear: right;
+	font-family: Cantarell, Calibri, Tahoma, Arial, sans;
+}
+
+.aside * {
+	font-size: 90%;
+	line-height: 1.83333em;  /* 1.6667 base */
+}
+
+.box {
+	border-radius: 1.5em;
+	-moz-border-radius-topleft: 1.5em 0.75em;
+	-moz-border-radius-topright: 1.5em 0.75em;
+	-moz-border-radius-bottomleft: 1.5em 0.75em;
+	-moz-border-radius-bottomright: 1.5em 0.75em;
+	-webkit-border-top-left-radius: 1.5em 0.75em;
+	-webkit-border-top-right-radius: 1.5em 0.75em;
+	-webkit-border-bottom-left-radius: 1.5em 0.75em;
+	-webkit-border-bottom-right-radius: 1.5em 0.75em;
+}
+
+.aside ul, .aside li, .nav ul, .nav li {
+	list-style-type: none;
+}
+
+.clear {
+	clear: both;
+}
+
+p {
+	margin: 0 0 1.5em 0;
+}
+
+.noindent {
+	text-indent: 0;
+}
+
+h1 {
+	letter-spacing: 0.1em;
+	margin-bottom: 0.75em;
+}
+
+.article h1 {
+	font-size: 200%;
+	color: #c98520;
+}
+
+.aside h1 {
+	color: #b83811;
+	font-size: 200%;
+	line-height: 1.6667em;
+	margin-bottom: 0.83333em;
+	font-family: 'Yanone Kaffeesatz', Candara, Calibri, sans;
+}
+
+.article p {
+	text-align: justify;
+	letter-spacing: 0.5px;
+	text-indent: 1.5em;
+}
+
+.aside p {
+	margin-bottom: 1.8519em;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover, a:focus {
+	text-decoration: underline;
+}
+
+.article a {
+	color: #5d3d0e;
+}
+
+.aside a, .nav a {
+	color: #c98520;
+}
+
+.nav a {
+	letter-spacing: 0.2em;
+	display: block;
+	font-size: 120%;
+}
+
+.nav a:hover, .nav:focus {
+	text-decoration: none;
+	color: #eecec4;
+}
+
+#latest-tweet {
+	min-height: 5.5em; /* 3 lines */
+}
+
+@media screen and (max-width: 50em) {
+	/* Collapse the side nav to below the article, putting it in 3 columns */
+	body {
+		max-width: 33em;
+	}
+	#masthead {
+		font-size: 250%;
+	}
+	.article {
+		float: none;
+		margin: 0 auto;
+	}
+	.aside, .nav {
+		margin: 0 auto;
+		max-width: 30em;
+	}
+	.colable {
+		column-count: 3;
+		-moz-column-count: 3;
+		-webkit-column-count: 3;
+		column-gap: 3em;
+		-moz-column-gap: 3em;
+		-webkit-column-gap: 3em;
+	}
+	.colable li {
+		break-inside: avoid;
+	}
+}
+
+@media screen and (max-width: 33em) {
+	/* Collapse the side nav to 2 columns */
+	.article {
+		padding: 0;
+	}
+	.colable {
+		column-count: 2;
+		-moz-column-count: 2;
+		-webkit-column-count: 2;
+	}
+}
+
+@media screen and (max-width: 16.5em) {
+	/* Collapse the side nav to a single column */
+	.colable {
+		column-count: 1;
+		-moz-column-count: 1;
+		-webkit-column-count: 1;
+	}
+}
