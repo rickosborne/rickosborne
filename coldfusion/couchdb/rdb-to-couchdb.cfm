@@ -1,4 +1,4 @@
-﻿<cfsetting enablecfoutputonly="true" requesttimeout="600">
+﻿<cfsetting enablecfoutputonly="true" requesttimeout="600" showdebugoutput="false">
 
 <cfset thisPage=CGI.SCRIPT_NAME>
 <cfset pathInfo = lcase(listLast(CGI.PATH_INFO, "/"))>
