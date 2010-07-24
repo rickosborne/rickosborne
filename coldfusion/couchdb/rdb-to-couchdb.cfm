@@ -6,7 +6,7 @@
 <cfparam name="Form.cfPass" default="" type="string">
 <cfparam name="Form.dsn" default="" type="string">
 <cfparam name="Form.db" default="" type="string">
-<cfparam name="Form.table" default="" type="string">
+<cfparam name="Form.tables" default="" type="string">
 <cfparam name="Form.tablePrefix" default="" type="string">
 <cfparam name="Form.colPrefix" default="" type="string">
 <cfparam name="Form.doc" default="" type="string">
@@ -19,7 +19,7 @@
 <cfset cfPass = trim(Form.cfPass)>
 <cfset dsn = trim(Form.dsn)>
 <cfset dbName = trim(Form.db)>
-<cfset tableName = trim(Form.table)>
+<cfset tableNames = trim(Form.tables)>
 <cfset tablePrefix = trim(Form.tablePrefix)>
 <cfset colPrefix = trim(Form.colPrefix)>
 <cfset docName = trim(Form.doc)>
@@ -119,20 +119,23 @@
 <br /><input type="submit" value="Continue" />
 </cfform>
 	</cfoutput>
-<cfelseif (tableName eq "")>
+<cfelseif (tableNames eq "")>
 	<cfdbinfo datasource="#dsn#" dbname="#dbName#" name="tableNames" type="tables">
 	<cfquery name="tableNames" dbtype="query">
 	SELECT * FROM tableNames WHERE table_type <> 'SYSTEM_TABLE'
 	</cfquery>
 	<cfoutput>
-<h1>Source Relational Table</h1>
-<cfform action="#thisPage#" method="post">#makeHidden("table")#
-<label for="db">Table:</label>
-<cfselect name="table" id="table" required="true" message="Please choose a database table.">
+<h1>Source Relational Tables</h1>
+<cfform action="#thisPage#" method="post">#makeHidden("tables")#
+<label for="db">Tables:</label>
+<ul class="col3">
+<!---<cfselect name="table" id="table" required="true" message="Please choose a database table.">--->
 	<cfloop query="tableNames">
-	<option>#htmlEditFormat(tableNames.table_name)#</option>
+	<!---<option>#htmlEditFormat(tableNames.table_name)#</option>--->
+	<li><input type="checkbox" name="tables" value="#htmlEditFormat(tableNames.table_name)#" id="table#currentRow#" /><label for="table#currentRow#">#htmlEditFormat(tableNames.table_name)#</label></li>
 	</cfloop>
-</cfselect><br/>
+<!---</cfselect><br/>--->
+</ul>
 <label for="tablePrefix">Table Prefixes:</label> <cfinput type="text" name="tablePrefix" id="tablePrefix" value="" /><br/>
 <label for="tablePrefix">Column Prefixes:</label> <cfinput type="text" name="colPrefix" id="colPrefix" value="" /><br/>
 <input type="submit" value="Continue" />
@@ -144,9 +147,59 @@
 	</cfoutput>
 	<cfset couch = new CouchDB(couchHost, couchPort, couchUser, couchPass)>
 	<cfset couch.db(couchDb)>
-	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="foreign" type="foreignkeys">
-	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="columns" type="columns">
-	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="indexes" type="index">
+	<cfset allForeign = queryNew("tableName,fkColumn,fkTable,pkColumn","varchar,varchar,varchar,varchar")>
+	<cfset allColumns = queryNew("tableName,default,columnName,size,digits,isFK,nullable,isPK,place,refPK,refTable,typeName","varchar,varchar,varchar,integer,integer,varchar,varchar,varchar,integer,varchar,varchar,varchar")>
+	<cfset allIndexes = queryNew("tableName,columnName,indexName,isMulti,place,typeName","varchar,varchar,varchar,varchar,varchar,varchar")>
+	<cffunction name="getTableInfo" returntype="void">
+		<cfargument name="tableName" type="string" required="true">
+		<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="local.foreigns" type="foreignkeys">
+		<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="local.columns" type="columns">
+		<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="local.indexes" type="index">
+		<cfquery dbtype="query" name="allForeign">
+		SELECT tableName,fkColumn,fkTable,pkColumn FROM allForeign
+		UNION ALL
+		SELECT <cfqueryparam value="#tableName#">, fkcolumn_name, fktable_name,pkcolumn_name FROM foreigns
+		</cfquery>
+		<cfquery dbtype="query" name="allColumns">
+		SELECT tableName,default,columnName,size,digits,isFK,nullable,isPK,place,refPK,refTable,typeName FROM allColumns
+		UNION ALL
+		SELECT <cfqueryparam value="#tableName#">, column_default_value, column_name, column_size, decimal_digits, is_foreignkey, is_nullable, is_primarykey, ordinal_position, referenced_primarykey, referenced_primarykey_table, type_name FROM columns
+		</cfquery>
+		<cfquery dbtype="query" name="allIndexes">
+		SELECT tableName,columnName,indexName,isMulti,place,typeName FROM allIndexes
+		UNION ALL
+		SELECT <cfqueryparam value="#tableName#">, column_name, index_name, non_unique, ordinal_position, type FROM indexes
+		</cfquery>
+	</cffunction>
+	<cfset gotTables = "">
+	<cfloop list="#tableNames#" index="tableName">
+		<cfset getTableInfo(tableName)>
+		<cfset gotTables = listAppend(gotTables, tableName)>
+	</cfloop>
+	<cfquery dbtype="query" name="needTables">
+	SELECT DISTINCT fkTable AS tableName FROM allForeign WHERE fkTable NOT IN (<cfqueryparam list="true" value="#gotTables#">) AND (fkTable != 'N/A')
+	UNION
+	SELECT DISTINCT refTable AS tableName FROM allColumns WHERE refTable NOT IN (<cfqueryparam list="true" value="#gotTables#">) AND (refTable != 'N/A')
+	</cfquery>
+	<!---<cfdump var="#needTables#" label="needTables">--->
+	<cfset loopCounter = 0>
+	<cfloop condition="(needTables.recordCount gt 0) and (loopCounter lte 5)">
+		<cfset loopCounter += 1> 
+		<cfloop query="needTables">
+			<cfset getTableInfo(needTables.tableName)>
+			<cfset gotTables = listAppend(gotTables, needTables.tableName)>
+		</cfloop>
+		<cfquery dbtype="query" name="needTables">
+		SELECT DISTINCT fkTable AS tableName FROM allForeign WHERE fkTable NOT IN (<cfqueryparam list="true" value="#gotTables#">) AND (fkTable != 'N/A')
+		UNION
+		SELECT DISTINCT refTable AS tableName FROM allColumns WHERE refTable NOT IN (<cfqueryparam list="true" value="#gotTables#">) AND (refTable != 'N/A')
+		</cfquery>
+		<!---<cfdump var="#needTables#" label="needTables">--->
+	</cfloop>
+	<cfdump var="#allForeign#" label="foreign">
+	<cfdump var="#allColumns#" label="columns">
+	<cfdump var="#allIndexes#" label="indexes">
+	<cfexit method="exittemplate">
 	<cfquery name="primary" dbtype="query">
 	SELECT column_name, type_name FROM columns WHERE is_primarykey = 'YES' ORDER BY ordinal_position
 	</cfquery>
@@ -672,6 +725,15 @@ dd {
 	-webkit-column-fill: balance;
 }
 
+.col3 {
+	-moz-column-count: 3;
+	-moz-column-gap: 1.5em;
+	-moz-column-fill: balance;
+	-webkit-column-count: 3;
+	-webkit-column-gap: 1.5em;
+	-webkit-column-fill: balance;
+}
+
 h3 {
 	color: ##2f4451;
 	font-size: 150%;
@@ -695,6 +757,19 @@ label {
 	text-align: right;
 	padding-right: 1em;
 	height: 2em;
+}
+
+ul label {
+	text-align: inherit;
+	min-width: 0;
+	padding: inherit;
+}
+
+ul.col3, ul.col3 li {
+	list-style-type: none;
+	margin-left: 0;
+	text-indent: 0;
+	padding-left: 0;
 }
 
 input[type=submit] {
