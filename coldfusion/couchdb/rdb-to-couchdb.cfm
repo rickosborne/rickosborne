@@ -319,11 +319,13 @@ function(head, req) {
 		<cfargument name="viewName" type="string" required="true">
 		<cfargument name="colNames" type="string" required="true">
 		<cfargument name="dataType" type="string" required="false" default="">
+		<cfargument name="fkColumn" type="string" required="false" default="">
 		<cfset var ixColumns = listToArray(arguments.colNames, ", ")>
 		<cfset var less = "<">
 		<cfset var viewurl = "">
 		<cfset var sql = "">
 		<cfset var info = "">
+		<cfset var isMulti = false> 
 		<cfsavecontent variable="local.viewjs"><cfoutput>
 function (doc) {
 	if (doc.Type === '#jsStringFormat(arguments.docType)#') {
@@ -348,8 +350,10 @@ function (doc) {
 		<cfelseif (not structKeyExists(colMap, ixColumns[1]))>
 			<cfset info = "Fetch related documents, as with an inner join">
 			<cfset sql = "SELECT #ixColumns[1]#.* FROM #ixColumns[1]# INNER JOIN #tableName# ON (...) WHERE (_id = :_id)">
-			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startkey=""#docType#:_id""&endkey=""#docType#:_id""&include_docs=true">
-			<cfif (arguments.dataType eq "array")>
+			<cfset viewurl = "http://#couchHost#:#couchPort#/#couchDb#/_design/#docType#/_view/#viewName#?startkey=[""#docType#:_id"",""""]&endkey=[""#docType#:_id"",""zzzzz""]">
+			<cfset isMulti = true>
+		emit([ doc._id, "" ], doc);
+			<!---<cfif (arguments.dataType eq "array")>
 		for (var i = 0; i #less# doc.#ixColumns[1]#.length; i++) {
 			emit(doc._id, { '_id': doc.#ixColumns[1]#[i] });
 		}
@@ -357,7 +361,7 @@ function (doc) {
 		for (var i in doc.#ixColumns[1]#) {
 			emit(doc._id, { '_id': i });
 		}
-			</cfif>
+			</cfif>--->
 		<!--- <cfelseif structKeyExists(rowFromCol, ixColumns[1]) and (columns.is_foreignkey[rowFromCol[ixColumns[1]]] eq "yes")>
 		emit(doc.#colMap[ixColumns[1]]#, { '_id': doc.#colMap[ixColumns[1]]#}); --->
 		<cfelse>
@@ -368,6 +372,11 @@ function (doc) {
 		emit(doc.#colMap[ixColumns[1]]#, doc);
 		</cfif>
 	}
+	<cfif isMulti>
+	else if (doc.Type === '#ixColumns[1]#') {
+		emit([ doc.#fkColumn#, doc._id ], doc);
+	}
+	</cfif>
 }
 		</cfoutput></cfsavecontent>
 		<cfset viewjs = reReplace(trim(viewjs), "(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)[ #chr(9)#]*(#chr(13)##chr(10)#|#chr(13)#|#chr(10)#)", "#chr(13)##chr(10)#", "ALL")>
@@ -449,12 +458,12 @@ function (doc) {
 	</cfloop>
 	<cfloop array="#fkMap#" index="fkInfo">
 		<cfif not structKeyExists(ixViews, fkInfo.field)>
-			<!---<cfdump var="#fkInfo#">--->
+			<cfdump var="#fkInfo#">
 			<cfset viewName = fkInfo.field>
 			<cfif (left(viewName, len(colPrefix)) eq colPrefix) and (len(viewName) gt len(colPrefix))>
 				<cfset viewName = mid(viewName, len(colPrefix) + 1, len(viewName))>
 			</cfif>
-			<cfset ixViews[viewName] = makeView(docName, viewName, fkInfo.field, structKeyExists(fkInfo, "key") ? "struct" : "array")>
+			<cfset ixViews[viewName] = makeView(docName, viewName, fkInfo.field, structKeyExists(fkInfo, "key") ? "struct" : "array", fieldFromColumn(fkInfo.fcolumn))>
 		</cfif>
 	</cfloop>
 	<cfset design = {
