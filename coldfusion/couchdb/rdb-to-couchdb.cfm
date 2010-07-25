@@ -231,6 +231,36 @@
 			<cfset colPrefix = left(primary.column_name, len(primary.column_name) - 3)>
 		</cfif>
 	</cfif>
+	<cffunction name="makeProperty" returntype="string">
+		<cfargument name="fieldName" type="string" required="true">
+		<cfargument name="typeName" type="string" required="true">
+		<cfargument name="defaultValue" type="string" required="true">
+		<cfargument name="isNullable" type="string" required="true">
+		<cfargument name="isPK" type="string" required="true">
+		<cfset var cfType = typeFromDB[listFirst(typeName," ")]>
+		<cfset var prop = tab & 'property name="#fieldName#" type="#cfType#" default="#defaultValue#" notnull="' & (isNullable eq "yes" ? "false" : "true") & '" required="' & (isNullable eq "yes" ? "false" : "true") & '"'>
+		<cfif (typeName CONTAINS "char")>
+			<cfset prop &= ' length="#column_size#"'>
+		</cfif>
+		<cfif typeName CONTAINS "decimal">
+			<cfset prop &= ' precision="#decimal_digits#"'>
+		</cfif>
+		<cfif (isPK eq "yes")>
+			<cfset prop &= ' fieldtype="id"'>
+		</cfif>
+		<cfset prop &= ";" & crlf>
+		<cfreturn prop>
+	</cffunction>
+	<cfset jsHtmlEscape = "var htmlEscape = function(s) { return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;'); };">
+	<cfset shows = { }>
+	<cfset lists = { }>
+	<cfset fieldDivs = "">
+	<cfset optionTitleField = "">
+	<cffunction name="tidyJS" returntype="String">
+		<cfargument name="js" type="string" required="true">
+		<cfset var ret = trim(replace(js, "' + '", "", "ALL"))>
+		<cfreturn ret>
+	</cffunction>
 	<cfloop query="columns">
 		<cfset rowFromCol[column_name] = currentRow>
 		<cfif singleName eq left(column_name, len(singleName))>
@@ -244,20 +274,46 @@
 		<cfif (referenced_primarykey_table neq "n/a")>
 			<cfset pkMap[column_name] = singularify(listLast(referenced_primarykey_table, "_"))>
 		</cfif>
-		<cfset cfType = typeFromDB[listFirst(type_name," ")]>
-		<cfset prop = tab & 'property name="#fieldName#" type="#cfType#" default="#column_default_value#" notnull="' & (is_nullable eq "yes" ? "false" : "true") & '" required="' & (is_nullable eq "yes" ? "false" : "true") & '"'>
-		<cfif (type_name CONTAINS "char")>
-			<cfset prop &= ' length="#column_size#"'>
+		<cfset cfc &= makeProperty(fieldName, columns.type_name, columns.column_default_value, columns.is_nullable, columns.is_primarykey)>
+		<cfif (columns.is_primarykey neq "yes")>
+			<cfif (optionTitleField eq "")><cfset optionTitleField = fieldName></cfif>
+			<cfset fieldDiv = "<div class=""#singleName#_#fieldName#"">' + htmlEscape(doc.#fieldName#) + '</div>\n">
+			<!---<cfsavecontent variable="showFieldFunc"><cfoutput>
+function(doc, req) {
+	/* http://#couchHost#:#couchPort#/#couchDB#/_design/#singleName#/_show/#fieldName#/#singleName#:id */
+	#jsHtmlEscape#
+	return (doc == null) ? '' : '#fieldDiv#';
+}
+			</cfoutput></cfsavecontent>
+			<cfset shows[fieldName] = trim(showFieldFunc)>--->
+			<cfset fieldDivs &= " + '\t#fieldDiv#'">
 		</cfif>
-		<cfif type_name CONTAINS "decimal">
-			<cfset prop &= ' precision="#decimal_digits#"'>
-		</cfif>
-		<cfif (is_primarykey eq "yes")>
-			<cfset prop &= ' fieldtype="id"'>
-		</cfif>
-		<cfset prop &= ";" & crlf>
-		<cfset cfc &= prop>
 	</cfloop>
+	<cfsavecontent variable="showDivFunc"><cfoutput>
+function(doc, req) {
+	/* http://#couchHost#:#couchPort#/#couchDB#/_design/#singleName#/_show/div_/#singleName#:id */
+	#jsHtmlEscape#
+	return (doc == null) ? '' : '<div class="#singleName#" id="' + htmlEscape(doc._id.replace(':','_')) + '">\n'#fieldDivs# + '</div>';
+}
+	</cfoutput></cfsavecontent>
+	<cfset shows["div_"] = tidyJS(showDivFunc)>
+	<cfif (optionTitleField neq "")>
+		<!---<cfset shows["option_"] = "function(doc, req) { return (doc == null) ? '' : '<option value=""' + doc._id + '"">' + doc.#optionTitleField# + '</option>\n'; }">--->
+		<cfsavecontent variable="listSelectFunc"><cfoutput>
+function(head, req) {
+	/* http://#couchHost#:#couchPort#/#couchDB#/_design/#singleName#/_list/select_/viewName?selected=#singleName#:id */
+	start({ 'headers': { 'Content-Type': 'text/html' }});
+	#jsHtmlEscape#
+	var row, rowNum = 0, selected = req.query.selected, opts = '<select name="#htmlEditFormat(singleName)#"' + (req.query.multiple ? ' multiple="multiple"' : '') + '>\n';
+	while (row = getRow()) {
+		opts += '<option value="' + htmlEscape(row.value._id) + '"' + (row.value._id === selected ? ' selected="selected"' : '') + '>' + htmlEscape(row.value.#optionTitleField#) + '</option>\n';
+		if (++rowNum > 10) { rowNum = 0; send(opts); opts = ''; }
+	}
+	return opts + '</select>\n';
+}
+		</cfoutput></cfsavecontent>
+		<cfset lists["select_"] = trim(listSelectFunc)>
+	</cfif>
 	<cffunction name="makeView" returntype="struct">
 		<cfargument name="docType" type="string" required="true">
 		<cfargument name="viewName" type="string" required="true">
@@ -404,7 +460,9 @@ function (doc) {
 	<cfset design = {
 		"_id"      = "_design/#docName#",
 		"language" = "javascript",
-		"views"    = ixViews
+		"views"    = ixViews,
+		"shows"    = shows,
+		"lists"    = lists
 	}>
 	<cfif (maxrows eq 0)>
 		<cfoutput>
@@ -417,6 +475,10 @@ function (doc) {
 <br /><input type="submit" value="Update" />
 </p>
 </cfform>
+<h2>Design Document</h2>
+<cfdump var="#design#">
+<cfset couchSave(design, true)>
+<p><a href="http://#couchHost#:#couchPort#/_utils/document.html?#htmlEditFormat(couchDb)#/_design/#htmlEditFormat(docName)#" target="_blank">Open Design Document</a></p>
 		</cfoutput>
 	<cfelse>
 		<cfset couchSave(design, maxrows gt 0)>
