@@ -175,7 +175,7 @@
 	</cffunction>
 	<cffunction name="fieldFromColumn" returntype="string">
 		<cfargument name="col" type="string" required="true">
-		<cfreturn lcase(replace((right(col, 3) eq "_id") and (len(col) gt 3) ? left(col, len(col) - 3) : col, "_", "", "ALL"))>
+		<cfreturn lcase(trim(replace((right(col, 3) eq "_id") and (len(col) gt 3) ? left(col, len(col) - 3) : col, "_", "", "ALL")))>
 	</cffunction>
 	<cffunction name="couchSave" returntype="void">
 		<cfargument name="data" type="struct" required="true">
@@ -251,7 +251,7 @@
 		<cfset prop &= ";" & crlf>
 		<cfreturn prop>
 	</cffunction>
-	<cfset jsHtmlEscape = "var htmlEscape = function(s) { return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;'); };">
+	<cfset jsHtmlEscape = "var htmlEscape = function(s) { return ((typeof s) !== 'string') ? '' : s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;'); };">
 	<cfset shows = { }>
 	<cfset lists = { }>
 	<cfset fieldDivs = "">
@@ -293,7 +293,7 @@ function(doc, req) {
 function(doc, req) {
 	/* http://#couchHost#:#couchPort#/#couchDB#/_design/#singleName#/_show/div_/#singleName#:id */
 	#jsHtmlEscape#
-	return (doc == null) ? '' : '<div class="#singleName#" id="' + htmlEscape(doc._id.replace(':','_')) + '">\n'#fieldDivs# + '</div>';
+	return (doc == null) ? '' : '<div class="#docName#" id="' + htmlEscape(doc._id.replace(':','_')) + '">\n'#fieldDivs# + '</div>';
 }
 	</cfoutput></cfsavecontent>
 	<cfset shows["div_"] = tidyJS(showDivFunc)>
@@ -304,7 +304,7 @@ function(head, req) {
 	/* http://#couchHost#:#couchPort#/#couchDB#/_design/#singleName#/_list/select_/viewName?selected=#singleName#:id */
 	start({ 'headers': { 'Content-Type': 'text/html' }});
 	#jsHtmlEscape#
-	var row, rowNum = 0, selected = req.query.selected, opts = '<select name="#htmlEditFormat(singleName)#"' + (req.query.multiple ? ' multiple="multiple"' : '') + '>\n';
+	var row, rowNum = 0, selected = req.query.selected, opts = '<select name="#htmlEditFormat(docName)#"' + (req.query.multiple ? ' multiple="multiple"' : '') + '>\n';
 	while (row = getRow()) {
 		opts += '<option value="' + htmlEscape(row.value._id) + '"' + (row.value._id === selected ? ' selected="selected"' : '') + '>' + htmlEscape(row.value.#optionTitleField#) + '</option>\n';
 		if (++rowNum > 10) { rowNum = 0; send(opts); opts = ''; }
@@ -419,13 +419,21 @@ function (doc) {
 		WHERE is_primarykey = 'YES'
 		ORDER BY ordinal_position
 		</cfquery>
+		<cfquery name="fkNonPkInfo" dbtype="query">
+		SELECT column_name, type_name, referenced_primarykey_table AS refTable, referenced_primarykey AS refCol
+		FROM fkcolumns
+		WHERE (is_primarykey = 'NO')
+		  AND (column_name != <cfqueryparam value="#foreign.fkcolumn_name#">)
+		ORDER BY ordinal_position
+		</cfquery>
 		<cfset fkInfo = {
 			"table"   = foreign.fktable_name,
 			"single"  = singularify(foreign.fktable_name, tablePrefix),
 			"fcolumn" = foreign.fkcolumn_name,
 			"pcolumn" = foreign.pkcolumn_name,
 			"field"   = fieldName,
-			"type"    = fkcolumns.type_name
+			"type"    = fkcolumns.type_name,
+			"nonpk"   = fkNonPkInfo
 		}>
 		<cfif (fkDates.recordCount eq 1)>
 			<cfset fkInfo["key"] = fkDates.column_name>
@@ -464,6 +472,35 @@ function (doc) {
 				<cfset viewName = mid(viewName, len(colPrefix) + 1, len(viewName))>
 			</cfif>
 			<cfset ixViews[viewName] = makeView(docName, viewName, fkInfo.field, structKeyExists(fkInfo, "key") ? "struct" : "array", fieldFromColumn(fkInfo.fcolumn))>
+			<cfif (listLen(fkInfo.field) eq 1) and (fkInfo.nonPK.recordCount gt 0)>
+				<cfsavecontent variable="listDivFKFunc"><cfoutput>
+function (head, req) {
+	/* http://#couchHost#:#couchPort#/#couchDB#/_design/#singleName#/_list/#viewName#/#viewName#?startkey=["#docname#:id",""]&endkey=["#docname#:id","zzzzz"] */
+	start({ 'headers': { 'Content-Type': 'text/html' }});
+	#jsHtmlEscape#
+	var row, lastParentId = '', div;
+	while (row = getRow()) {
+		div = '';
+		if (row.value.Type === '#docName#') {
+			if (lastParentId !== '') {
+				div += '</div>\n';
+			}
+			lastParentId = row.value._id;
+			div += '<div class="#docName#" id="' + htmlEscape(row.value._id.replace(':','_')) + '">\n'#replace(fieldDivs,"doc.","row.value.","ALL")#;
+		} else if (row.value.Type === '#fkInfo.field#') {
+			div += '\t<div class="#fkInfo.field#" id="' + htmlEscape(row.value._id.replace(':','_')) + '">\n';
+			<cfloop query="fkInfo.nonpk"><cfset fkField = fieldFromColumn(column_name)>
+			div += '\t\t<div class="#fkInfo.field#_#fkField#">' + htmlEscape(row.value.#fkField#) + '</div>\n';
+			</cfloop>
+			div += '\t</div>\n';
+		}
+		if (div.length > 0) send(div);
+	}
+	return (lastParentId === '') ? '' : '</div>\n';
+}
+				</cfoutput></cfsavecontent>
+				<cfset lists[viewName] = tidyJS(listDivFKFunc)>
+			</cfif>
 		</cfif>
 	</cfloop>
 	<cfset design = {
