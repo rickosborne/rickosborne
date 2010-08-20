@@ -234,7 +234,8 @@
 		"TIMESTAMP" = "date",
 		"TINYINT"   = "numeric",
 		"TINYTEXT"  = "string",
-		"VARCHAR"   = "string"
+		"VARCHAR"   = "string",
+		"TIME"      = "string"
 	}>
 	<cfif (colPrefix eq "")>
 		<cfset colPrefix = " ">
@@ -477,6 +478,9 @@ function (doc) {
 				<cfswitch expression="#columns.type_name#">
 					<cfcase value="BIT">
 						<cfset fieldVal = (fieldVal neq 0) ? true : false>
+					</cfcase>
+					<cfcase value="TIME">
+						<cfset fieldVal = dateFormat(fieldVal, "HH:mm:ss")>
 					</cfcase>
 					<cfcase value="DATETIME">
 						<cfset fieldVal = prettyDate(fieldVal)>
