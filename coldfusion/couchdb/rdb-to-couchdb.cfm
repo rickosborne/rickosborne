@@ -1,7 +1,7 @@
 ﻿<cfsetting enablecfoutputonly="true" requesttimeout="600" showdebugoutput="false">
 
 <cfset thisPage=CGI.SCRIPT_NAME>
-<cfset pathInfo = lcase(listLast(CGI.PATH_INFO, "/"))>
+<cfset pathInfo = lcase(listLast(structKeyExists(URL, "path_info") ? URL.PATH_INFO : CGI.PATH_INFO, "/"))>
 
 <cfparam name="Form.cfPass" default="" type="string">
 <cfparam name="Form.dsn" default="" type="string">
@@ -70,7 +70,7 @@
 </cfform>
 	</cfoutput>
 <cfelseif (couchDb eq "")>
-	<cfset dbs = new CouchDB(couchHost, couchPort, couchUser, couchPass).allDbs()>
+	<cfset dbs = createObject("component", "CouchDB").init(couchHost, couchPort, couchUser, couchPass).allDbs()>
 	<cfoutput>
 <h1>Target CouchDB Database</h1>
 <cfform action="#thisPage#" method="post">#makeHidden("couchDb")#
@@ -91,8 +91,19 @@
 </cfform>
 	</cfoutput>
 <cfelseif (dsn eq "")>
-	<cfset createObject("component","cfide.adminapi.administrator").login(cfPass)>
-	<cfset sources = CreateObject("component","cfide.adminapi.datasource").getDatasources()>
+	<cftry>
+		<cfset createObject("component","cfide.adminapi.administrator").login(cfPass)>
+		<cfset sources = CreateObject("component","cfide.adminapi.datasource").getDatasources()>
+		<cfcatch>
+			<!--- Uncomment for Railo 3.x
+			<cfadmin action="getDatasources" type="web" password="#cfPass#" returnVariable="railosources">
+			--->
+			<cfset sources = {}>
+			<cfloop query="railosources">
+				<cfset sources[railosources.name] = { "name" = railosources.name }>
+			</cfloop>
+		</cfcatch>
+	</cftry>
 	<cfoutput>
 <h1>ColdFusion Datasource</h1>
 <cfform action="#thisPage#" method="post">#makeHidden("dsn")#
@@ -142,7 +153,7 @@
 	<cfoutput>
 <h1>Data Migration</h1>
 	</cfoutput>
-	<cfset couch = new CouchDB(couchHost, couchPort, couchUser, couchPass)>
+	<cfset couch = createObject("component", "CouchDB").init(couchHost, couchPort, couchUser, couchPass)>
 	<cfset couch.db(couchDb)>
 	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="foreign" type="foreignkeys">
 	<cfdbinfo datasource="#dsn#" dbname="#dbName#" table="#tableName#" name="columns" type="columns">
@@ -539,7 +550,9 @@ function (doc) {
 	</cfif>
 </cfif>
 
-<cfoutput></div></body></html>
+<cfoutput></div>
+</body>
+</html>
 </cfoutput>
 <cfexit method="exittemplate">
 </cfif>
@@ -725,7 +738,7 @@ table.zebra, .zebra td {
 		</cfoutput>
 	</cfcase>
 	<cfcase value="couchdb-watermark.png">
-		<cfcontent type="image/png">
+		<cfcontent type="image/png; charset=ISO-8859-1">
 		<cfsavecontent variable="png">
 		<cfoutput>
 iVBORw0KGgoAAAANSUhEUgAAAKUAAACWCAYAAAC/xUjZAAAcNUlEQVR42u2dB7AURdeGr58555xz
@@ -858,10 +871,10 @@ F8k1bYWCAJPfcUII4ObfZGGRk6nX9aCR0bQ4QqY2Zsw4V9iaOjXkQdnAwrbtynNN0kkvqnQ3bomv
 B6WX3IoHpRcPSi9ePCi9FE7+D7WFh8zSgpXnAAAAAElFTkSuQmCC
 		</cfoutput>
 		</cfsavecontent>
-		<cfoutput>#toString(toBinary(trim(png)))#</cfoutput>
+		<cfoutput>#toString(toBinary(trim(png)), "ISO-8859-1")#</cfoutput>
 	</cfcase>
 	<cfcase value="back-stripes.png">
-		<cfcontent type="image/png">
+		<cfcontent type="image/png; charset=ISO-8859-1">
 		<cfsavecontent variable="png">
 		<cfoutput>
 iVBORw0KGgoAAAANSUhEUgAAArwAAADZCAYAAADCHOODAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
@@ -996,7 +1009,7 @@ Y4wxxvjOf+QcUNhmVdhGfezaqU91HNTjbHXetXhs62DxqZkPXjGxjLlV3va4jurashbvC6/xrAPE
 RxGTdcX8rLm/auZPhD2uvkdS3NtEu4aq3793PP8vwAB8yIHYaiOJuAAAAABJRU5ErkJggg==
 		</cfoutput>
 		</cfsavecontent>
-		<cfoutput>#toString(toBinary(trim(png)))#</cfoutput>
+		<cfoutput>#toString(toBinary(trim(png)), "ISO-8859-1")#</cfoutput>
 	</cfcase>
 	<cfdefaultcase>
 		<cfheader statuscode="404" statustext="Not Found">
