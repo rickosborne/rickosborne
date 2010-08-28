@@ -10,6 +10,7 @@ component initmethod="init" {
 
 variables.appKey = "gitwatch";
 variables.chatAppKey = "gitchat";
+variables.maxCommitAge = createTimespan(0,0,3,0);
 
 lock scope="Application" type="exclusive" timeout="5" {
 	if (not structKeyExists(application, variables.appKey)) {
@@ -40,28 +41,68 @@ public void function setChatGatewayID(required string gatewayID) {
 } // setChatGatewayID
 
 public void function fileChanged(required string filename, required date lastmod, required string action) {
-	// var repoDir = rereplaceNoCase(arguments.fileName, "([.]git[:\\/]).*$", "\1");
-	// var repo = createObject("java", "org.eclipse.jgit.lib.Repository").init(createObject("java", "java.io.File").init(repoDir));
+	var online = [];
 	for (local.buddyID in application[variables.chatAppKey].buddies) {
 		var buddy = application[variables.chatAppKey].buddies[buddyID];
 		if (structKeyExists(buddy, "status") and ((buddy.status eq "ONLINE") or (buddy.status eq "FREE TO CHAT") or (buddy.status eq "IDLE"))) {
-			SendGatewayMessage(application[variables.appKey].chatGatewayID, {
-				"command" = "submit",
-				"buddyID" = buddyID,
-				"message" = "File Changed: " & arguments.filename
-			});
+			arrayAppend(online, buddyID);
 		}
 	} // for each buddy
+	if (arrayLen(online) eq 0) {
+		return;
+	}
+	var repoDir = rereplaceNoCase(arguments.fileName, "([.]git[:\\/]).*$", "\1");
+	var repo = createObject("java", "org.eclipse.jgit.lib.Repository").init(createObject("java", "java.io.File").init(repoDir));
 	// writeDump(repo.getAllRefs());
-	// writeDump(queryFromLog(repo, 25, createDate(2010,07,13)));
+	var log = queryFromLog(repo, 5, now() - variables.maxCommitAge);
+	if (log.recordCount lt 1) {
+		return;
+	}
+	var msgs = [];
+	var lastCommitter = "";
+	var msg = "";
+	for (var r = 1; r lte log.recordCount; r++) {
+		if (log.committerName[r] neq lastCommitter) {
+			if (msg neq "") {
+				arrayAppend(msgs, msg);
+			}
+			lastCommitter = log.committerName[r];
+			msg = lastCommitter & " committed:" & chr(13) & chr(10);
+		}
+		msg &= " * " & log.shortMessage[r];
+		if (log.ref[r] neq "") {
+			msg &= " [" & log.ref[r] & "]";
+		}
+		msg &= chr(13) & chr(10);
+	} // for r
+	arrayAppend(msgs, msg);
+	writeDump(msgs);
+	
+	for (local.i = 1; i lte arrayLen(online); i++) {
+		for (local.m = 1; m lte arrayLen(msgs); m++) {
+			SendGatewayMessage(application[variables.appKey].chatGatewayID, {
+				"command" = "submit",
+				"buddyID" = online[i],
+				"message" = msgs[m]
+			});
+		} // for m
+	} // for i
+	
 } // fileChanged
 
 private query function queryFromLog(required any repo, numeric entryCount = 25, date earliest) {
+	var refs = arguments.repo.getAllRefs();
+	var refIds = {};
+	for (local.refName in refs) {
+		var ref = refs[refName];
+		refIds[ref.getObjectId().getName()] = reReplace(ref.getName(), "^refs/(heads|remotes)/", "");
+	} // for each ref
+	// writeDump(refs);
 	var git = createObject("java", "org.eclipse.jgit.api.Git").init(arguments.repo);
 	// writeDump(git);
 	var iter = git.log().call().iterator();
 	// writeDump(iter);
-	var commits = queryNew("id,authoremail,authorname,committime,committeremail,committername,fullmessage,parent1,parent2,parentcount,shortmessage,type","varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,varchar,integer");
+	var commits = queryNew("id,authoremail,authorname,committime,committeremail,committername,fullmessage,parent1,parent2,parentcount,shortmessage,type,ref","varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,varchar,integer,varchar");
 	for (var n = 1; n lte arguments.entryCount; n++) {
 		if (iter.hasNext()) {
 			var commit = iter.next();
@@ -69,8 +110,10 @@ private query function queryFromLog(required any repo, numeric entryCount = 25, 
 			if (structKeyExists(arguments, "earliest") and (earliest gt commitTime)) {
 				return commits;
 			} // if we've gone back too early
+			// writeDump(commit);
 			queryAddRow(commits);
-			querySetCell(commits, "id", commit.getName(), commits.recordCount);
+			var commitId = commit.getName();
+			querySetCell(commits, "id", commitId, commits.recordCount);
 			querySetCell(commits, "authorname", commit.getAuthorIdent().getName(), commits.recordCount);
 			querySetCell(commits, "authoremail", commit.getAuthorIdent().getEmailAddress(), commits.recordCount);
 			querySetCell(commits, "committime", commitTime, commits.recordCount);
@@ -83,6 +126,9 @@ private query function queryFromLog(required any repo, numeric entryCount = 25, 
 			querySetCell(commits, "parentcount", commit.getParentCount(), commits.recordCount);
 			querySetCell(commits, "shortmessage", commit.getShortMessage(), commits.recordCount);
 			querySetCell(commits, "type", commit.getType(), commits.recordCount);
+			if (structKeyExists(refIds, commitId)) {
+				querySetCell(commits, "ref", refIds[commitId], commits.recordCount);
+			}
 		} // if next
 	} // for n
 	return commits;
