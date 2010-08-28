@@ -59,13 +59,17 @@ public void function fileChanged(required string filename, required date lastmod
 		return;
 	}
 	var msgs = [];
+	var ids = [];
 	var lastCommitter = "";
+	var lastID = "";
 	var msg = "";
 	for (var r = 1; r lte log.recordCount; r++) {
 		if (log.committerName[r] neq lastCommitter) {
 			if (msg neq "") {
 				arrayAppend(msgs, msg);
+				arrayAppend(ids, lastID);
 			}
+			lastID = log.id[r];
 			lastCommitter = log.committerName[r];
 			msg = lastCommitter & " committed:" & chr(13) & chr(10);
 		}
@@ -76,15 +80,23 @@ public void function fileChanged(required string filename, required date lastmod
 		msg &= chr(13) & chr(10);
 	} // for r
 	arrayAppend(msgs, msg);
+	arrayAppend(ids, lastID);
 	writeDump(msgs);
 	
 	for (local.i = 1; i lte arrayLen(online); i++) {
 		for (local.m = 1; m lte arrayLen(msgs); m++) {
-			SendGatewayMessage(application[variables.appKey].chatGatewayID, {
-				"command" = "submit",
-				"buddyID" = online[i],
-				"message" = msgs[m]
-			});
+			buddy = application[variables.chatAppKey].buddies[online[i]];
+			if (not structKeyExists(buddy, "sent")) {
+				buddy.sent = {};
+			}
+			if (not structKeyExists(buddy.sent, ids[m])) {
+				SendGatewayMessage(application[variables.appKey].chatGatewayID, {
+					"command" = "submit",
+					"buddyID" = online[i],
+					"message" = msgs[m]
+				});
+				buddy.sent[ids[m]] = now();
+			} // if not sent
 		} // for m
 	} // for i
 	
