@@ -1,0 +1,12 @@
+This is a pair of ColdFusion gateway components that work together to
+watch a Git repository for commits and then IM you the short commit
+messages over XMPP/Jabber.
+
+It's really basic for now, but it works.
+
+TODO:
+
+ * Ability to watch multiple repos with the same chat bot.
+ * Ability to manage subscriptions to specific repos.
+ * Ability to customize chat messages.
+
