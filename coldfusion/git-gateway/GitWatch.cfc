@@ -69,7 +69,7 @@ public void function fileChanged(required string filename, required date lastmod
 				arrayAppend(msgs, msg);
 				arrayAppend(ids, lastID);
 			}
-			lastID = log.id[r];
+			lastID = log.id[r] & (log.ref[r] eq "" ? "" : ":") & log.ref[r];
 			lastCommitter = log.committerName[r];
 			msg = lastCommitter & " committed:" & chr(13) & chr(10);
 		}
@@ -81,8 +81,7 @@ public void function fileChanged(required string filename, required date lastmod
 	} // for r
 	arrayAppend(msgs, msg);
 	arrayAppend(ids, lastID);
-	writeDump(msgs);
-	
+	// writeDump(msgs);
 	for (local.i = 1; i lte arrayLen(online); i++) {
 		for (local.m = 1; m lte arrayLen(msgs); m++) {
 			buddy = application[variables.chatAppKey].buddies[online[i]];
