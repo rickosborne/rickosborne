@@ -1,0 +1,24 @@
+iTunes Exporter to (Real) Database
+
+Reads a user's "iTunes Music Library.xml" and exports the track contents
+to one of several databases or database-friendly formats:
+
+ * Comma-delimited CSV
+ * CouchDB
+
+Requires:
+
+ * Ektorp for CouchDB: http://code.google.com/p/ektorp/
+ * Apache HttpClient: http://hc.apache.org/httpclient-3.x/
+ * Apache Commons Codec: http://commons.apache.org/codec/
+ * Apache Commons Logging: http://commons.apache.org/logging/
+ * Apache Commons IO: http://commons.apache.org/io/
+ * Apache James Mime4J: http://james.apache.org/mime4j/
+ * Jackson JSON Processor: http://jackson.codehaus.org/
+ * Joda Time: http://joda.sourceforge.net/
+
+Usage:
+
+ itunes2db.jar csv path/to/tracks.csv path/to/library.csv path/to/library.xml
+
+ itunes2db.jar couchdb http://user:pass@host:port/db/ path/to/library.xml
