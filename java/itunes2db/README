@@ -22,3 +22,28 @@ Usage:
  itunes2db.jar csv path/to/tracks.csv path/to/library.csv path/to/library.xml
 
  itunes2db.jar couchdb http://user:pass@host:port/db/ path/to/library.xml
+
+Licensing:
+
+Most of the libraries used in this project are licensed with the Apache
+License 2.0, including: Ektorp, all Apache code, and Jackson.  This license
+is available in its entirety here:
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+The Joda License is Apache-style and can be viewed in its entirety here:
+
+ http://joda.sourceforge.net/licence.html
+
+In keeping with the common theme, the org.rickosborne.java.itunesdb.*
+source files written by me, Rick Osborne, are licensed under the Apache
+License 2.0 as shown above.  Please note that this is slightly different
+than the Creative Commons By-NC-SA license used for most other code in
+this repository.
+
+
+Acknowledgements:
+
+This product includes software developed by the Joda project (http://www.joda.org/),
+copyright (c) 2001-2004 Stephen Colebourne.
+
