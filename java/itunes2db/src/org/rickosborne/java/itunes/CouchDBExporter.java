@@ -1,58 +1,35 @@
 package org.rickosborne.java.itunes;
 
 import java.util.List;
-import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
-import org.codehaus.jackson.annotate.*;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig.Feature;
+import org.codehaus.jackson.map.ext.JodaDeserializers;
+import org.codehaus.jackson.map.util.StdDateFormat;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.http.HttpClient;
-import org.ektorp.Revision;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbConnector;
 import org.ektorp.impl.StdCouchDbInstance;
-import org.ektorp.impl.JsonSerializer;
-import org.ektorp.support.CouchDbDocument;
 
 public class CouchDBExporter implements ItunesExporter {
 	
 	private HttpClient httpclient;
 	private CouchDbInstance dbInstance;
 	private CouchDbConnector db;
-	final private String colMap = "TrackID,Name,Artist,Album,Genre,Kind,Size,TotalTime,Year,DateModified,DateAdded,BitRate,SampleRate,PlayCount,PlayDate,PlayDateUTC,Rating,AlbumRating,AlbumRatingComputed,ArtworkCount,PersistentID,TrackType,Location,FileFolderCount,LibraryFolderCount"; 
-	
-	@SuppressWarnings("unused")
-	@JsonWriteNullProperties(false)
-	private class CouchLibrary extends CouchDbDocument {
-		
-		private static final long serialVersionUID = -5583820047934106165L;
-		@JsonProperty("appver")
-		public String applicationVersion;
-		public int features;
-		@JsonProperty("verminor")
-		public int minorVersion;
-		@JsonProperty("vermajor")
-		public int majorVersion;
-		@JsonProperty("musicfolder")
-		public String musicFolder;
-		@JsonProperty("showratings")
-		public boolean showContentRatings;
-		private String id;
-		
-		@JsonProperty("_id")
-		@Override
-		public String getId() { return "library:" + id; }
-		
-		@JsonProperty("_id")
-		@Override
-		public void setId(String id) { this.id = id; }
-		
-	}
+	private Class<?> docClass;
+	private static StdDateFormat stdDateFormat = new StdDateFormat();
+	private static HashSet<String> dateFields = new HashSet<String>( Arrays.asList("DateAdded,SkipDate,DateModified,PlayDateUTC".split(",")) );
 	
 	public CouchDBExporter(URL couchUrl) {
 		String userName = "";
@@ -72,46 +49,161 @@ public class CouchDBExporter implements ItunesExporter {
 			.build();
 		dbInstance = new StdCouchDbInstance(httpclient);
 		String dbName = couchUrl.getPath().split("/")[1];
-		db = new StdCouchDbConnector(dbName, dbInstance);
+		ObjectMapper om = new ObjectMapper();
+		om.configure(Feature.WRITE_DATES_AS_TIMESTAMPS, false);
+		om.getDeserializationConfig().setDateFormat(StdDateFormat.instance);
+		db = new StdCouchDbConnector(dbName, dbInstance, om);
 		db.createDatabaseIfNotExists();
-	}
-
-	@Override
-	public boolean addTrack(Map<String, Object> trackInfo) {
-		String docId = "track:" + ((String) trackInfo.get("PersistentID"));
-		if (db.contains(docId)) {
-			System.out.println("Skipping " + docId);
-			return false;
-		}
-		trackInfo.put("_id", docId);
-		trackInfo.put("type", "track");
-		db.update(trackInfo);
-		return true;
-	}
-
-	@Override
-	public void addColumns(Set<String> columnNames) {
-		// TODO Auto-generated method stub
+		docClass = (new HashMap<String,Object>()).getClass();
 		
 	}
 
 	@Override
-	public boolean close() {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean addTrack(Map<String, Object> trackInfo) {
+		String trackId = buildId("track", (String) trackInfo.get("PersistentID"));
+		trackInfo.put("_id", trackId);
+		trackInfo.put("type", "track");
+		String album = (String) trackInfo.get("Album");
+		String artist = (String) trackInfo.get("Artist");
+		String albumArtist = (String) trackInfo.get("AlbumArtist");
+		String albumId = null;
+		if (album != null) {
+			albumId = buildId("album", album);
+			addItemToSet("album", album, "Album", "tracks", trackId);
+		}
+		if (artist != null) {
+			addItemToSet("artist", artist, "Artist", "tracks", trackId);
+			if (album != null)
+				addItemToSet("artist", artist, "Artist", "albums", albumId);
+		}
+		if (albumArtist != null) {
+			addItemToSet("artist", albumArtist, "Artist", "tracks", trackId);
+			if (album != null)
+				addItemToSet("artist", albumArtist, "Artist", "albums", albumId);
+		}
+		updateIfChanged(trackInfo);
+		return true;
 	}
 
 	@Override
+	public void addColumns(Set<String> columnNames) {}
+
+	@Override
+	public boolean close() { return true; }
+
+	@Override
 	public boolean addLibraryInfo(Map<String, Object> libraryInfo) {
-		String docId = "library:" + ((String) libraryInfo.get("LibraryPersistentID"));
+		if (! libraryInfo.containsKey("LibraryPersistentID")) return false;
+		String docId = buildId("library",(String) libraryInfo.get("LibraryPersistentID"));
 		libraryInfo.put("_id", docId);
-		List<Revision> revs = db.getRevisions(docId);
 		libraryInfo.put("type", "library");
-		if (revs.size() == 0)
-			db.update(libraryInfo);
-		// libraryInfo.put("_rev", revs.get(0).getRev());
-		// System.out.println( new JsonSerializer(new ObjectMapper()).toJson(libraryInfo));
+		updateIfChanged(libraryInfo);
 		return false;
 	}
+	
+	private static String buildId(String type, String readable) {
+		return (type != null ? type + ":" : "") + readable.replaceAll("[^a-zA-Z0-9]+", "").toLowerCase();
+	}
+	
+	private void addItemToSet(String docType, String title, String titleKey, String setKey, String item) {
+		Map<String, Object> doc = fetchOrCreateDoc(buildId(docType, title));
+		if (! doc.containsKey(titleKey))
+			doc.put(titleKey, title);
+		ArrayList<String> set = null;
+		try {
+			set = (ArrayList<String>) doc.get(setKey);
+			if ((set != null) && set.contains(item)) return;
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		if (set == null) set = new ArrayList<String>();
+		set.add(item);
+		doc.put(setKey, set);
+		updateIfChanged(doc);
+	}
+	
+	private Map<String,Object> fetchOrCreateDoc(String docId) {
+		if (db.contains(docId))
+			return fetchDoc(docId);
+		HashMap<String,Object> doc = new HashMap<String,Object>();
+		doc.put("_id", docId);
+		return doc;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Map<String,Object> fetchDoc(String docId) {
+		Map<String,Object> doc = (Map<String, Object>) db.get(docClass, docId);
+		// System.out.println(doc);
+		// Holy crap what a hack
+		for(String key: doc.keySet()) {
+			if (dateFields.contains(key)) {
+				Object value = doc.get(key);
+				if (value.getClass().equals(String.class)) {
+					try {
+						doc.put(key, stdDateFormat.parse((String) value));
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return doc;
+	}
+	
+	private void updateDoc(Map<String, Object> doc) {
+		System.out.println("Updating: " + doc.get("_id"));
+		db.update(doc);
+	}
+	
+	private void updateIfChanged(Map<String, Object> doc) {
+		String docId = (String) doc.get("_id");
+		String verb = "Skipping";
+		boolean needsUpdate = false;
+		if (db.contains(docId)) {
+			Map<String, Object> existing = fetchDoc(docId);
+			if (docsDiffer(doc, existing)) {
+				if (existing.containsKey("_rev"))
+					doc.put("_rev", (String) existing.get("_rev"));
+				else {
+					System.out.println("Missing rev: " + existing.toString());
+				}
+				needsUpdate = true;
+				verb = "Updating";
+			}
+		} else {
+			verb = "Inserting";
+			needsUpdate = true;
+		}
+		System.out.println(verb + ": " + docId);
+		if (needsUpdate) {
+			db.update(doc);
+		}
+	} // updateIfChanged
+	
+	private static boolean docsDiffer(Map<String, Object> a, Map<String, Object> b) {
+		TreeSet<String> aKeys = new TreeSet<String>(a.keySet());
+		TreeSet<String> bKeys = new TreeSet<String>(b.keySet());
+		// We don't care if revisions differ
+		if (aKeys.contains("_rev")) aKeys.remove("_rev");
+		if (bKeys.contains("_rev")) bKeys.remove("_rev");
+		if (! aKeys.equals(bKeys)) {
+			System.out.println("Keys differ: " + aKeys.toString() + " :: " + bKeys.toString());
+			return true;
+		}
+		for (String key: aKeys) {
+			// if ("_rev".equals(key)) continue;
+			Object aVal = a.get(key);
+			Object bVal = b.get(key);
+			if (! aVal.getClass().equals(bVal.getClass())) {
+				System.out.println("Data type change for \"" + key + "\": " + aVal.getClass().toString() + " => " + bVal.getClass().toString());
+				return true;
+			}
+			if (! aVal.equals(bVal)) {
+				// System.out.println("Value change for \"" + key + "\": " + aVal.toString() + " => " + bVal.toString());
+				return true;
+			}
+		}
+		return false;
+	} // docsDiffer
 
 }
