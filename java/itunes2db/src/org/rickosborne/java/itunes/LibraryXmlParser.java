@@ -82,7 +82,15 @@ public class LibraryXmlParser {
 								e.printStackTrace();
 							}
 						} else if (TYPE_NUMERIC.equals(type)) {
-							value = new BigInteger((String) value);
+							try {
+								value = Integer.parseInt((String) value);
+							} catch (NumberFormatException ei) {
+								try {
+									value = Long.parseLong((String) value);
+								} catch (NumberFormatException el) {
+									value = new BigInteger((String) value);
+								}
+							}
 						} else if (TYPE_BOOLEAN.equals(type)) {
 							value = (Boolean) "true".equals((String) value);
 						}

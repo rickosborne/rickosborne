@@ -73,7 +73,7 @@ public class Itunes2DB {
 		if (! err.isEmpty()) {
 			System.err.println(err);
 		}
-		System.err.println("Usage:\n\titunes2db couch http://couchhost:5984/dbName path/to/library.xml\n\titunes2db csv path/to/tracks.csv path/to/library.csv path/to/library.xml");
+		System.err.println("Usage:\n\titunes2db couchdb http://couchhost:5984/dbName path/to/library.xml\n\titunes2db csv path/to/tracks.csv path/to/library.csv path/to/library.xml");
 		System.exit(-1);
 	} // printUsage
 
