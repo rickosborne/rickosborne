@@ -1,2 +1,5 @@
 preblock : Convert the selected text to a <pre> block, suitable for
     syntax-highlighted blog posts, including class name sniffing.
+
+hex-rgb  : Convert CSS hex/RGB values in the selected text to
+    hex, RGB, or RGBA format.
