@@ -1,4 +1,4 @@
-﻿component extends="ArmoryBot" persistent="true" table="wow_realm" {
+﻿component extends="SmartObject" persistent="true" table="wow_realm" {
 
 property name="name" type="string" length="32" fieldtype="id" generated="never" generator="assigned" required="true" notnull="true";
 property name="nameEN" type="string" length="32" required="true" notnull="true";

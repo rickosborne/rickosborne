@@ -1,4 +1,4 @@
-﻿component {
+﻿component extends="SmartObject" {
 
 property name="basehref" type="string" insert="false" update="false";
 
@@ -8,8 +8,7 @@ public any function init() {
 }
 
 private string function fetchCached(required string url) {
-	local.q = new Query();
-	q.setSql("SELECT data FROM wow_bot_log WHERE (url = :url) ORDER BY finished DESC LIMIT 1");
+	local.q = new Query(sql = "SELECT data FROM wow_bot_log WHERE (url = :url) AND (status = '200 OK') ORDER BY finished DESC LIMIT 1");
 	q.addParam(name = "url", value = arguments.url);
 	return q.execute().getResult().data;
 } // fetchCached
@@ -29,23 +28,5 @@ public xml function fetch(required string url) {
 	}
 	return xmlParse("<error/>");
 } // fetch
-
-public void function loadProperties(required struct props) {
-	for(local.k in arguments.props) {
-		if(structKeyExists(variables, k) and (variables[k] neq arguments.props[k])) {
-			variables[k] = arguments.props[k];
-		}
-	} // for k
-} // loadProperties
-
-public any function loadOrNew(required string entityName, required string match, required struct params) {
-	local.e = entityLoad(arguments.entityName, { "#arguments.match#" = arguments.params[arguments.match] });
-	if(arrayLen(local.e) eq 1) {
-		local.e = local.e[1];
-		local.e.loadProperties(arguments.params);
-		return local.e;
-	}
-	return entityNew(arguments.entityName, arguments.params);
-} // loadorNew
 
 }
