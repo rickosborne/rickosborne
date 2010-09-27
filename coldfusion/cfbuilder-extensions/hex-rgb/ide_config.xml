@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<application>
+	<name>HexRGBConverter</name>
+	<author>Rick Osborne</author>
+	<version>0.1</version>
+	<email></email>
+	<description><![CDATA[ Convert CSS colors from/to Hex, RGB, and RGBA formats. ]]></description>
+	<license><![CDATA[ This extension is licensed under the <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/us/">Creative Commons Attribution Noncommercial ShareAlike</a> (by-nc-sa) license.  Make sure you understand the terms of this license before you continue! ]]></license>
+	<handlers>
+		<handler id="hexToRgb" type="CFM" filename="hex-to-rgb.cfm" />
+		<handler id="hexToRgba" type="CFM" filename="hex-to-rgba.cfm" />
+		<handler id="rgbToHex" type="CFM" filename="rgb-to-hex.cfm" />
+	</handlers>
+	<menucontributions>
+		<contribution target="editor">
+			<menu name="HexRGB">
+				<!-- <filters>
+					<filter type="file" pattern=".+\.((css)|(cfm)|(cfc)|(php)|(html?))" />
+				</filters> -->
+				<action name="Hex to RGB" handlerid="hexToRgb" showresponse="true">
+				</action>
+				<action name="Hex to RGBA" handlerid="hexToRgba" showresponse="true">
+				</action>
+				<action name="RGB to Hex" handlerid="rgbToHex" showresponse="true">
+				</action>
+			</menu>
+		</contribution>
+	</menucontributions>	
+</application>
