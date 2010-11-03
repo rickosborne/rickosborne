@@ -4,7 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>rick osborne dot org</title>
 <link rel="stylesheet" href="assets/shirt.css" type="text/css" />
-
 </head>
 <body>
 <header>
@@ -15,6 +14,75 @@
 	<article>
 		<h1>I Like Turtles</h1>
 		<p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
+<pre class="javascript">db.runCommand({
+mapreduce: "workouts",
+map: function () { emit(
+  this.goalType,
+  {
+    '_cfcount': 1,
+    'distancekm_cfsum': isNaN(this.distancekm) ? null : this.distancekm,
+    'distancekm_cfnum': isNaN(this.distancekm) ? 0 : 1,
+    'powerSongAlbum_cfcount': (this.powerSongAlbum == null) ? 0 : 1,
+    'distancekm_cfmax': isNaN(this.distancekm) ? null : this.distancekm,
+    'distancekm_cfmin': isNaN(this.distancekm) ? null : this.distancekm
+  }
+); },
+reduce: function (key,vals) {
+  var ret = {
+    'distancekm_cfmax': null,
+    'distancekm_cfsum': null,
+    'distancekm_cfmin': null,
+    'distancekm_cfnum': 0,
+    'powerSongAlbum_cfcount': 0,
+    '_cfcount': 0
+  };
+  for(var i = 0; i < vals.length; i++) {
+    var v = vals[i];
+    ret['distancekm_cfnum'] += v['distancekm_cfnum'];
+    if(!isNaN(v['distancekm_cfmax'])) ret['distancekm_cfmax'] = (ret['distancekm_cfmax'] == null) ? v['distancekm_cfmax'] : (ret['distancekm_cfmax'] > v['distancekm_cfmax']) ? ret['distancekm_cfmax'] : v['distancekm_cfmax'];
+    ret['_cfcount'] += v['_cfcount'];
+    if(!isNaN(v['distancekm_cfmin'])) ret['distancekm_cfmin'] = (ret['distancekm_cfmin'] == null) ? v['distancekm_cfmin'] : (v['distancekm_cfmin'] > ret['distancekm_cfmin']) ? ret['distancekm_cfmin'] : v['distancekm_cfmin'];
+    ret['powerSongAlbum_cfcount'] += v['powerSongAlbum_cfcount'];
+    if(!isNaN(v['distancekm_cfsum'])) ret['distancekm_cfsum'] = v['distancekm_cfsum'] + (ret['distancekm_cfsum'] == null ? 0 : ret['distancekm_cfsum']);
+  }
+  return ret;
+},
+finalize: function (key,val) {
+  return {
+    'totalkm'   : val['distancekm_cfsum'],
+    'workouts'  : val['_cfcount'],
+    'songcount' : val['powerSongAlbum_cfcount'],
+    'avgkm'     : (isNaN(val['distancekm_cfnum']) || isNaN(val['distancekm_cfsum'])) ? null : val['distancekm_cfsum'] / val['distancekm_cfnum'],
+    'maxkm'     : val['distancekm_cfmax'],
+    'minkm'     : val['distancekm_cfmin']
+  };
+},
+out: "s2mr",
+verbose: true
+});</pre>
+<pre class="sql">SELECT "goalType",
+  SUM("distancekm") AS "totalkm",
+  COUNT(*) AS "workouts",
+  COUNT("powerSongAlbum") AS "songcount",
+  AVG("distancekm") AS "avgkm",
+  MAX("distancekm") AS "maxkm",
+  MIN("distancekm") AS "minkm"
+FROM "workouts"
+GROUP BY "goalType"</pre>
+<pre class="coldfusion">&lt;!--- Depending on your setup, maybe HTTP_HOST works better here, but I don't trust it. ---&gt;
+&lt;cfset ServerName=LCase(CGI.SERVER_NAME)&gt;
+&lt;cfset structClear(Session)&gt;
+&lt;cfloop condition="listLen(ServerName,'.') gte 2"&gt;
+    &lt;cfloop list="CFID,CFTOKEN,CFMAGIC,SESSIONID,JSESSIONID" index="CookieName"&gt;
+        &lt;cfcookie expires="NOW" name="#CookieName#" domain=".#ServerName#"&gt;
+        &lt;cfcookie expires="NOW" name="#CookieName#" domain="#ServerName#"&gt;
+
+        &lt;cfcookie expires="NOW" name="#CookieName#"&gt;
+    &lt;/cfloop&gt;
+    &lt;cfset ServerName=listRest(ServerName,".")&gt;
+&lt;/cfloop&gt;</pre>
+		<p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
+		<p class="noindent"><img src="http://rickosborne.org/blog/wp-content/uploads/2010/03/sudoku-db-win1.png" alt="" title="Database list in Safari preferences" width="456" height="171" class="aligncenter size-full wp-image-1222 noindent" /></p>
 		<p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
 	</article>
 	</div>
@@ -57,5 +125,7 @@
 	
 </footer>
 </div>
+<script type="text/javascript" src="assets/ricko.js" defer="defer"></script>
+
 </body>
 </html>
