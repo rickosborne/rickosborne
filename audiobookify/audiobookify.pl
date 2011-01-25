@@ -1,4 +1,4 @@
-#!/opt/local/bin/perl -w
+﻿#!/opt/local/bin/perl -w
 $| = 1;
 
 use Data::Dumper;
@@ -14,7 +14,7 @@ use strict;
 my $isWin = ($^O =~ /mswin/i);
 my $cwd = getcwd();
 my $apps = $isWin ? "k:\\rick" : "";
-my $ssa = "c:\\program files\\slideshow assembler\\ssa.exe";
+my $ssa = "c:\\program files (x86)\\slideshow assembler\\ssa.exe";
 my @files = sort(<*.mp3>);
 my $maxseconds = 60 * 60 * 5.5;
 my @images = sort(<*.jpg>);
