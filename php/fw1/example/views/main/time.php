@@ -1,0 +1,1 @@
+<p>The current time on the server is <?php print date('r') ?>.</p>

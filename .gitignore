@@ -1,0 +1,9 @@
+.couchapprc
+.project
+settings.xml
+~*
+*~
+*.tmp
+.buildpath
+.settings
+
