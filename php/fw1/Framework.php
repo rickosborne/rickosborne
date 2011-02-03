@@ -28,6 +28,14 @@ class FW1Obj {
 			unset($this->properties[$property]);
 		}
 	}
+	
+	public function dump() {
+		print '<table class="debug">' . "\n";
+		foreach ($this->properties as $key => $value) {
+			print '<tr><td class="key">' . htmlentities($key) . '</td><td class="value">' . (is_scalar($value) ? htmlentities($value) : '[' . gettype($value) . ']') . "</td></tr>\n";
+		}
+		print "</table>\n";
+	}
 }
 
 class Framework1 {
@@ -46,6 +54,7 @@ class Framework1 {
 		$this->cgiPathInfo = self::arrayParam($_SERVER, 'PATH_INFO');
 		$this->cgiScriptFileName = self::arrayParam($_SERVER, 'SCRIPT_FILENAME');
 		$this->appRoot = dirname($this->cgiScriptFileName) . '/';
+		$this->basePath = dirname($this->cgiScriptName) . '/';
 		$this->context   = new FW1Obj();
 		$this->framework = new FW1Obj();
 		$this->request   = new FW1Obj();
@@ -60,11 +69,21 @@ class Framework1 {
 		}
 	} // ctor
 	
+	public function __get($property) {
+		if ($property === 'appRoot')
+			return $this->appRoot;
+		elseif ($property === 'baseUrl')
+			return $this->framework->baseUrl;
+		elseif ($property === 'scriptName')
+			return $this->cgiScriptName;
+		return NULL;
+	} // get
+	
 	protected static function arrayParam(&$arr, $key, $def = '') {
 		return array_key_exists($key, $arr) ? $arr[$key] : $def;
 	} // arrayParam
 	
-	public function buildUrl($action, $path = NULL, $queryString = '') {
+	public function buildUrl($action, $path = NULL, $queryString = '', $literal = FALSE) {
 		if (is_null($path)) {
 			$path = $this->framework->baseUrl;
 		}
@@ -83,7 +102,12 @@ class Framework1 {
 			$queryString = substr($action, strpos($action, '?'));
 			$action = substr($action, 0, min(strpos($action, '?'), strpos($action, '#')));
 		}
-		$cosmeticAction = $this->getSectionAndItem($action);
+		if (substr($action, 0, 2) === './') {
+			$literal = TRUE;
+			$cosmeticAction = substr($action, 2);
+		} else {
+			$cosmeticAction = $this->getSectionAndItem($action);
+		}
 		$isHomeAction = ($cosmeticAction === $this->getSectionAndItem($this->framework->home));
 		$isDefaultItem = ($this->getItem($cosmeticAction) === $this->framework->defaultItem);
 		$initialDelim = '?';
@@ -98,7 +122,7 @@ class Framework1 {
 			} else {
 				$initialDelim = '&';
 			}
-		} else if ($this->framework->exists('generateSES') && ($this->framework->generateSES)) {
+		} elseif ($this->framework->exists('generateSES') && ($this->framework->generateSES)) {
 			if ($omitIndex) {
 				$initialDelim = '';
 			} else {
@@ -130,8 +154,10 @@ class Framework1 {
 		if ($ses) {
 			if ($isHomeAction && ($extraArgs === '')) {
 				$basePath = $path; 
-			} else if ($isDefaultItem && ($extraArgs === '')) {
+			} elseif ($isDefaultItem && ($extraArgs === '')) {
 				$basePath  = $path . $initialDelim . array_shift(explode($cosmeticAction, '.', 2));
+			} elseif ($literal === TRUE) {
+				$basePath  = $path . $initialDelim . $cosmeticAction;
 			} else {
 				$basePath  = $path . $initialDelim . str_replace('.', '/', $cosmeticAction);
 			}
@@ -235,17 +261,20 @@ class Framework1 {
 	} // customizeViewOrLayoutPath
 	
 	protected function doController($obj, $method) {
-		if (is_callable(array($obj, $method))) {
+		$reflect = new \ReflectionClass(get_class($obj));
+		if($reflect->hasMethod($method) && $reflect->getMethod($method)->isPublic()) {
+		// if (is_callable(array($obj, $method))) {
 			$obj->{$method}($this->context);
 			// call_user_func_array(array($obj, $method), $this->context);
 		} else {
-			print "Method '$method' is not available for controller '" . get_class($obj) . "'.";
+			// print "Method '$method' is not available for controller '" . get_class($obj) . "'.";
 		}
 	} // doController
 	
 	protected function doService($obj, $method, $args, $enforceExistence) {
-		$result = 0;
-		if (is_callable(array($obj, $method))) {
+		$reflect = new \ReflectionClass(get_class($obj));
+		if($reflect->hasMethod($method) && $reflect->getMethod($method)->isPublic()) {
+		// if (is_callable(array($obj, $method))) {
 			// return $obj->{$method}($args);
 			return call_user_func_array(array($obj, $method), $args);
 		} elseif ($enforceExistence) {
@@ -510,7 +539,7 @@ class Framework1 {
 		} else {
 			$baseQueryString = $queryString;
 		}
-		$targetUrl = buildUrl($action, $path, $baseQueryString);
+		$targetUrl = $this->buildUrl($action, $path, $baseQueryString);
 		if ($preserveKey !== '') {
 			if (strpos($targetUrl, '?') !== FALSE) {
 				$preserveKey = '&' . $this->framework->preserveKeyURLKey . '=' . $preserveKey;
@@ -520,6 +549,7 @@ class Framework1 {
 			$targetUrl .= $preserveKey;
 		}
 		header('Location: ' . $targetUrl);
+		exit;
 	} // redirect
 	
 	public function service($action, $key, $args = array(), $enforceExistence = TRUE) {
