@@ -1,4 +1,5 @@
 RewriteEngine On
+RewriteBase /php/fw1/example
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

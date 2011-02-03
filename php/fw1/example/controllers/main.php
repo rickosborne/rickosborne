@@ -3,7 +3,7 @@ namespace Controllers;
 
 class main {
 	
-	public $fw;
+	protected $fw;
 	
 	public function __construct($fw) {
 		$this->fw = $fw;
