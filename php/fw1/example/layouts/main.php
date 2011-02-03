@@ -1,2 +1,2 @@
-<p>Nav for section 'main': <a href="<?php print $fw->buildUrl('') ?>">Home</a> | <a href="<?php print $fw->buildUrl('reverse') ?>">Reverse</a> | <a href="<?php print $fw->buildUrl('time') ?>">Time</a></p>
-<?php print $body ?> 
+<p>Nav for section 'main': <a href="<?php echo $fw->buildUrl('') ?>">Home</a> | <a href="<?php echo $fw->buildUrl('reverse') ?>">Reverse</a> | <a href="<?php echo $fw->buildUrl('time') ?>">Time</a> | <a href="<?php echo $fw->buildUrl('dump') ?>">Dump</a></p>
+<?php echo $body ?> 
