@@ -74,6 +74,8 @@ class Framework1 {
 			return $this->framework->baseUrl;
 		elseif ($property === 'scriptName')
 			return $this->cgiScriptName;
+		elseif ($property === 'pathInfo')
+			return $this->cgiPathInfo;
 		return NULL;
 	} // get
 	
@@ -295,9 +297,9 @@ class Framework1 {
 		$self = $this;
 		$echoFunction = function($var, $tabs, $label = '') use ($self) {
 			if (!is_subclass_of($var, 'ReflectionFunctionAbstract')) {
-				$var = new ReflectionFunction($var);
+				$var = new \ReflectionFunction($var);
 			}
-			echo "$tabs<table class=\"dump function\">$tabs<thead><tr><th>" . ($label != '' ? $label . ' - ' : '') . htmlentities(implode(' ', \Reflection::getModifierNames($var->getModifiers()))) . " function " . htmlentities($var->getName()) . "</th></tr></thead>$tabs<tbody>";
+			echo "$tabs<table class=\"dump function\">$tabs<thead><tr><th>" . ($label != '' ? $label . ' - ' : '') . (is_callable(array($var, 'getModifiers')) ? htmlentities(implode(' ', \Reflection::getModifierNames($var->getModifiers()))) : '') . " function " . htmlentities($var->getName()) . "</th></tr></thead>$tabs<tbody>";
 			echo "$tabs<tr><td class=\"value\">$tabs<table class=\"dump layout\">$tabs<tr><th>Parameters:</th><td>";
 			$params = $var->getParameters();
 			if (count($params) > 0) {
@@ -350,6 +352,7 @@ table.dump.param th { background-color: #eee; color: black; font-weight: bold; }
 DUMPCSS;
 		}
 		if (is_array($var)) {
+			$label = $label === '' ? (($var === $_POST) ? '$_POST' : (($var === $_GET) ? '$_GET' : (($var === $_COOKIE) ? '$_COOKIE' : (($var === $_ENV) ? '$_ENV' : (($var === $_FILES) ? '$_FILES' : (($var === $_REQUEST) ? '$_REQUEST' : (($var === $_SERVER) ? '$_SERVER' : (($var === $_SESSION) ? '$_SESSION' : '')))))))) : $label;      
 			$c = count($var);
 			if(isset($var['fw1recursionsentinel'])) {
 				echo "(Recursion)";
@@ -385,7 +388,11 @@ DUMPCSS;
 			$ref = new \ReflectionObject($var);
 			$parent = $ref->getParentClass();
 			$interfaces = implode("<br/>implements ", $ref->getInterfaceNames());
-			$serial = serialize($var);
+			try {
+				$serial = serialize($var);
+			} catch (\Exception $e) {
+				$serial = 'hasclosure' . $ref->getName();
+			}
 			$objHash = 'o' . md5($serial);
 			$refHash = 'r' . md5($ref);
 			echo "$tabs<table class=\"dump object\"" . (isset($seen[$refHash]) ? "" : "id=\"$refHash\"") . ">$tabs<thead>$tabs<tr><th colspan=\"2\">" . ($label != '' ? $label . ' - ' : '') . "object " . htmlentities($ref->getName()) . ($parent ? "<br/>extends " .$parent->getName() : "") . ($interfaces !== '' ? "<br/>implements " . $interfaces : "") . "</th></tr>$tabs<tbody>";
@@ -453,6 +460,7 @@ DUMPCSS;
 			echo "<p>The action $fa failed.</p>";
 		}
 		echo "<p>" . htmlentities($ex->getMessage()) . "</p>";
+		// echo $this->dump($ex);
 	} // failure
 	
 	protected function getCachedObject($type, $section) {
@@ -805,4 +813,5 @@ DUMPCSS;
 	protected function viewNotFound() {
 		throw new \Exception("Unable to find a view for '" . $this->request->action . "' action.");
 	} // viewNotFound
+
 }
