@@ -59,18 +59,15 @@ div, p, ul, li, ol, dl, dt, dd, h1, h2, h3, h4, h5, h6, article, aside, header, 
 .aside, .nav {
 	max-width: 15em;
 	margin-left: 34.5em;
+	padding: 1.5em 0;
 	color: #dc9c88;
 	clear: right;
 	font-family: Cantarell, Calibri, Tahoma, Arial, sans;
 }
 
-.nav {
-	padding: 1.5em 0;
-}
-
 .aside * {
 	font-size: 90%;
-	line-height: 1.8888em;  /* 1.6667 base */
+	line-height: 1.83333em;  /* 1.6667 base */
 }
 
 .box {
@@ -85,23 +82,37 @@ div, p, ul, li, ol, dl, dt, dd, h1, h2, h3, h4, h5, h6, article, aside, header, 
 	-webkit-border-bottom-right-radius: 1.5em 0.75em;
 }
 
-.aside ul, .aside li, .nav ul, .nav li { list-style-type: none; }
+.aside ul, .aside li, .nav ul, .nav li {
+	list-style-type: none;
+}
 
-.clear { clear: both; }
-p { margin: 0 0 1.5em 0; }
-.noindent { text-indent: 0; }
-.center { text-align: center; }
-.noindent img { margin: 0 auto; display: block; }
+.clear {
+	clear: both;
+}
 
+p {
+	margin: 0 0 1.5em 0;
+}
 
-h1 { letter-spacing: 0.1em; margin-bottom: 0.75em; }
-.article h1 { font-size: 200%; color: #c98520; }
+.noindent {
+	text-indent: 0;
+}
+
+h1 {
+	letter-spacing: 0.1em;
+	margin-bottom: 0.75em;
+}
+
+.article h1 {
+	font-size: 200%;
+	color: #c98520;
+}
 
 .aside h1 {
 	color: #b83811;
 	font-size: 200%;
 	line-height: 1.6667em;
-	margin-top: 0.83333em;
+	margin-bottom: 0.83333em;
 	font-family: 'Yanone Kaffeesatz', Candara, Calibri, sans;
 }
 
@@ -112,7 +123,7 @@ h1 { letter-spacing: 0.1em; margin-bottom: 0.75em; }
 }
 
 .aside p {
-	margin-bottom: 1.852em;
+	margin-bottom: 1.8519em;
 }
 
 a {
