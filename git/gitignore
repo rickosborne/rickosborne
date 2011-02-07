@@ -12,6 +12,7 @@
 *~
 ~*
 *.tmp
+*.bak
 
 # Eclipse
 .project
