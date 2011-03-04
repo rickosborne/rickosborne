@@ -8,6 +8,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Arrays;
 
+import org.rickosborne.java.itunes.CommaDelimitedExporter;
+import org.rickosborne.java.itunes.CouchDBExporter;
+import org.rickosborne.java.itunes.ItunesExporter;
+import org.rickosborne.java.itunes.LibraryXmlParser;
+
 public class Itunes2DB {
 	
 	final private static int MAX_LOOKAHEAD = 100;
