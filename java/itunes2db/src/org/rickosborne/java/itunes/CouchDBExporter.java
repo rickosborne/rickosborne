@@ -1,10 +1,8 @@
 package org.rickosborne.java.itunes;
 
-import java.util.List;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,7 +11,6 @@ import java.util.TreeSet;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
-import org.codehaus.jackson.map.ext.JodaDeserializers;
 import org.codehaus.jackson.map.util.StdDateFormat;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -21,6 +18,7 @@ import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbConnector;
 import org.ektorp.impl.StdCouchDbInstance;
+import org.rickosborne.java.itunes.ItunesExporter;
 
 public class CouchDBExporter implements ItunesExporter {
 	
@@ -58,7 +56,6 @@ public class CouchDBExporter implements ItunesExporter {
 		
 	}
 
-	@Override
 	public boolean addTrack(Map<String, Object> trackInfo) {
 		String trackId = buildId("track", (String) trackInfo.get("PersistentID"));
 		trackInfo.put("_id", trackId);
@@ -70,13 +67,17 @@ public class CouchDBExporter implements ItunesExporter {
 		if (album != null) {
 			albumId = buildId("album", album);
 			addItemToSet("album", album, "Album", "tracks", trackId);
+			trackInfo.put("albumkey", albumId);
 		}
 		if (artist != null) {
+			trackInfo.put("artistkey", buildId("artist", artist));
 			addItemToSet("artist", artist, "Artist", "tracks", trackId);
 			if (album != null)
 				addItemToSet("artist", artist, "Artist", "albums", albumId);
 		}
 		if (albumArtist != null) {
+			if (artist == null)
+				trackInfo.put("artistkey", buildId("artist", artist));
 			addItemToSet("artist", albumArtist, "Artist", "tracks", trackId);
 			if (album != null)
 				addItemToSet("artist", albumArtist, "Artist", "albums", albumId);
@@ -85,13 +86,10 @@ public class CouchDBExporter implements ItunesExporter {
 		return true;
 	}
 
-	@Override
 	public void addColumns(Set<String> columnNames) {}
 
-	@Override
 	public boolean close() { return true; }
 
-	@Override
 	public boolean addLibraryInfo(Map<String, Object> libraryInfo) {
 		if (! libraryInfo.containsKey("LibraryPersistentID")) return false;
 		String docId = buildId("library",(String) libraryInfo.get("LibraryPersistentID"));
@@ -105,6 +103,7 @@ public class CouchDBExporter implements ItunesExporter {
 		return (type != null ? type + ":" : "") + readable.replaceAll("[^a-zA-Z0-9]+", "").toLowerCase();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void addItemToSet(String docType, String title, String titleKey, String setKey, String item) {
 		Map<String, Object> doc = fetchOrCreateDoc(buildId(docType, title));
 		if (! doc.containsKey(titleKey))
@@ -150,6 +149,7 @@ public class CouchDBExporter implements ItunesExporter {
 		return doc;
 	}
 	
+	@SuppressWarnings("unused")
 	private void updateDoc(Map<String, Object> doc) {
 		System.out.println("Updating: " + doc.get("_id"));
 		db.update(doc);
