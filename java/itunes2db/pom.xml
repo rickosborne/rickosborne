@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>itunes2db</groupId>
+  <artifactId>itunes2db</artifactId>
+  <version>0.3.1</version>
+  <name>itunes2db</name>
+  <description>iTunes to Real Database Exporter</description>
+  <organization>
+  	<name>Rick Osborne</name>
+  	<url>http://rickosborne.org</url>
+  </organization>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.codehaus.jackson</groupId>
+  		<artifactId>jackson-mapper-asl</artifactId>
+  		<version>1.7.2</version>
+  	</dependency>
+  	<dependency>
+	    <groupId>org.ektorp</groupId>
+	    <artifactId>org.ektorp</artifactId>
+	    <version>1.0.0</version>
+	</dependency>
+  	<dependency>
+  		<groupId>javax.xml.stream</groupId>
+  		<artifactId>stax-api</artifactId>
+  		<version>1.0-2</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-simple</artifactId>
+  		<version>1.6.1</version>
+  	</dependency>
+  </dependencies>
+</project>

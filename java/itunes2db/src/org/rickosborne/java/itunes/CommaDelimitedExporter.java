@@ -24,6 +24,8 @@ public class CommaDelimitedExporter implements ItunesExporter {
 	final private static Class<?> bigintClass  = BigInteger.class;
 	final private static Class<?> booleanClass = Boolean.class;
 	final private static Class<?> dateClass    = Date.class;
+	final private static Class<?> longClass    = Long.class;
+	final private static Class<?> intClass     = Integer.class;
 	final private static SimpleDateFormat dateFormat = new SimpleDateFormat("'{ts '''yyyy-MM-dd HH:mm:ss'''}'");
 	
 	public CommaDelimitedExporter(File tracksFile, File libraryFile) {
@@ -85,6 +87,10 @@ public class CommaDelimitedExporter implements ItunesExporter {
 				writer.write(colValue.equals(Boolean.TRUE) ? "Y" : "N");
 			else if (colClass.equals(dateClass))
 				writer.write(dateFormat.format((Date) colValue));
+			else if (colClass.equals(intClass))
+				writer.write(((Integer) colValue).toString());
+			else if (colClass.equals(longClass))
+				writer.write(((Long) colValue).toString());
 			else
 				writer.write(escapeString((String) colValue));		
 		} catch (IOException e) {
