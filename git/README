@@ -6,6 +6,9 @@ gitflow-installer.sh
 gitignore
 	Template .gitignore
 
+gitosis-admin.pl
+	A Perl script for managing the gitosis-admin.conf file.
+
 gitlog2csv-DDL.sql
 	DDL for tables for holding a git log
 

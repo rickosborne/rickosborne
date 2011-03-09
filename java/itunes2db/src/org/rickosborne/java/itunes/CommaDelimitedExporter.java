@@ -2,7 +2,6 @@ package org.rickosborne.java.itunes;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +24,8 @@ public class CommaDelimitedExporter implements ItunesExporter {
 	final private static Class<?> bigintClass  = BigInteger.class;
 	final private static Class<?> booleanClass = Boolean.class;
 	final private static Class<?> dateClass    = Date.class;
+	final private static Class<?> longClass    = Long.class;
+	final private static Class<?> intClass     = Integer.class;
 	final private static SimpleDateFormat dateFormat = new SimpleDateFormat("'{ts '''yyyy-MM-dd HH:mm:ss'''}'");
 	
 	public CommaDelimitedExporter(File tracksFile, File libraryFile) {
@@ -40,7 +41,6 @@ public class CommaDelimitedExporter implements ItunesExporter {
 		// missingColumns = new HashMap<String,Integer>();
 	}
 	
-	@Override
 	public boolean addTrack(Map<String, Object> trackInfo) {
 		try {
 			int columnCount = columns.size();
@@ -87,6 +87,10 @@ public class CommaDelimitedExporter implements ItunesExporter {
 				writer.write(colValue.equals(Boolean.TRUE) ? "Y" : "N");
 			else if (colClass.equals(dateClass))
 				writer.write(dateFormat.format((Date) colValue));
+			else if (colClass.equals(intClass))
+				writer.write(((Integer) colValue).toString());
+			else if (colClass.equals(longClass))
+				writer.write(((Long) colValue).toString());
 			else
 				writer.write(escapeString((String) colValue));		
 		} catch (IOException e) {
@@ -94,7 +98,6 @@ public class CommaDelimitedExporter implements ItunesExporter {
 		}
 	}
 
-	@Override
 	public boolean close() {
 		try {
 			outTracks.close();
@@ -106,7 +109,6 @@ public class CommaDelimitedExporter implements ItunesExporter {
 		return true;
 	}
 
-	@Override
 	public boolean addLibraryInfo(Map<String, Object> libraryInfo) {
 		int columnCount = libraryInfo.size();
 		int columnsDone = 0;
@@ -133,7 +135,6 @@ public class CommaDelimitedExporter implements ItunesExporter {
 		return true;
 	}
 
-	@Override
 	public void addColumns(Set<String> columnNames) {
 		columns.addAll(columnNames);
 		int columnCount = columns.size();
