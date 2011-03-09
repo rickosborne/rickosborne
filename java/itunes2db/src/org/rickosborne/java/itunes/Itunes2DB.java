@@ -33,22 +33,26 @@ public class Itunes2DB {
 		ItunesExporter exporter = null;
 		String libraryFile = null;
 		Integer libraryArg = 2;
-		if ("couchdb".equals(args[0])) {
-			String couchUrl = (args.length > 1) ? args[1] : "http://localhost:5984/itunes";
-			exporter = new CouchDBExporter(new URL(couchUrl));
-		} else if ("csv".equals(args[0])) {
-			String tracksCSV = (args.length > 1) ? args[1] : "tracks.csv";
-			String libCSV    = (args.length > 2) ? args[2] : "library.csv";
-			exporter = new CommaDelimitedExporter(new File(tracksCSV), new File(libCSV));
-			libraryArg = 3;
-		} else if ("mongodb".equals(args[0])) {
-			String dbname = (args.length > 1) ? args[1] : "";
-			String host   = (args.length > 2) ? args[2] : "localhost";
-			Integer port  = (args.length > 3) ? Integer.valueOf(args[3]) : 27017;
-			exporter = new MongoDBExporter(dbname, host, port);
-			libraryArg = 4;
-		} else {
-			printUsage("Unknown argument: " + args[0]);
+		try {
+			if ("couchdb".equals(args[0])) {
+				String couchUrl = (args.length > 1) ? args[1] : "http://localhost:5984/itunes";
+				exporter = new CouchDBExporter(new URL(couchUrl));
+			} else if ("csv".equals(args[0])) {
+				String tracksCSV = (args.length > 1) ? args[1] : "tracks.csv";
+				String libCSV    = (args.length > 2) ? args[2] : "library.csv";
+				exporter = new CommaDelimitedExporter(new File(tracksCSV), new File(libCSV));
+				libraryArg = 3;
+			} else if ("mongodb".equals(args[0])) {
+				String dbname = (args.length > 1) ? args[1] : "itunes";
+				String host   = (args.length > 2) ? args[2] : "localhost";
+				Integer port  = (args.length > 3) ? Integer.valueOf(args[3]) : 27017;
+				exporter = new MongoDBExporter(dbname, host, port);
+				libraryArg = 4;
+			} else {
+				printUsage("Unknown argument: " + args[0]);
+			}
+		} catch(Exception e) {
+			printUsage(e.getMessage());
 		}
 		libraryFile = (args.length > libraryArg) ? args[libraryArg] : libPath;
 		File libFile = new File(libraryFile);
