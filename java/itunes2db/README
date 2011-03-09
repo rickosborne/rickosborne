@@ -5,6 +5,7 @@ to one of several databases or database-friendly formats:
 
  * Comma-delimited CSV
  * CouchDB
+ * MongoDB
 
 Requires:
 
@@ -16,12 +17,15 @@ Requires:
  * Apache James Mime4J: http://james.apache.org/mime4j/
  * Jackson JSON Processor: http://jackson.codehaus.org/
  * Joda Time: http://joda.sourceforge.net/
+ * MongoDB: http://www.mongodb.org/display/DOCS/Java+Language+Center
 
 Usage:
 
  itunes2db.jar csv path/to/tracks.csv path/to/library.csv path/to/library.xml
 
  itunes2db.jar couchdb http://user:pass@host:port/db/ path/to/library.xml
+
+ itunes2db.jar mongodb dbName host port path/to/library.xml
 
 Licensing:
 
