@@ -108,6 +108,8 @@ public class CouchDBExporter implements ItunesExporter {
 		Map<String, Object> doc = fetchOrCreateDoc(buildId(docType, title));
 		if (! doc.containsKey(titleKey))
 			doc.put(titleKey, title);
+		if (! doc.containsKey("type"))
+			doc.put("type", docType);
 		ArrayList<String> set = null;
 		try {
 			set = (ArrayList<String>) doc.get(setKey);
