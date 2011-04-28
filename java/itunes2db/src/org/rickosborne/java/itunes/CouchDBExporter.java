@@ -1,13 +1,10 @@
 package org.rickosborne.java.itunes;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
@@ -20,7 +17,7 @@ import org.ektorp.impl.StdCouchDbConnector;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.rickosborne.java.itunes.ItunesExporter;
 
-public class CouchDBExporter implements ItunesExporter {
+public class CouchDBExporter extends NonRelationalExporter implements ItunesExporter {
 	
 	private HttpClient httpclient;
 	private CouchDbInstance dbInstance;
@@ -30,6 +27,7 @@ public class CouchDBExporter implements ItunesExporter {
 	private static HashSet<String> dateFields = new HashSet<String>( Arrays.asList("DateAdded,SkipDate,DateModified,PlayDateUTC".split(",")) );
 	
 	public CouchDBExporter(URL couchUrl) {
+		super();
 		String userName = "";
 		String password = "";
 		if (couchUrl.getUserInfo() != null) {
@@ -53,75 +51,14 @@ public class CouchDBExporter implements ItunesExporter {
 		db = new StdCouchDbConnector(dbName, dbInstance, om);
 		db.createDatabaseIfNotExists();
 		docClass = (new HashMap<String,Object>()).getClass();
-		
 	}
 
-	public boolean addTrack(Map<String, Object> trackInfo) {
-		String trackId = buildId("track", (String) trackInfo.get("PersistentID"));
-		trackInfo.put("_id", trackId);
-		trackInfo.put("type", "track");
-		String album = (String) trackInfo.get("Album");
-		String artist = (String) trackInfo.get("Artist");
-		String albumArtist = (String) trackInfo.get("AlbumArtist");
-		String albumId = null;
-		if (album != null) {
-			albumId = buildId("album", album);
-			addItemToSet("album", album, "Album", "tracks", trackId);
-			trackInfo.put("albumkey", albumId);
-		}
-		if (artist != null) {
-			trackInfo.put("artistkey", buildId("artist", artist));
-			addItemToSet("artist", artist, "Artist", "tracks", trackId);
-			if (album != null)
-				addItemToSet("artist", artist, "Artist", "albums", albumId);
-		}
-		if (albumArtist != null) {
-			if (artist == null)
-				trackInfo.put("artistkey", buildId("artist", artist));
-			addItemToSet("artist", albumArtist, "Artist", "tracks", trackId);
-			if (album != null)
-				addItemToSet("artist", albumArtist, "Artist", "albums", albumId);
-		}
-		updateIfChanged(trackInfo);
-		return true;
-	}
-
-	public void addColumns(Set<String> columnNames) {}
-
-	public boolean close() { return true; }
-
-	public boolean addLibraryInfo(Map<String, Object> libraryInfo) {
-		if (! libraryInfo.containsKey("LibraryPersistentID")) return false;
-		String docId = buildId("library",(String) libraryInfo.get("LibraryPersistentID"));
-		libraryInfo.put("_id", docId);
-		libraryInfo.put("type", "library");
-		updateIfChanged(libraryInfo);
-		return false;
-	}
-	
-	private static String buildId(String type, String readable) {
+	protected String buildId(String type, String readable) {
+		// System.out.println("CouchDBExporter:buildID: " + type + ", " + readable);
 		return (type != null ? type + ":" : "") + readable.replaceAll("[^a-zA-Z0-9]+", "").toLowerCase();
 	}
 	
-	@SuppressWarnings("unchecked")
-	private void addItemToSet(String docType, String title, String titleKey, String setKey, String item) {
-		Map<String, Object> doc = fetchOrCreateDoc(buildId(docType, title));
-		if (! doc.containsKey(titleKey))
-			doc.put(titleKey, title);
-		ArrayList<String> set = null;
-		try {
-			set = (ArrayList<String>) doc.get(setKey);
-			if ((set != null) && set.contains(item)) return;
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		if (set == null) set = new ArrayList<String>();
-		set.add(item);
-		doc.put(setKey, set);
-		updateIfChanged(doc);
-	}
-	
-	private Map<String,Object> fetchOrCreateDoc(String docId) {
+	protected Map<String,Object> fetchOrCreateDoc(String docId) {
 		if (db.contains(docId))
 			return fetchDoc(docId);
 		HashMap<String,Object> doc = new HashMap<String,Object>();
@@ -130,7 +67,7 @@ public class CouchDBExporter implements ItunesExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Map<String,Object> fetchDoc(String docId) {
+	protected Map<String,Object> fetchDoc(String docId) {
 		Map<String,Object> doc = (Map<String, Object>) db.get(docClass, docId);
 		// System.out.println(doc);
 		// Holy crap what a hack
@@ -149,13 +86,7 @@ public class CouchDBExporter implements ItunesExporter {
 		return doc;
 	}
 	
-	@SuppressWarnings("unused")
-	private void updateDoc(Map<String, Object> doc) {
-		System.out.println("Updating: " + doc.get("_id"));
-		db.update(doc);
-	}
-	
-	private void updateIfChanged(Map<String, Object> doc) {
+	protected void updateIfChanged(Map<String, Object> doc) {
 		String docId = (String) doc.get("_id");
 		String verb = "Skipping";
 		boolean needsUpdate = false;
@@ -179,31 +110,5 @@ public class CouchDBExporter implements ItunesExporter {
 			db.update(doc);
 		}
 	} // updateIfChanged
-	
-	private static boolean docsDiffer(Map<String, Object> a, Map<String, Object> b) {
-		TreeSet<String> aKeys = new TreeSet<String>(a.keySet());
-		TreeSet<String> bKeys = new TreeSet<String>(b.keySet());
-		// We don't care if revisions differ
-		if (aKeys.contains("_rev")) aKeys.remove("_rev");
-		if (bKeys.contains("_rev")) bKeys.remove("_rev");
-		if (! aKeys.equals(bKeys)) {
-			System.out.println("Keys differ: " + aKeys.toString() + " :: " + bKeys.toString());
-			return true;
-		}
-		for (String key: aKeys) {
-			// if ("_rev".equals(key)) continue;
-			Object aVal = a.get(key);
-			Object bVal = b.get(key);
-			if (! aVal.getClass().equals(bVal.getClass())) {
-				System.out.println("Data type change for \"" + key + "\": " + aVal.getClass().toString() + " => " + bVal.getClass().toString());
-				return true;
-			}
-			if (! aVal.equals(bVal)) {
-				// System.out.println("Value change for \"" + key + "\": " + aVal.toString() + " => " + bVal.toString());
-				return true;
-			}
-		}
-		return false;
-	} // docsDiffer
 
 }
