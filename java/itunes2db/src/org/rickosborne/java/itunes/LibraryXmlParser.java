@@ -26,7 +26,6 @@ public class LibraryXmlParser {
 	
 	private class LibraryStreamFilter implements javax.xml.stream.StreamFilter {
 
-		@Override
 		public boolean accept(XMLStreamReader reader) {
 			if (reader.isStartElement() || reader.isEndElement()) return true;
 			return false;

@@ -10,35 +10,55 @@ import java.util.Arrays;
 
 import org.rickosborne.java.itunes.CommaDelimitedExporter;
 import org.rickosborne.java.itunes.CouchDBExporter;
+import org.rickosborne.java.itunes.MongoDBExporter;
 import org.rickosborne.java.itunes.ItunesExporter;
 import org.rickosborne.java.itunes.LibraryXmlParser;
 
 public class Itunes2DB {
 	
 	final private static int MAX_LOOKAHEAD = 100;
+	private static String userHome = "";
+	private static String libPath  = "";
 
 	/**
 	 * @param args
 	 * @throws MalformedURLException 
 	 */
 	public static void main(String[] args) throws MalformedURLException {
-		if (args.length < 3) {
+		userHome = System.getProperty("user.home");
+		libPath  = userHome + File.separator + "Music" + File.separator + "iTunes" + File.separator + "iTunes Music Library.xml";
+		if (args.length < 1) {
 			printUsage("");
 		}
 		ItunesExporter exporter = null;
 		String libraryFile = null;
-		if ("couchdb".equals(args[0])) {
-			exporter = new CouchDBExporter(new URL(args[1]));
-			libraryFile = args[2];
-		} else if ("csv".equals(args[0])) {
-			if (args.length < 4)
-				printUsage("Too few arguments for CSV");
-			exporter = new CommaDelimitedExporter(new File(args[1]), new File(args[2]));
-			libraryFile = args[3];
-		} else {
-			printUsage("Unknown argument: " + args[0]);
+		Integer libraryArg = 2;
+		try {
+			if ("couchdb".equals(args[0])) {
+				String couchUrl = (args.length > 1) ? args[1] : "http://localhost:5984/itunes";
+				exporter = new CouchDBExporter(new URL(couchUrl));
+			} else if ("csv".equals(args[0])) {
+				String tracksCSV = (args.length > 1) ? args[1] : "tracks.csv";
+				String libCSV    = (args.length > 2) ? args[2] : "library.csv";
+				exporter = new CommaDelimitedExporter(new File(tracksCSV), new File(libCSV));
+				libraryArg = 3;
+			} else if ("mongodb".equals(args[0])) {
+				String dbname = (args.length > 1) ? args[1] : "itunes";
+				String host   = (args.length > 2) ? args[2] : "localhost";
+				Integer port  = (args.length > 3) ? Integer.valueOf(args[3]) : 27017;
+				exporter = new MongoDBExporter(dbname, host, port);
+				libraryArg = 4;
+			} else {
+				printUsage("Unknown argument: " + args[0]);
+			}
+		} catch(Exception e) {
+			printUsage(e.getMessage());
 		}
-		LibraryXmlParser parser = new LibraryXmlParser(new File(libraryFile));
+		libraryFile = (args.length > libraryArg) ? args[libraryArg] : libPath;
+		File libFile = new File(libraryFile);
+		if (! libFile.canRead())
+			printUsage("Can't read library XML file: " + libraryFile);
+		LibraryXmlParser parser = new LibraryXmlParser(libFile);
 		exporter.addLibraryInfo(parser.getLibraryInfo());
 		HashSet<String> columnNames = new HashSet<String>(
 			Arrays.asList("TrackID,Name,Artist,Album,Genre,Kind,Size,TotalTime,Year,DateModified,DateAdded,BitRate,SampleRate,PlayCount,PlayDate,PlayDateUTC,Rating,AlbumRating,AlbumRatingComputed,ArtworkCount,PersistentID,TrackType,Location,FileFolderCount,LibraryFolderCount".split(","))
@@ -75,10 +95,10 @@ public class Itunes2DB {
 	} // main
 	
 	private static void printUsage(String err) {
+		System.err.println("Usage:\n\titunes2db (dbtype) [options] [path/to/itunes/library.xml]\n\nDatabase types and options:\n\tcsv     [path/to/tracks.csv] [path/to/library.csv]\n\tcouchdb [dbName = itunes] [host = localhost] [port =  5984]\n\tmongodb [dbName = itunes] [host = localhost] [port = 27017]\n\nDefaults:\n\tlibrary.xml = " + libPath + "\n");
 		if (! err.isEmpty()) {
-			System.err.println(err);
+			System.err.println("!!!\n" + err + "\n!!!\n");
 		}
-		System.err.println("Usage:\n\titunes2db couchdb http://couchhost:5984/dbName path/to/library.xml\n\titunes2db csv path/to/tracks.csv path/to/library.csv path/to/library.xml");
 		System.exit(-1);
 	} // printUsage
 
