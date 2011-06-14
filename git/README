@@ -21,3 +21,5 @@ pre-commit
 post-checkout
 	Hook script to fix file mod times on checkout or branch change
 
+make-hook-repos.sh
+	Creates some example repos for a presentation I made on Git hooks.  Embedded are some example hook scripts.
