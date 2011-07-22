@@ -25,7 +25,9 @@ my $performer = '';
 my $noempty = 0;
 my $skipre = '';
 my $onlyre = '';
-my $quality = 80;
+my $quality = 0;
+my $bitrate = 0;
+my $encodeQuality = '';
 my $verbose = 0;
 my ($termCols, $termRows) = chars();
 my ($termTrack, $termTime) = (4, 12);
@@ -38,9 +40,14 @@ GetOptions(
 	"verbose=i"   => \$verbose,
 	"skipre=s"    => \$skipre,
 	"onlyre=s"    => \$onlyre,
-	"quality=f"   => \$quality
+	"quality=f"   => \$quality,
+	"bitrate=i"   => \$bitrate
 );
 @splitats = split(',', join(',', @splitats));
+if (($quality == 0) and ($bitrate == 0)) { $bitrate = 32; }
+if (($quality < 1) or ($quality > 100)) { $quality = 80; }
+if ($bitrate > 0) { $encodeQuality = "-b $bitrate"; }
+else { $encodeQuality = "-q $quality"; }
 
 my %titles  = ();
 my %artists = ();
@@ -204,13 +211,13 @@ __PODHEAD__
 	my $safeparttitle = escapeSingle($parttitle);
 	my $safecover = escapeSingle($cover);
 	if ($isWin) {
-		print BAT1 qq! | "$apps\\faac.exe" -q $quality --artist "$safeartist" --title "$safeparttitle" --genre "Audiobook" --album "$safealbum" ! . ($splitcount > 1 ? qq!--disc "$splitnum/$splitcount" ! : "") . qq! --year "$year" --cover-art "$safecover" -o "$partnamees.m4a" -\n!;
+		print BAT1 qq! | "$apps\\faac.exe" $encodeQuality --artist "$safeartist" --title "$safeparttitle" --genre "Audiobook" --album "$safealbum" ! . ($splitcount > 1 ? qq!--disc "$splitnum/$splitcount" ! : "") . qq! --year "$year" --cover-art "$safecover" -o "$partnamees.m4a" -\n!;
 		print BAT1 qq!"$ssa" "$parttitle.pod"\n!;
 		print BAT1 qq!"$apps\\neroAacTag.exe" -meta:year="$year" -meta:album="$album" -meta:artist="$artist" -meta:title="$parttitle" -meta-user:Performer="$performer" -meta:genre=Audiobook -meta:totaltracks="$chapcount" -add-cover:front:"$cover" ! . ($splitcount > 1 ? qq!-meta:disc=$splitnum -meta:totaldiscs=$splitcount ! : '') . qq!"$parttitle.m4a"\n!;
 		print BAT1 qq!"$apps\\MP4Box.exe" -rem 3 -chap "$parttitle.chap" "$parttitle.m4a"\n!;
 		print BAT1 qq!move "$parttitle.m4a" "$partname.m4b"\n!;
 	} else {
-		print BAT1 qq! | faac -q $quality --artist '$safeartist' --title '$safeparttitle' --genre 'Audiobook' --album '$safealbum' ! . ($splitcount > 1 ? qq!--disc '$splitnum/$splitcount' ! : '') . qq! --year '$year' --cover-art '$safecover' -o '$partnamees.m4a' -\n!;
+		print BAT1 qq! | faac $encodeQuality --artist '$safeartist' --title '$safeparttitle' --genre 'Audiobook' --album '$safealbum' ! . ($splitcount > 1 ? qq!--disc '$splitnum/$splitcount' ! : '') . qq! --year '$year' --cover-art '$safecover' -o '$partnamees.m4a' -\n!;
 		print BAT1 qq!mp4chaps -i '$partnamees.m4a'\n!;
 		print BAT1 qq!mv '$partnamees.m4a' '$partnamees.m4b'\n!;
 	}
