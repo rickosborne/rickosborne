@@ -1,0 +1,30 @@
+if [ -z "${REPO_NAME}" ]; then
+    return 1
+fi
+
+if [ -z "${REPO_WWW}" ]; then
+    return 1
+fi
+
+GIT_REPO=/home/git/repositories/${REPO_NAME}.git
+PUBLIC_WWW=/var/www/${REPO_WWW}
+WWW_TMP=/home/git/tmp/${REPO_NAME}
+
+rm -Rf $WWW_TMP
+mkdir -p $WWW_TMP
+
+# cd $PUBLIC_WWW
+
+cd $GIT_REPO
+git checkout -q -f master
+
+# rm -Rf $PUBLIC_WWW/*
+cp -R $WWW_TMP/* $PUBLIC_WWW/ 2> nul
+cp -R $WWW_TMP/.[a-zA-Z0-9]* $PUBLIC_WWW/ 2> nul
+
+chown -R git:git $PUBLIC_WWW
+chmod -R a-x+X+r,g-w,o-w,u+w $PUBLIC_WWW
+
+rm -Rf $WWW_TMP
+
+# git update-server-info
