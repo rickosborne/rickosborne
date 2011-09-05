@@ -33,7 +33,8 @@ audiobookify.pl
   --margin 1.1        Modify the wiggle room left in files.
   --splits '1,3,5'    Split for new M4B files at specific MP3s (chapters, etc).
   --noempty           Don't make chapter marks for files with empty titles.
-  --quality 80        Quantization quality for FFMPEG.
+  --quality 80        Quantization quality for FFMPEG. (Instead of bitrate)
+  --bitrate 32        FAAC bitrate. (Instead of quality)
   --skipre 'regex'    Regular expression of MP3 titles to ignore (not chapters)
   --onlyre 'regex'    RegEx of MP3 titles to chapterize (ignoring others)
   --verbose           Show all files, even non-chapter markers
