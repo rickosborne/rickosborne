@@ -15,9 +15,12 @@ my $isWin = ($^O =~ /mswin/i);
 my $cwd = getcwd();
 my $apps = $isWin ? "k:\\rick" : "";
 my $ssa = "c:\\program files (x86)\\slideshow assembler\\ssa.exe";
+my $mp3wrap = ($isWin ? qq!"$apps\\mp3wrap.exe"! : 'mp3wrap');
+my $cmdCopy = ($isWin ? 'copy' : 'cp');
+my $cmdMove = ($isWin ? 'move' : 'mv');
 my @files = sort(<*.mp3>);
 my $maxseconds = 60 * 60 * 5.5;
-my @images = sort(<*.jpg>);
+my @images = sort(<*.jpg>);  unless(scalar(@images)) { die "Need a cover image!"; }
 my $cover = pop(@images);
 my $margin = 1.05;
 my @splitats = ();
@@ -167,8 +170,9 @@ __PODHEAD__
 	my $offset = 0;
 	my $skippedLen = 0;
 	my $lastOffset = 0;
+	my $title = '';
 	foreach my $track (@{$part}) {
-		my $title = $track->{'TITLE'};
+		$title = $track->{'TITLE'};
 		unless($title || $track->{'SKIP'}) { $title = 'Disc ' . $track->{'ORDER'}; }
 		$tracknum++ unless($track->{'SKIP'});
 		$realnum++;
@@ -232,6 +236,8 @@ close(BAT1);
 
 unless ($isWin) {
 	system(qq!chmod +x 'Encode ! . escapeSingle($parentdir) . qq!.sh'!);
+	system(qq!chmod +x 'Faster Chapters.sh'!);
+	system(qq!chmod +x 'Wrap Chapters.sh'!);
 }
 
 exit(0);
@@ -261,6 +267,11 @@ sub splitTracksAtChapters {
 	if($isWin) {
 		open(WRAP,">Wrap Chapters.bat");
 		print WRAP qq!\@echo off\nmkdir wrapped\n!;
+	} else {
+		open(WRAP,">Wrap Chapters.sh");
+		print WRAP qq|#!/bin/sh\nmkdir wrapped\n|;
+		open(FASTER,">Faster Chapters.sh");
+		print FASTER qq{#!/bin/sh\nTEMPO="\$1"\nif [ -z "\$TEMPO" ] ; then\n\techo "Please provide a multiplier, such as 1.2"\n\texit -1\nfi\nif [ ! -d "notempo" ] ; then\n\tmkdir "notempo"\nfi\n};
 	}
 	my $chapterLength = 0;
 	my $lastChapter = [];
@@ -305,29 +316,38 @@ sub splitTracksAtChapters {
 			push(@{$splits->[-1]}, $track);
 		}
 		$counts->[-1]++;
-		if ($isWin) {
-			my $chapZero = substr("00$chapterNum", -2);
-			if (scalar(@{$chapter}) == 1) {
-				print WRAP "copy " . $chapter->[0]->{'FILE'} . qq! "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
-			} elsif (scalar(@{$chapter}) > 1) {
-				print WRAP qq!"$apps\\mp3wrap.exe" "$splitNum-$chapZero"!;
-				foreach my $track (@{$chapter}) {
-					print WRAP ' "' . escapeSingle($track->{'FILE'}) . '"';
-				}
-				print WRAP "\n";
-			}
+		my $chapZero = substr("00$chapterNum", -2);
+		my $safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
+		print FASTER qq!\necho "Adjusting tempo for $safeTitle"\nmadplay -q -o wave:- !;
+		if (scalar(@{$chapter}) == 1) {
+			print WRAP $cmdCopy . ' "' . escapeSingle($chapter->[0]->{'FILE'}) . qq!" "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
+			print FASTER ' "' . escapeSingle($chapter->[0]->{'FILE'}) . '"';
+		} elsif (scalar(@{$chapter}) > 1) {
+			print WRAP qq!$mp3wrap "$splitNum-$chapZero"!;
 			foreach my $track (@{$chapter}) {
-				print WRAP qq!move "! . escapeSingle($track->{'FILE'}) . qq!" wrapped\n!;
+				print WRAP ' "' . escapeSingle($track->{'FILE'}) . '"';
+				print FASTER ' "' . escapeSingle($track->{'FILE'}) . '"';
 			}
-			my $safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
-			print WRAP qq!"$apps\\tag.exe" --remove "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
-			print WRAP qq!"$apps\\tag.exe" --title "$safeTitle" "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
+			print WRAP "\n";
+		}
+		print FASTER qq! | sox -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song "$safeTitle" "faster-$splitNum-$chapZero.mp3"\n!;
+		foreach my $track (@{$chapter}) {
+			print WRAP $cmdMove . qq! "! . escapeSingle($track->{'FILE'}) . qq!" wrapped\n!;
+			print FASTER $cmdMove . qq! "! . escapeSingle($track->{'FILE'}) . qq!" notempo\n!;
+		}
+		my $wrapFile = "$splitNum-${chapZero}.mp3";
+		print WRAP $cmdMove . qq! "$splitNum-${chapZero}_MP3WRAP.mp3" "$wrapFile"\n!;
+		if ($isWin) {
+			print WRAP qq!"$apps\\tag.exe" --remove "$wrapFile"\n!;
+			print WRAP qq!"$apps\\tag.exe" --title "$safeTitle" "$wrapFile"\n!;
+		} else {
+			print WRAP qq!id3v2 --delete-all '$wrapFile'\n!;
+			print WRAP qq!id3v2 --song '$safeTitle' '$wrapFile'\n!;
 		}
 	} # foreach chapter
-	if ($isWin) {
-		print WRAP "move Encode*.bat wrapped\nmove *.csv wrapped\nmove *.pod wrapped\n";
-		close(WRAP);
-	}
+	print WRAP "$cmdMove Encode*.* wrapped\n$cmdMove *.csv wrapped\n$cmdMove *.pod wrapped\n";
+	close(WRAP);
+	close(FASTER);
 } # splitTracksAtChapters
 
 sub formatPart {
