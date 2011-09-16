@@ -31,6 +31,9 @@ my $onlyre = '';
 my $quality = 0;
 my $bitrate = 0;
 my $encodeQuality = '';
+my $album = '';
+my $artist = '';
+my $year = '';
 my $verbose = 0;
 my ($termCols, $termRows) = chars();
 my ($termTrack, $termTime) = (4, 12);
@@ -44,7 +47,10 @@ GetOptions(
 	"skipre=s"    => \$skipre,
 	"onlyre=s"    => \$onlyre,
 	"quality=f"   => \$quality,
-	"bitrate=i"   => \$bitrate
+	"bitrate=i"   => \$bitrate,
+	"album=s"     => \$album,
+	"artist=s"    => \$artist,
+	"year=i"      => \$year
 );
 @splitats = split(',', join(',', @splitats));
 if (($quality == 0) and ($bitrate == 0)) { $bitrate = 32; }
@@ -86,23 +92,23 @@ foreach my $file (@files) {
 
 $termVar = ($termVar > $maxTitle ? $maxTitle : $termVar);
 
-my $album  = (sort { $albums{$b} <=> $albums{$a} } keys %albums)[0] || '';
-my $artist = (sort { $artists{$b} <=> $artists{$a} } keys %artists)[0] || '';
-my $year   = (sort { $years{$b} <=> $years{$a} } keys %years)[0] || '';
+my @dirs = File::Spec->splitdir($cwd);
+my $parentdir = pop(@dirs);
+if($parentdir =~ /^(.+?)\s+\((\d+)\)\s+(.+?)$/) {
+	if ($artist eq '') { $artist = $1; }
+	if ($year eq '')   { $year   = $2; }
+	if ($album eq '')  { $album  = $3 };
+}
+
+if ($album eq '')  { $album  = (sort { $albums{$b} <=> $albums{$a} } keys %albums)[0] || ''; }
+if ($artist eq '') { $artist = (sort { $artists{$b} <=> $artists{$a} } keys %artists)[0] || ''; }
+if ($year eq '')   { $year   = (sort { $years{$b} <=> $years{$a} } keys %years)[0] || ''; }
 my $duration = secs2index($seconds);
 my $splitcount = POSIX::ceil($seconds / $maxseconds);
 push(@splitats, $trackcount+1) if(scalar(@splitats));
 $splitcount = scalar(@splitats) if(scalar(@splitats));
 my $targetseconds = POSIX::ceil($seconds / $splitcount) * $margin;
 my $targetdur = secs2index($targetseconds);
-
-my @dirs = File::Spec->splitdir($cwd);
-my $parentdir = pop(@dirs);
-if($parentdir =~ /^(.+?)\s+\((\d+)\)\s+(.+?)$/) {
-	$artist = $1;
-	$year = $2;
-	$album = $3;
-}
 
 print "Artist:\t$artist\nAlbum:\t$album\nYear:\t$year\nTime:\t$duration ($seconds)\nTracks:\t$trackcount\nFiles:\t$splitcount\nSplits:\t$targetdur ($targetseconds)\n" . ($noempty ? "No Empties\n" : "");
 
