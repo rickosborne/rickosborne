@@ -37,7 +37,10 @@ audiobookify.pl
   --bitrate 32        FAAC bitrate. (Instead of quality)
   --skipre 'regex'    Regular expression of MP3 titles to ignore (not chapters)
   --onlyre 'regex'    RegEx of MP3 titles to chapterize (ignoring others)
-  --verbose           Show all files, even non-chapter markers
+  --verbose           Show all files, even non-chapter markers.
+  --album '...'       Override the automatic Album detection.
+  --artist '...'      Override the automatic Artist detection.
+  --year 1995         Override the automatic Year detection.
 
 
 OTHER TOOLS
