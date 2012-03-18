@@ -17,6 +17,10 @@
 		B973D76E151505A600401595 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B973D74E151505A400401595 /* Cocoa.framework */; };
 		B973D776151505A600401595 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B973D774151505A600401595 /* InfoPlist.strings */; };
 		B973D779151505A600401595 /* WoWLogSplitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B973D778151505A600401595 /* WoWLogSplitTests.m */; };
+		B9CEA124151599E500F5E675 /* FileReader.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA123151599E500F5E675 /* FileReader.m */; };
+		B9CEA12815159B4800F5E675 /* NSDataExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA12715159B4800F5E675 /* NSDataExtensions.m */; };
+		B9CEA12B15159FC300F5E675 /* WoWLogLine.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA12A15159FC300F5E675 /* WoWLogLine.m */; };
+		B9CEA12E1515BDE400F5E675 /* WoWLogTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA12D1515BDE400F5E675 /* WoWLogTableView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +53,14 @@
 		B973D775151505A600401595 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B973D777151505A600401595 /* WoWLogSplitTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WoWLogSplitTests.h; sourceTree = "<group>"; };
 		B973D778151505A600401595 /* WoWLogSplitTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WoWLogSplitTests.m; sourceTree = "<group>"; };
+		B9CEA122151599E500F5E675 /* FileReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileReader.h; sourceTree = "<group>"; };
+		B9CEA123151599E500F5E675 /* FileReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileReader.m; sourceTree = "<group>"; };
+		B9CEA12615159B4800F5E675 /* NSDataExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataExtensions.h; sourceTree = "<group>"; };
+		B9CEA12715159B4800F5E675 /* NSDataExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataExtensions.m; sourceTree = "<group>"; };
+		B9CEA12915159FC300F5E675 /* WoWLogLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WoWLogLine.h; sourceTree = "<group>"; };
+		B9CEA12A15159FC300F5E675 /* WoWLogLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WoWLogLine.m; sourceTree = "<group>"; };
+		B9CEA12C1515BDE400F5E675 /* WoWLogTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WoWLogTableView.h; sourceTree = "<group>"; };
+		B9CEA12D1515BDE400F5E675 /* WoWLogTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WoWLogTableView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +128,14 @@
 			children = (
 				B973D760151505A400401595 /* WLSAppDelegate.h */,
 				B973D761151505A400401595 /* WLSAppDelegate.m */,
+				B9CEA12C1515BDE400F5E675 /* WoWLogTableView.h */,
+				B9CEA12D1515BDE400F5E675 /* WoWLogTableView.m */,
+				B9CEA12615159B4800F5E675 /* NSDataExtensions.h */,
+				B9CEA12715159B4800F5E675 /* NSDataExtensions.m */,
+				B9CEA122151599E500F5E675 /* FileReader.h */,
+				B9CEA123151599E500F5E675 /* FileReader.m */,
+				B9CEA12915159FC300F5E675 /* WoWLogLine.h */,
+				B9CEA12A15159FC300F5E675 /* WoWLogLine.m */,
 				B973D763151505A500401595 /* MainMenu.xib */,
 				B973D755151505A400401595 /* Supporting Files */,
 			);
@@ -262,6 +282,10 @@
 			files = (
 				B973D75B151505A400401595 /* main.m in Sources */,
 				B973D762151505A400401595 /* WLSAppDelegate.m in Sources */,
+				B9CEA124151599E500F5E675 /* FileReader.m in Sources */,
+				B9CEA12815159B4800F5E675 /* NSDataExtensions.m in Sources */,
+				B9CEA12B15159FC300F5E675 /* WoWLogLine.m in Sources */,
+				B9CEA12E1515BDE400F5E675 /* WoWLogTableView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -433,6 +457,7 @@
 				B973D77E151505A600401595 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B973D77F151505A600401595 /* Build configuration list for PBXNativeTarget "WoWLogSplitTests" */ = {
 			isa = XCConfigurationList;
@@ -441,6 +466,7 @@
 				B973D781151505A600401595 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
