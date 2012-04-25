@@ -64,10 +64,17 @@
 			NSLog(@"File:%@ (%@)", fileName, datePart);
 			[[NSFileManager defaultManager] createFileAtPath:fileName contents:nil attributes:nil];
 			out = [NSFileHandle fileHandleForWritingAtPath:fileName];
+			datePart = nil;
+			fileName = nil;
 		}
 		[out writeData:[line dataUsingEncoding:NSUTF8StringEncoding]];
+		[line release], line = nil;
+		[data release], data = nil;
 	}
 	[out closeFile];
+	out = nil;
+	[reader release], reader = nil;
+	[dateFormat release], dateFormat = nil;
 }
 
 - (IBAction)archiveSplitLogs:(id)sender {

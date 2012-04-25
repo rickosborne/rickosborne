@@ -79,7 +79,7 @@
 		NSLog(@"Bad time, h:%d m:%d s:%d ms:%d parts:%@", timeHour, timeMinute, timeSecond, timeMS, timeParts);
 		return nil;
 	}
-	WoWLogLine *line = [[WoWLogLine alloc] init];
+	WoWLogLine *line = [[[WoWLogLine alloc] init] autorelease];
 	NSDateComponents *dc = [WoWLogLine dateComponents];
 	[dc setMonth:dateMonth];
 	[dc setDay:dateDay];

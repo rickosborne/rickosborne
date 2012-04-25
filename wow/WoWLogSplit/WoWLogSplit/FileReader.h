@@ -19,6 +19,7 @@
 	unsigned long long	m_totalFileLength;		/**< Total number of bytes in file. */
 	NSString*			m_lineDelimiter;		/**< Character for line break or page break. */
 	NSUInteger			m_chunkSize;			/**< Standard block size. */
+	NSUInteger          m_delimiterCount;
 }
 
 - (id)initWithFilePath:(NSString*)filePath;

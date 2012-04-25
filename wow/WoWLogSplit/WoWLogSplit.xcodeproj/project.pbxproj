@@ -391,6 +391,7 @@
 		B973D77D151505A600401595 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WoWLogSplit/WoWLogSplit-Prefix.pch";
 				INFOPLIST_FILE = "WoWLogSplit/WoWLogSplit-Info.plist";
@@ -402,6 +403,7 @@
 		B973D77E151505A600401595 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WoWLogSplit/WoWLogSplit-Prefix.pch";
 				INFOPLIST_FILE = "WoWLogSplit/WoWLogSplit-Info.plist";

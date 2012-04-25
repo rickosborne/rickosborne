@@ -49,7 +49,8 @@
 		[m_fileHandle seekToEndOfFile];
 		m_totalFileLength = [m_fileHandle offsetInFile];				
 		m_currentInset = m_totalFileLength;						
-		m_prevDelimiterRange = NSMakeRange(m_currentInset, 1);			
+		m_prevDelimiterRange = NSMakeRange(m_currentInset, 1);
+		m_delimiterCount = 0;
 		
 		NSLog(@"%qu characters in %@", m_totalFileLength, [filePath lastPathComponent]); /* DEBUG LOG */
 	}
@@ -69,7 +70,9 @@
 		return nil;
 	}
 	
-	NSData* newLineData = [m_lineDelimiter dataUsingEncoding:NSUTF8StringEncoding];
+	static NSData* newLineData = nil;
+	if (!newLineData)
+		newLineData = [m_lineDelimiter dataUsingEncoding:NSUTF8StringEncoding];
 	[m_fileHandle seekToFileOffset:m_currentOffset];
 	NSMutableData* currentData = [[NSMutableData alloc] init];
 	BOOL shouldReadMore = YES;
@@ -84,13 +87,19 @@
 		if (newLineRange.location != NSNotFound) {
 			// Include the length so we can include the delimiter in the string.
 			NSRange subDataRange = NSMakeRange(0, newLineRange.location + [newLineData length]);
+			NSData *subchunk = chunk;
 			chunk = [chunk subdataWithRange:subDataRange];
+			[subchunk release], subchunk = nil;
 			shouldReadMore = NO;
+			m_delimiterCount++;
+			m_chunkSize = MAX(m_chunkSize, MAX(10, 1 + ((m_currentOffset + [chunk length] + 2) / m_delimiterCount)));
+			if ((m_delimiterCount % 1000) == 0)
+				NSLog(@"chunkSize:%lu", m_chunkSize);
 		}
 		[currentData appendData:chunk];
 		m_currentOffset += [chunk length];
+		[chunk release], chunk = nil;
 	}
-	
 	NSString* line = [currentData stringValueWithEncoding:NSUTF8StringEncoding];
     // finished with data
     [currentData release], currentData = nil;
