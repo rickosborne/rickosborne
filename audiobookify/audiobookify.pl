@@ -8,7 +8,7 @@ use File::Spec;
 use MP3::Info;
 use MP3::Tag;
 use Getopt::Long;
-use Term::Size::Any qw( chars );
+# use Term::Size::Any qw( chars );
 use strict;
 
 my $isWin = ($^O =~ /mswin/i);
@@ -35,7 +35,8 @@ my $album = '';
 my $artist = '';
 my $year = '';
 my $verbose = 0;
-my ($termCols, $termRows) = chars();
+# my ($termCols, $termRows) = chars();
+my ($termCols, $termRows) = (80, 20);
 my ($termTrack, $termTime) = (4, 12);
 my $termVar = int(($termCols - ($termTrack + $termTime + 7)) / 2);
 GetOptions(
