@@ -1,0 +1,476 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B973D74F151505A400401595 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B973D74E151505A400401595 /* Cocoa.framework */; };
+		B973D759151505A400401595 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B973D757151505A400401595 /* InfoPlist.strings */; };
+		B973D75B151505A400401595 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B973D75A151505A400401595 /* main.m */; };
+		B973D75F151505A400401595 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = B973D75D151505A400401595 /* Credits.rtf */; };
+		B973D762151505A400401595 /* WLSAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B973D761151505A400401595 /* WLSAppDelegate.m */; };
+		B973D765151505A500401595 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = B973D763151505A500401595 /* MainMenu.xib */; };
+		B973D76D151505A600401595 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B973D76C151505A600401595 /* SenTestingKit.framework */; };
+		B973D76E151505A600401595 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B973D74E151505A400401595 /* Cocoa.framework */; };
+		B973D776151505A600401595 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B973D774151505A600401595 /* InfoPlist.strings */; };
+		B973D779151505A600401595 /* WoWLogSplitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B973D778151505A600401595 /* WoWLogSplitTests.m */; };
+		B9CEA124151599E500F5E675 /* FileReader.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA123151599E500F5E675 /* FileReader.m */; };
+		B9CEA12815159B4800F5E675 /* NSDataExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA12715159B4800F5E675 /* NSDataExtensions.m */; };
+		B9CEA12B15159FC300F5E675 /* WoWLogLine.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA12A15159FC300F5E675 /* WoWLogLine.m */; };
+		B9CEA12E1515BDE400F5E675 /* WoWLogTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = B9CEA12D1515BDE400F5E675 /* WoWLogTableView.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B973D76F151505A600401595 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B973D741151505A300401595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B973D749151505A300401595;
+			remoteInfo = WoWLogSplit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B973D74A151505A400401595 /* WoWLogSplit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WoWLogSplit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B973D74E151505A400401595 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		B973D751151505A400401595 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		B973D752151505A400401595 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		B973D753151505A400401595 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		B973D756151505A400401595 /* WoWLogSplit-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WoWLogSplit-Info.plist"; sourceTree = "<group>"; };
+		B973D758151505A400401595 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B973D75A151505A400401595 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		B973D75C151505A400401595 /* WoWLogSplit-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WoWLogSplit-Prefix.pch"; sourceTree = "<group>"; };
+		B973D75E151505A400401595 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		B973D760151505A400401595 /* WLSAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WLSAppDelegate.h; sourceTree = "<group>"; };
+		B973D761151505A400401595 /* WLSAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WLSAppDelegate.m; sourceTree = "<group>"; };
+		B973D764151505A500401595 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		B973D76B151505A600401595 /* WoWLogSplitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WoWLogSplitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B973D76C151505A600401595 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		B973D773151505A600401595 /* WoWLogSplitTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WoWLogSplitTests-Info.plist"; sourceTree = "<group>"; };
+		B973D775151505A600401595 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B973D777151505A600401595 /* WoWLogSplitTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WoWLogSplitTests.h; sourceTree = "<group>"; };
+		B973D778151505A600401595 /* WoWLogSplitTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WoWLogSplitTests.m; sourceTree = "<group>"; };
+		B9CEA122151599E500F5E675 /* FileReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileReader.h; sourceTree = "<group>"; };
+		B9CEA123151599E500F5E675 /* FileReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileReader.m; sourceTree = "<group>"; };
+		B9CEA12615159B4800F5E675 /* NSDataExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataExtensions.h; sourceTree = "<group>"; };
+		B9CEA12715159B4800F5E675 /* NSDataExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataExtensions.m; sourceTree = "<group>"; };
+		B9CEA12915159FC300F5E675 /* WoWLogLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WoWLogLine.h; sourceTree = "<group>"; };
+		B9CEA12A15159FC300F5E675 /* WoWLogLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WoWLogLine.m; sourceTree = "<group>"; };
+		B9CEA12C1515BDE400F5E675 /* WoWLogTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WoWLogTableView.h; sourceTree = "<group>"; };
+		B9CEA12D1515BDE400F5E675 /* WoWLogTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WoWLogTableView.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B973D747151505A300401595 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B973D74F151505A400401595 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B973D767151505A600401595 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B973D76D151505A600401595 /* SenTestingKit.framework in Frameworks */,
+				B973D76E151505A600401595 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B973D73F151505A300401595 = {
+			isa = PBXGroup;
+			children = (
+				B973D754151505A400401595 /* WoWLogSplit */,
+				B973D771151505A600401595 /* WoWLogSplitTests */,
+				B973D74D151505A400401595 /* Frameworks */,
+				B973D74B151505A400401595 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B973D74B151505A400401595 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B973D74A151505A400401595 /* WoWLogSplit.app */,
+				B973D76B151505A600401595 /* WoWLogSplitTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B973D74D151505A400401595 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B973D74E151505A400401595 /* Cocoa.framework */,
+				B973D76C151505A600401595 /* SenTestingKit.framework */,
+				B973D750151505A400401595 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B973D750151505A400401595 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B973D751151505A400401595 /* AppKit.framework */,
+				B973D752151505A400401595 /* CoreData.framework */,
+				B973D753151505A400401595 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		B973D754151505A400401595 /* WoWLogSplit */ = {
+			isa = PBXGroup;
+			children = (
+				B973D760151505A400401595 /* WLSAppDelegate.h */,
+				B973D761151505A400401595 /* WLSAppDelegate.m */,
+				B9CEA12C1515BDE400F5E675 /* WoWLogTableView.h */,
+				B9CEA12D1515BDE400F5E675 /* WoWLogTableView.m */,
+				B9CEA12615159B4800F5E675 /* NSDataExtensions.h */,
+				B9CEA12715159B4800F5E675 /* NSDataExtensions.m */,
+				B9CEA122151599E500F5E675 /* FileReader.h */,
+				B9CEA123151599E500F5E675 /* FileReader.m */,
+				B9CEA12915159FC300F5E675 /* WoWLogLine.h */,
+				B9CEA12A15159FC300F5E675 /* WoWLogLine.m */,
+				B973D763151505A500401595 /* MainMenu.xib */,
+				B973D755151505A400401595 /* Supporting Files */,
+			);
+			path = WoWLogSplit;
+			sourceTree = "<group>";
+		};
+		B973D755151505A400401595 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				B973D756151505A400401595 /* WoWLogSplit-Info.plist */,
+				B973D757151505A400401595 /* InfoPlist.strings */,
+				B973D75A151505A400401595 /* main.m */,
+				B973D75C151505A400401595 /* WoWLogSplit-Prefix.pch */,
+				B973D75D151505A400401595 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		B973D771151505A600401595 /* WoWLogSplitTests */ = {
+			isa = PBXGroup;
+			children = (
+				B973D777151505A600401595 /* WoWLogSplitTests.h */,
+				B973D778151505A600401595 /* WoWLogSplitTests.m */,
+				B973D772151505A600401595 /* Supporting Files */,
+			);
+			path = WoWLogSplitTests;
+			sourceTree = "<group>";
+		};
+		B973D772151505A600401595 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				B973D773151505A600401595 /* WoWLogSplitTests-Info.plist */,
+				B973D774151505A600401595 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B973D749151505A300401595 /* WoWLogSplit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B973D77C151505A600401595 /* Build configuration list for PBXNativeTarget "WoWLogSplit" */;
+			buildPhases = (
+				B973D746151505A300401595 /* Sources */,
+				B973D747151505A300401595 /* Frameworks */,
+				B973D748151505A300401595 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WoWLogSplit;
+			productName = WoWLogSplit;
+			productReference = B973D74A151505A400401595 /* WoWLogSplit.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B973D76A151505A600401595 /* WoWLogSplitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B973D77F151505A600401595 /* Build configuration list for PBXNativeTarget "WoWLogSplitTests" */;
+			buildPhases = (
+				B973D766151505A600401595 /* Sources */,
+				B973D767151505A600401595 /* Frameworks */,
+				B973D768151505A600401595 /* Resources */,
+				B973D769151505A600401595 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B973D770151505A600401595 /* PBXTargetDependency */,
+			);
+			name = WoWLogSplitTests;
+			productName = WoWLogSplitTests;
+			productReference = B973D76B151505A600401595 /* WoWLogSplitTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B973D741151505A300401595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = B973D744151505A300401595 /* Build configuration list for PBXProject "WoWLogSplit" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B973D73F151505A300401595;
+			productRefGroup = B973D74B151505A400401595 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B973D749151505A300401595 /* WoWLogSplit */,
+				B973D76A151505A600401595 /* WoWLogSplitTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B973D748151505A300401595 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B973D759151505A400401595 /* InfoPlist.strings in Resources */,
+				B973D75F151505A400401595 /* Credits.rtf in Resources */,
+				B973D765151505A500401595 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B973D768151505A600401595 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B973D776151505A600401595 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B973D769151505A600401595 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B973D746151505A300401595 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B973D75B151505A400401595 /* main.m in Sources */,
+				B973D762151505A400401595 /* WLSAppDelegate.m in Sources */,
+				B9CEA124151599E500F5E675 /* FileReader.m in Sources */,
+				B9CEA12815159B4800F5E675 /* NSDataExtensions.m in Sources */,
+				B9CEA12B15159FC300F5E675 /* WoWLogLine.m in Sources */,
+				B9CEA12E1515BDE400F5E675 /* WoWLogTableView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B973D766151505A600401595 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B973D779151505A600401595 /* WoWLogSplitTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B973D770151505A600401595 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B973D749151505A300401595 /* WoWLogSplit */;
+			targetProxy = B973D76F151505A600401595 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		B973D757151505A400401595 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B973D758151505A400401595 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		B973D75D151505A400401595 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B973D75E151505A400401595 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		B973D763151505A500401595 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B973D764151505A500401595 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		B973D774151505A600401595 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B973D775151505A600401595 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		B973D77A151505A600401595 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B973D77B151505A600401595 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B973D77D151505A600401595 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WoWLogSplit/WoWLogSplit-Prefix.pch";
+				INFOPLIST_FILE = "WoWLogSplit/WoWLogSplit-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		B973D77E151505A600401595 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WoWLogSplit/WoWLogSplit-Prefix.pch";
+				INFOPLIST_FILE = "WoWLogSplit/WoWLogSplit-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		B973D780151505A600401595 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WoWLogSplit.app/Contents/MacOS/WoWLogSplit";
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WoWLogSplit/WoWLogSplit-Prefix.pch";
+				INFOPLIST_FILE = "WoWLogSplitTests/WoWLogSplitTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		B973D781151505A600401595 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WoWLogSplit.app/Contents/MacOS/WoWLogSplit";
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WoWLogSplit/WoWLogSplit-Prefix.pch";
+				INFOPLIST_FILE = "WoWLogSplitTests/WoWLogSplitTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B973D744151505A300401595 /* Build configuration list for PBXProject "WoWLogSplit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B973D77A151505A600401595 /* Debug */,
+				B973D77B151505A600401595 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B973D77C151505A600401595 /* Build configuration list for PBXNativeTarget "WoWLogSplit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B973D77D151505A600401595 /* Debug */,
+				B973D77E151505A600401595 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B973D77F151505A600401595 /* Build configuration list for PBXNativeTarget "WoWLogSplitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B973D780151505A600401595 /* Debug */,
+				B973D781151505A600401595 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B973D741151505A300401595 /* Project object */;
+}

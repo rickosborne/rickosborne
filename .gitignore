@@ -25,3 +25,23 @@ org.eclipse.*
 # Misc
 .couchapprc
 
+# Xcode
+# via http://stackoverflow.com/a/49488
+.DS_Store
+profile
+.localized
+*.swp
+*~.nib
+*.pyc
+
+build/
+
+*.pbxuser
+*.perspective
+*.perspectivev3
+
+*.mode1v3
+*.mode2v3
+
+xcuserdata
+
