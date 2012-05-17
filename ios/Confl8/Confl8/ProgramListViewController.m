@@ -6,17 +6,41 @@
 //
 
 #import "ProgramListViewController.h"
-
+#import "ProgramStore.h"
+#import "Program.h"
 
 @implementation ProgramListViewController
 
-- (id)initWithStyle:(UITableViewStyle)style
+- (void)editPrograms:(id)sender
 {
-    self = [super initWithStyle:style];
-    if (self) {
-        // Custom initialization
+    NSLog(@"editPrograms:%@", sender);
+}
+
+- (void)addProgram:(id)sender
+{
+    NSLog(@"addProgram:%@", sender);
+    [[ProgramStore defaultStore] createProgram];
+    [self.tableView reloadData];
+}
+
+- (id)init
+{
+    self = [super initWithStyle:UITableViewStylePlain];
+    if (self)
+    {
+        self.title = @"Programs";
+        ProgramStore *ps = [ProgramStore defaultStore];
+        if (ps.count == 0)
+        {
+            [ps createProgram];
+        }
     }
     return self;
+}
+
+- (id)initWithStyle:(UITableViewStyle)style
+{ // Screw you guys.  I'm going home.
+    return [self init];
 }
 
 - (void)didReceiveMemoryWarning
@@ -32,8 +56,10 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	self.title = @"Programs";
-    self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    // self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editPrograms:)];
+    // UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithTitle:@"Add" style:UIBarButtonItemStylePlain target:self action:@selector(addProgram:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addProgram:)];
+    // self.navigationItem.rightBarButtonItem = addButton;
 }
 
 - (void)viewDidUnload
@@ -73,25 +99,30 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 0;
+    return [[ProgramStore defaultStore] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
+    static NSString *CellIdentifier = @"ProgramCell";
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
     
     // Configure the cell...
-    
+    Program *p = [[ProgramStore defaultStore] programAtIndex:(NSUInteger) [indexPath row]];
+    if (p)
+    { // what race condition?
+        cell.textLabel.text = p.key;
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@", p.lastSyncDate];
+    }
     return cell;
 }
 
@@ -103,7 +134,7 @@
     return YES;
 }
 */
-
+/*
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
@@ -114,7 +145,7 @@
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }   
 }
-
+*/
 /*
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath

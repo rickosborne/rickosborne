@@ -19,8 +19,8 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-	ProgramListViewController *plvc = [[ProgramListViewController alloc] initWithStyle:UITableViewStylePlain];
-	UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:plvc];
+	plvc = [[ProgramListViewController alloc] init];
+	nc = [[UINavigationController alloc] initWithRootViewController:plvc];
 	[self.window addSubview:nc.view];
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B9812D661564B45E0052A202 /* ProgramStore.m in Sources */ = {isa = PBXBuildFile; fileRef = B9812D651564B45E0052A202 /* ProgramStore.m */; };
 		B9A7895A156499F30043EDDA /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A78959156499F30043EDDA /* UIKit.framework */; };
 		B9A7895C156499F30043EDDA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A7895B156499F30043EDDA /* Foundation.framework */; };
 		B9A7895E156499F30043EDDA /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A7895D156499F30043EDDA /* CoreGraphics.framework */; };
@@ -16,9 +17,12 @@
 		B9A7896C156499F30043EDDA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7896B156499F30043EDDA /* AppDelegate.m */; };
 		B9A7896F156499F30043EDDA /* Confl8.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B9A7896D156499F30043EDDA /* Confl8.xcdatamodeld */; };
 		B9A7897F15649D3F0043EDDA /* ProgramListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897E15649D3F0043EDDA /* ProgramListViewController.m */; };
+		B9A7897F15649D3F0043EDDC /* Program.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDDB /* Program.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B9812D641564B45E0052A202 /* ProgramStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgramStore.h; sourceTree = "<group>"; };
+		B9812D651564B45E0052A202 /* ProgramStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgramStore.m; sourceTree = "<group>"; };
 		B9A78955156499F30043EDDA /* Confl8.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Confl8.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9A78959156499F30043EDDA /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B9A7895B156499F30043EDDA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -33,6 +37,8 @@
 		B9A7896E156499F30043EDDA /* Confl8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Confl8.xcdatamodel; sourceTree = "<group>"; };
 		B9A7897D15649D3F0043EDDA /* ProgramListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgramListViewController.h; sourceTree = "<group>"; };
 		B9A7897E15649D3F0043EDDA /* ProgramListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgramListViewController.m; sourceTree = "<group>"; };
+		B9A7897F15649D3F0043EDDB /* Program.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Program.m; sourceTree = "<group>"; };
+		B9A7897F15649D3F0043EDDD /* Program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Program.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,12 +87,16 @@
 		B9A78961156499F30043EDDA /* Confl8 */ = {
 			isa = PBXGroup;
 			children = (
+				B9A7897F15649D3F0043EDDD /* Program.h */,
+				B9A7897F15649D3F0043EDDB /* Program.m */,
 				B9A7896A156499F30043EDDA /* AppDelegate.h */,
 				B9A7896B156499F30043EDDA /* AppDelegate.m */,
 				B9A7896D156499F30043EDDA /* Confl8.xcdatamodeld */,
 				B9A7897D15649D3F0043EDDA /* ProgramListViewController.h */,
 				B9A7897E15649D3F0043EDDA /* ProgramListViewController.m */,
 				B9A78962156499F30043EDDA /* Supporting Files */,
+				B9812D641564B45E0052A202 /* ProgramStore.h */,
+				B9812D651564B45E0052A202 /* ProgramStore.m */,
 			);
 			path = Confl8;
 			sourceTree = "<group>";
@@ -167,6 +177,8 @@
 				B9A7896C156499F30043EDDA /* AppDelegate.m in Sources */,
 				B9A7896F156499F30043EDDA /* Confl8.xcdatamodeld in Sources */,
 				B9A7897F15649D3F0043EDDA /* ProgramListViewController.m in Sources */,
+				B9812D661564B45E0052A202 /* ProgramStore.m in Sources */,
+				B9A7897F15649D3F0043EDDC /* Program.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

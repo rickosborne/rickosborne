@@ -9,4 +9,6 @@
 
 @interface ProgramListViewController : UITableViewController
 
+- (void)addProgram:(id)sender;
+
 @end
