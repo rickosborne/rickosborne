@@ -1,0 +1,286 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B9A7895A156499F30043EDDA /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A78959156499F30043EDDA /* UIKit.framework */; };
+		B9A7895C156499F30043EDDA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A7895B156499F30043EDDA /* Foundation.framework */; };
+		B9A7895E156499F30043EDDA /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A7895D156499F30043EDDA /* CoreGraphics.framework */; };
+		B9A78960156499F30043EDDA /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A7895F156499F30043EDDA /* CoreData.framework */; };
+		B9A78966156499F30043EDDA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B9A78964156499F30043EDDA /* InfoPlist.strings */; };
+		B9A78968156499F30043EDDA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A78967156499F30043EDDA /* main.m */; };
+		B9A7896C156499F30043EDDA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7896B156499F30043EDDA /* AppDelegate.m */; };
+		B9A7896F156499F30043EDDA /* Confl8.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B9A7896D156499F30043EDDA /* Confl8.xcdatamodeld */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B9A78955156499F30043EDDA /* Confl8.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Confl8.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9A78959156499F30043EDDA /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		B9A7895B156499F30043EDDA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		B9A7895D156499F30043EDDA /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		B9A7895F156499F30043EDDA /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		B9A78963156499F30043EDDA /* Confl8-Info.plist */ = {isa = PBXFileReference; path = "Confl8-Info.plist"; sourceTree = "<group>"; };
+		B9A78965156499F30043EDDA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B9A78967156499F30043EDDA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		B9A78969156499F30043EDDA /* Confl8-Prefix.pch */ = {isa = PBXFileReference; path = "Confl8-Prefix.pch"; sourceTree = "<group>"; };
+		B9A7896A156499F30043EDDA /* AppDelegate.h */ = {isa = PBXFileReference; path = AppDelegate.h; sourceTree = "<group>"; };
+		B9A7896B156499F30043EDDA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		B9A7896E156499F30043EDDA /* Confl8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Confl8.xcdatamodel; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B9A78952156499F30043EDDA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9A7895A156499F30043EDDA /* UIKit.framework in Frameworks */,
+				B9A7895C156499F30043EDDA /* Foundation.framework in Frameworks */,
+				B9A7895E156499F30043EDDA /* CoreGraphics.framework in Frameworks */,
+				B9A78960156499F30043EDDA /* CoreData.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B9A7894A156499F30043EDDA = {
+			isa = PBXGroup;
+			children = (
+				B9A78961156499F30043EDDA /* Confl8 */,
+				B9A78958156499F30043EDDA /* Frameworks */,
+				B9A78956156499F30043EDDA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B9A78956156499F30043EDDA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B9A78955156499F30043EDDA /* Confl8.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B9A78958156499F30043EDDA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B9A78959156499F30043EDDA /* UIKit.framework */,
+				B9A7895B156499F30043EDDA /* Foundation.framework */,
+				B9A7895D156499F30043EDDA /* CoreGraphics.framework */,
+				B9A7895F156499F30043EDDA /* CoreData.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B9A78961156499F30043EDDA /* Confl8 */ = {
+			isa = PBXGroup;
+			children = (
+				B9A7896A156499F30043EDDA /* AppDelegate.h */,
+				B9A7896B156499F30043EDDA /* AppDelegate.m */,
+				B9A7896D156499F30043EDDA /* Confl8.xcdatamodeld */,
+				B9A78962156499F30043EDDA /* Supporting Files */,
+			);
+			path = Confl8;
+			sourceTree = "<group>";
+		};
+		B9A78962156499F30043EDDA /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				B9A78963156499F30043EDDA /* Confl8-Info.plist */,
+				B9A78964156499F30043EDDA /* InfoPlist.strings */,
+				B9A78967156499F30043EDDA /* main.m */,
+				B9A78969156499F30043EDDA /* Confl8-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B9A78954156499F30043EDDA /* Confl8 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B9A78972156499F30043EDDA /* Build configuration list for PBXNativeTarget "Confl8" */;
+			buildPhases = (
+				B9A78951156499F30043EDDA /* Sources */,
+				B9A78952156499F30043EDDA /* Frameworks */,
+				B9A78953156499F30043EDDA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Confl8;
+			productName = Confl8;
+			productReference = B9A78955156499F30043EDDA /* Confl8.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B9A7894C156499F30043EDDA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = B9A7894F156499F30043EDDA /* Build configuration list for PBXProject "Confl8" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B9A7894A156499F30043EDDA;
+			productRefGroup = B9A78956156499F30043EDDA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B9A78954156499F30043EDDA /* Confl8 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B9A78953156499F30043EDDA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9A78966156499F30043EDDA /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B9A78951156499F30043EDDA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9A78968156499F30043EDDA /* main.m in Sources */,
+				B9A7896C156499F30043EDDA /* AppDelegate.m in Sources */,
+				B9A7896F156499F30043EDDA /* Confl8.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		B9A78964156499F30043EDDA /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B9A78965156499F30043EDDA /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		B9A78970156499F30043EDDA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B9A78971156499F30043EDDA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B9A78973156499F30043EDDA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Confl8/Confl8-Prefix.pch";
+				INFOPLIST_FILE = "Confl8/Confl8-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		B9A78974156499F30043EDDA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Confl8/Confl8-Prefix.pch";
+				INFOPLIST_FILE = "Confl8/Confl8-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B9A7894F156499F30043EDDA /* Build configuration list for PBXProject "Confl8" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B9A78970156499F30043EDDA /* Debug */,
+				B9A78971156499F30043EDDA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B9A78972156499F30043EDDA /* Build configuration list for PBXNativeTarget "Confl8" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B9A78973156499F30043EDDA /* Debug */,
+				B9A78974156499F30043EDDA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		B9A7896D156499F30043EDDA /* Confl8.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				B9A7896E156499F30043EDDA /* Confl8.xcdatamodel */,
+			);
+			currentVersion = B9A7896E156499F30043EDDA /* Confl8.xcdatamodel */;
+			path = Confl8.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = B9A7894C156499F30043EDDA /* Project object */;
+}
