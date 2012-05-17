@@ -19,6 +19,9 @@
 		B9A7896F156499F30043EDDA /* Confl8.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B9A7896D156499F30043EDDA /* Confl8.xcdatamodeld */; };
 		B9A7897F15649D3F0043EDDA /* ProgramListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897E15649D3F0043EDDA /* ProgramListViewController.m */; };
 		B9A7897F15649D3F0043EDDC /* Program.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDDB /* Program.m */; };
+		B9A7897F15649D3F0043EDDF /* ProgramViewController.m in Sources */ = {isa = PBXBuildFile; };
+		B9A7897F15649D3F0043EDE3 /* ProgramViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDE2 /* ProgramViewController.m */; };
+		B9A7897F15649D3F0043EDE6 /* ProgramDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDE5 /* ProgramDetailViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +45,10 @@
 		B9A7897E15649D3F0043EDDA /* ProgramListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgramListViewController.m; sourceTree = "<group>"; };
 		B9A7897F15649D3F0043EDDB /* Program.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Program.m; sourceTree = "<group>"; };
 		B9A7897F15649D3F0043EDDD /* Program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Program.h; sourceTree = "<group>"; };
+		B9A7897F15649D3F0043EDE1 /* ProgramViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgramViewController.h; sourceTree = "<group>"; };
+		B9A7897F15649D3F0043EDE2 /* ProgramViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgramViewController.m; sourceTree = "<group>"; };
+		B9A7897F15649D3F0043EDE4 /* ProgramDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgramDetailViewController.h; sourceTree = "<group>"; };
+		B9A7897F15649D3F0043EDE5 /* ProgramDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgramDetailViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +97,10 @@
 		B9A78961156499F30043EDDA /* Confl8 */ = {
 			isa = PBXGroup;
 			children = (
+				B9A7897F15649D3F0043EDE5 /* ProgramDetailViewController.m */,
+				B9A7897F15649D3F0043EDE4 /* ProgramDetailViewController.h */,
+				B9A7897F15649D3F0043EDE2 /* ProgramViewController.m */,
+				B9A7897F15649D3F0043EDE1 /* ProgramViewController.h */,
 				B9A7897F15649D3F0043EDDD /* Program.h */,
 				B9A7897F15649D3F0043EDDB /* Program.m */,
 				B9A7896A156499F30043EDDA /* AppDelegate.h */,
@@ -185,6 +196,9 @@
 				B9812D661564B45E0052A202 /* ProgramStore.m in Sources */,
 				B9A7897F15649D3F0043EDDC /* Program.m in Sources */,
 				B9812D761564CE4B0052A202 /* ProgramAddViewController.m in Sources */,
+				B9A7897F15649D3F0043EDDF /* ProgramViewController.m in Sources */,
+				B9A7897F15649D3F0043EDE3 /* ProgramViewController.m in Sources */,
+				B9A7897F15649D3F0043EDE6 /* ProgramDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

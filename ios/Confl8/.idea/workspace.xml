@@ -22,33 +22,29 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ProgramListViewController.h" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.h">
+      <file leaf-file-name="ProgramDetailViewController.h" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Confl8/ProgramDetailViewController.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="0" selection-start="265" selection-end="265" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#89#112#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProgramStore.h" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="0" selection-start="207" selection-end="207" vertical-scroll-proportion="0.0">
+            <state line="5" column="0" selection-start="92" selection-end="92" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProgramStore.m" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.m">
+      <file leaf-file-name="ProgramDetailViewController.m" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Confl8/ProgramDetailViewController.m">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="27" selection-start="1029" selection-end="1029" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#76#100#0" expanded="true" />
-              </folding>
+            <state line="15" column="5" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProgramViewController.h" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Confl8/ProgramViewController.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="5" column="2" selection-start="88" selection-end="88" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -56,7 +52,7 @@
       <file leaf-file-name="ProgramListViewController.m" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.m">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="183" column="7" selection-start="5456" selection-end="5456" vertical-scroll-proportion="0.0">
+            <state line="181" column="66" selection-start="5546" selection-end="5546" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#89#126#0" expanded="true" />
               </folding>
@@ -64,11 +60,13 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProgramAddViewController.m" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.m">
+      <file leaf-file-name="ProgramViewController.m" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Confl8/ProgramViewController.m">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="20" column="7" selection-start="398" selection-end="398" vertical-scroll-proportion="0.24652088">
-              <folding />
+            <state line="17" column="34" selection-start="412" selection-end="412" vertical-scroll-proportion="0.43141153">
+              <folding>
+                <element signature="e#90#123#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -90,8 +88,12 @@
         <option value="$PROJECT_DIR$/Confl8/ProgramAddViewController.h" />
         <option value="$PROJECT_DIR$/Confl8/ProgramStore.h" />
         <option value="$PROJECT_DIR$/Confl8/ProgramStore.m" />
-        <option value="$PROJECT_DIR$/Confl8/ProgramListViewController.m" />
         <option value="$PROJECT_DIR$/Confl8/ProgramAddViewController.m" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramViewController.h" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramDetailViewController.h" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramListViewController.m" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramDetailViewController.m" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramViewController.m" />
       </list>
     </option>
   </component>
@@ -189,6 +191,24 @@
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="SvnConfiguration" maxAnnotateRevisions="500" myUseAcceleration="nothing" myAutoUpdateAfterCommit="false" cleanupOnStartRun="false">
+    <option name="USER" value="" />
+    <option name="PASSWORD" value="" />
+    <option name="mySSHConnectionTimeout" value="30000" />
+    <option name="mySSHReadTimeout" value="30000" />
+    <option name="LAST_MERGED_REVISION" />
+    <option name="MERGE_DRY_RUN" value="false" />
+    <option name="MERGE_DIFF_USE_ANCESTRY" value="true" />
+    <option name="UPDATE_LOCK_ON_DEMAND" value="false" />
+    <option name="IGNORE_SPACES_IN_MERGE" value="false" />
+    <option name="DETECT_NESTED_COPIES" value="true" />
+    <option name="CHECK_NESTED_FOR_QUICK_MERGE" value="false" />
+    <option name="IGNORE_SPACES_IN_ANNOTATE" value="true" />
+    <option name="SHOW_MERGE_SOURCES_IN_ANNOTATE" value="true" />
+    <option name="FORCE_UPDATE" value="false" />
+    <configuration useDefault="false">$USER_HOME$/.subversion_IDEA</configuration>
+    <myIsUseDefaultProxy>false</myIsUseDefaultProxy>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="1ec8a534-c4a7-47c6-bf72-7d8e015b723b" name="Default" comment="" />
@@ -305,44 +325,74 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.h">
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="0" selection-start="265" selection-end="265" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#89#112#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="0" selection-start="207" selection-end="207" vertical-scroll-proportion="0.0">
+        <state line="20" column="7" selection-start="398" selection-end="398" vertical-scroll-proportion="0.24652088">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="27" selection-start="1029" selection-end="1029" vertical-scroll-proportion="0.0">
+        <state line="47" column="27" selection-start="1029" selection-end="1029" vertical-scroll-proportion="0.45844156">
           <folding>
             <element signature="e#76#100#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="0" selection-start="207" selection-end="207" vertical-scroll-proportion="0.32694763">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="0" selection-start="265" selection-end="265" vertical-scroll-proportion="0.5146871">
+          <folding>
+            <element signature="e#89#112#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramDetailViewController.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="0" selection-start="92" selection-end="92" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="183" column="7" selection-start="5456" selection-end="5456" vertical-scroll-proportion="0.0">
+        <state line="181" column="66" selection-start="5546" selection-end="5546" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#89#126#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.m">
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramDetailViewController.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="7" selection-start="398" selection-end="398" vertical-scroll-proportion="0.24652088">
+        <state line="15" column="5" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramViewController.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="2" selection-start="88" selection-end="88" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramViewController.m">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="34" selection-start="412" selection-end="412" vertical-scroll-proportion="0.43141153">
+          <folding>
+            <element signature="e#90#123#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

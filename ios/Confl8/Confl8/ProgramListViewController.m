@@ -9,6 +9,7 @@
 #import "ProgramStore.h"
 #import "Program.h"
 #import "ProgramAddViewController.h"
+#import "ProgramViewController.h"
 
 @implementation ProgramListViewController
 
@@ -177,6 +178,8 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
+    ProgramViewController *pvc = [[ProgramViewController alloc] init];
+    [self.navigationController pushViewController:pvc animated:YES];
 }
 
 - (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL
