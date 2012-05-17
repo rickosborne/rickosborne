@@ -21,6 +21,7 @@
 {
     NSLog(@"addProgram:%@", sender);
 	ProgramAddViewController *pavc = [[ProgramAddViewController alloc] init];
+    pavc.delegate = self;
 	[self.navigationController pushViewController:pavc animated:YES];
     // [[ProgramStore defaultStore] createProgram];
     // [self.tableView reloadData];
@@ -176,6 +177,13 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
+}
+
+- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL
+{
+    NSLog(@"saveProgram:%@:%@", name, repoURL);
+    [[ProgramStore defaultStore] createProgram:name withRepoURL:repoURL];
+    [self.tableView reloadData];
 }
 
 @end

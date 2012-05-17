@@ -7,22 +7,64 @@
 
 #import "ProgramAddViewController.h"
 
+// via http://cbconfiguitableview.googlecode.com
+#define kCellHeight			25.0
+#define kCellLeftOffset		8.0
+#define kCellTopOffset		10.0
+#define kCellRightOffset    20.0
 
 @implementation ProgramAddViewController
+@synthesize delegate;
+
+- (void)saveProgram:(id)sender
+{
+    NSLog(@"saveProgram:%@ %@", programName, repoURL);
+    if ((programName.length > 0) && (repoURL.length > 0))
+    {
+        [self.delegate saveProgram:programName withRepoURL:repoURL];
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
+
+- (BOOL)doneEditing:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    if (textField.tag > 0)
+    {
+        [self saveProgram:textField];
+    }
+    return YES;
+}
+
+- (void)toggleSaveButton
+{
+    self.navigationItem.rightBarButtonItem.enabled = ((programName.length > 0) && (repoURL.length > 0));
+}
 
 - (void)nameChange:(UITextField *)sender
 {
-	NSLog(@"nameChange:%@ %@", sender.placeholder, sender.text);
+	// NSLog(@"nameChange:%@ %@", sender.placeholder, sender.text);
+    programName = sender.text;
+    [self toggleSaveButton];
 }
 
 - (void)repoChange:(UITextField *)sender
 {
-	NSLog(@"repoChange:%@ %@", sender.placeholder, sender.text);
+	// NSLog(@"repoChange:%@ %@", sender.placeholder, sender.text);
+    repoURL = sender.text;
+    [self toggleSaveButton];
 }
 
 - (id)init
 {
-	self = [super initWithStyle:UITableViewStyleGrouped];
+   if ((self = [super initWithStyle:UITableViewStyleGrouped]))
+   {
+       programName = @"";
+       repoURL = @"";
+       self.title = @"New Program";
+       self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(saveProgram:)];
+       [self toggleSaveButton];
+   }
 	return self;
 }
 
@@ -44,7 +86,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
  
@@ -111,7 +152,9 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
 	cell.accessoryType = UITableViewCellAccessoryNone;
-	UITextField *tf = [[UITextField alloc] initWithFrame:cell.contentView.bounds];
+    CGRect contentRect = cell.contentView.bounds;
+    CGRect textRect = CGRectMake(contentRect.origin.x + kCellLeftOffset, kCellTopOffset, contentRect.size.width - kCellLeftOffset - kCellRightOffset, kCellHeight);
+	UITextField *tf = [[UITextField alloc] initWithFrame:textRect];
 	tf.autocorrectionType = UITextAutocorrectionTypeNo;
 	tf.clearButtonMode = UITextFieldViewModeWhileEditing;
 	tf.spellCheckingType = UITextSpellCheckingTypeNo;
@@ -130,12 +173,13 @@
 	{ // repo
 		tf.placeholder = @"http://confl8.com/film/";
 		[tf addTarget:self action:@selector(repoChange:) forControlEvents:UIControlEventEditingChanged];
+        [tf addTarget:self action:@selector(doneEditing:) forControlEvents:UIControlEventEditingDidEndOnExit];
 		tf.autocapitalizationType = UITextAutocapitalizationTypeNone;
 		tf.keyboardType = UIKeyboardTypeURL;
 		tf.tag = 1;
 		tf.returnKeyType = UIReturnKeyDone;
 	}
-	[cell addSubview:tf];
+	[cell.contentView addSubview:tf];
     return cell;
 }
 

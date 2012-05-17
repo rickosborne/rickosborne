@@ -6,8 +6,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ProgramAddViewController.h"
 
-@interface ProgramListViewController : UITableViewController
+@interface ProgramListViewController : UITableViewController <ProgramAddDelegate>
 
 - (void)addProgram:(id)sender;
 

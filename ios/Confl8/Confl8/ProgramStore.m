@@ -33,6 +33,14 @@ static ProgramStore *defaultStore = nil;
     return p;
 }
 
+- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL
+{
+    Program *p = [self createProgram];
+    p.name = [NSString stringWithString:name];
+    p.repoURL = [NSString stringWithString:repoURL];
+    return p;
+}
+
 - (NSUInteger)count
 {
     return [allPrograms count];

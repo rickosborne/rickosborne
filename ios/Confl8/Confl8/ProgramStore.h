@@ -18,6 +18,7 @@
 
 - (NSArray *)allPrograms;
 - (Program *)createProgram;
+- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL;
 - (NSUInteger)count;
 - (Program *)programAtIndex:(NSUInteger)index;
 

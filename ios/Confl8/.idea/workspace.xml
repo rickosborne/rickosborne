@@ -22,41 +22,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="AppDelegate.m" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Confl8/AppDelegate.m">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="0" selection-start="643" selection-end="643" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="ProgramListViewController.h" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="30" selection-start="206" selection-end="206" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProgramListViewController.m" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.m">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="60" column="7" selection-start="1450" selection-end="1450" vertical-scroll-proportion="0.49360615">
+            <state line="13" column="0" selection-start="265" selection-end="265" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#89#126#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProgramStore.m" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.m">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="78" column="1" selection-start="1150" selection-end="1150" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#76#100#0" expanded="true" />
+                <element signature="e#89#112#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -65,29 +36,39 @@
       <file leaf-file-name="ProgramStore.h" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="0" selection-start="356" selection-end="356" vertical-scroll-proportion="0.0">
+            <state line="19" column="27" selection-start="287" selection-end="287" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Program.h" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Confl8/Program.h">
+      <file leaf-file-name="ProgramStore.m" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.m">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="26" selection-start="276" selection-end="276" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Program.m" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Confl8/Program.m">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="30" selection-start="1011" selection-end="1011" vertical-scroll-proportion="0.0">
+            <state line="40" column="13" selection-start="767" selection-end="767" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#43#62#0" expanded="true" />
-                <element signature="e#396#419#0" expanded="true" />
+                <element signature="e#76#100#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProgramListViewController.m" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.m">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="185" column="32" selection-start="5579" selection-end="5579" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="e#89#126#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProgramAddViewController.m" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.m">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="88" column="0" selection-start="2051" selection-end="2051" vertical-scroll-proportion="0.49304175">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -103,12 +84,14 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/Confl8/AppDelegate.m" />
-        <option value="$PROJECT_DIR$/Confl8/ProgramStore.h" />
         <option value="$PROJECT_DIR$/Confl8/Program.h" />
-        <option value="$PROJECT_DIR$/Confl8/ProgramStore.m" />
         <option value="$PROJECT_DIR$/Confl8/Program.m" />
         <option value="$PROJECT_DIR$/Confl8/ProgramListViewController.h" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramAddViewController.h" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramStore.m" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramStore.h" />
         <option value="$PROJECT_DIR$/Confl8/ProgramListViewController.m" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramAddViewController.m" />
       </list>
     </option>
   </component>
@@ -143,16 +126,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="DirectoryView.Xcode">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Confl8" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodeDirectoryView$1$1" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -177,6 +150,16 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="Confl8" />
               <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodePBXReferenceNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="DirectoryView.Xcode">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Confl8" />
+              <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodeDirectoryView$1$1" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
@@ -208,6 +191,7 @@
   <component name="ShelveChangesManager" show_recycled="false" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
+      <changelist id="1ec8a534-c4a7-47c6-bf72-7d8e015b723b" name="Default" comment="" />
       <created>1337228639433</created>
       <updated>1337228639433</updated>
     </task>
@@ -215,25 +199,25 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1436" height="878" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32962963" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32962963" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24982308" sideWeight="0.6" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18966737" sideWeight="0.6703704" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32962963" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32962963" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -303,7 +287,6 @@
         <state line="38" column="30" selection-start="1011" selection-end="1011" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#43#62#0" expanded="true" />
-            <element signature="e#396#419#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -315,35 +298,51 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="0" selection-start="356" selection-end="356" vertical-scroll-proportion="0.0">
-          <folding />
+        <state line="13" column="0" selection-start="265" selection-end="265" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#89#112#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="78" column="1" selection-start="1150" selection-end="1150" vertical-scroll-proportion="0.0">
+        <state line="40" column="13" selection-start="767" selection-end="767" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#76#100#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.h">
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="30" selection-start="206" selection-end="206" vertical-scroll-proportion="0.0">
+        <state line="19" column="27" selection-start="287" selection-end="287" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="60" column="7" selection-start="1450" selection-end="1450" vertical-scroll-proportion="0.49360615">
+        <state line="185" column="32" selection-start="5579" selection-end="5579" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#89#126#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="0" selection-start="273" selection-end="273" vertical-scroll-proportion="0.27906978">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.m">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="88" column="0" selection-start="2051" selection-end="2051" vertical-scroll-proportion="0.49304175">
+          <folding />
         </state>
       </provider>
     </entry>
