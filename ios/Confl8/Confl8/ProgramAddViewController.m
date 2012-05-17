@@ -1,48 +1,33 @@
 //
-//  ProgramListViewController.m
+//  ProgramAddViewController.m
 //  Confl8
 //
-//  Created by rosborne on 5/16/12.
+//  Created by rosborne on 5/17/12.
 //
 
-#import "ProgramListViewController.h"
-#import "ProgramStore.h"
-#import "Program.h"
 #import "ProgramAddViewController.h"
 
-@implementation ProgramListViewController
 
-- (void)editPrograms:(id)sender
+@implementation ProgramAddViewController
+
+- (void)nameChange:(UITextField *)sender
 {
-    NSLog(@"editPrograms:%@", sender);
+	NSLog(@"nameChange:%@ %@", sender.placeholder, sender.text);
 }
 
-- (void)addProgram:(id)sender
+- (void)repoChange:(UITextField *)sender
 {
-    NSLog(@"addProgram:%@", sender);
-	ProgramAddViewController *pavc = [[ProgramAddViewController alloc] init];
-	[self.navigationController pushViewController:pavc animated:YES];
-    // [[ProgramStore defaultStore] createProgram];
-    // [self.tableView reloadData];
+	NSLog(@"repoChange:%@ %@", sender.placeholder, sender.text);
 }
 
 - (id)init
 {
-    self = [super initWithStyle:UITableViewStylePlain];
-    if (self)
-    {
-        self.title = @"Programs";
-        ProgramStore *ps = [ProgramStore defaultStore];
-        if (ps.count == 0)
-        {
-            [ps createProgram];
-        }
-    }
-    return self;
+	self = [super initWithStyle:UITableViewStyleGrouped];
+	return self;
 }
 
 - (id)initWithStyle:(UITableViewStyle)style
-{ // Screw you guys.  I'm going home.
+{
     return [self init];
 }
 
@@ -59,10 +44,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editPrograms:)];
-    // UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithTitle:@"Add" style:UIBarButtonItemStylePlain target:self action:@selector(addProgram:)];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addProgram:)];
-    // self.navigationItem.rightBarButtonItem = addButton;
+
+    // Uncomment the following line to preserve selection between presentations.
+    // self.clearsSelectionOnViewWillAppear = NO;
+ 
+    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
 
 - (void)viewDidUnload
@@ -100,32 +87,55 @@
 
 #pragma mark - Table view data source
 
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+	return (section == 0) ? @"Name" : @"Source URL";
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    return 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [[ProgramStore defaultStore] count];
+    return 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"ProgramCell";
+    NSString *CellIdentifier = [@"ProgramAddCell" stringByAppendingString:((indexPath.section == 0) ? @"Name" : @"Repo")];
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
+	cell.accessoryType = UITableViewCellAccessoryNone;
+	UITextField *tf = [[UITextField alloc] initWithFrame:cell.contentView.bounds];
+	tf.autocorrectionType = UITextAutocorrectionTypeNo;
+	tf.clearButtonMode = UITextFieldViewModeWhileEditing;
+	tf.spellCheckingType = UITextSpellCheckingTypeNo;
     
     // Configure the cell...
-    Program *p = [[ProgramStore defaultStore] programAtIndex:(NSUInteger) [indexPath row]];
-    if (p)
-    { // what race condition?
-        cell.textLabel.text = p.key;
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@", p.lastSyncDate];
-    }
+	if (indexPath.section == 0)
+	{ // name
+		tf.placeholder = @"Example Film Program M.S.";
+		[tf addTarget:self action:@selector(nameChange:) forControlEvents:UIControlEventEditingChanged];
+		tf.autocapitalizationType = UITextAutocapitalizationTypeWords;
+		tf.keyboardType = UIKeyboardTypeDefault;
+		tf.tag = 0;
+		tf.returnKeyType = UIReturnKeyNext;
+	}
+    else
+	{ // repo
+		tf.placeholder = @"http://confl8.com/film/";
+		[tf addTarget:self action:@selector(repoChange:) forControlEvents:UIControlEventEditingChanged];
+		tf.autocapitalizationType = UITextAutocapitalizationTypeNone;
+		tf.keyboardType = UIKeyboardTypeURL;
+		tf.tag = 1;
+		tf.returnKeyType = UIReturnKeyDone;
+	}
+	[cell addSubview:tf];
     return cell;
 }
 
@@ -137,7 +147,9 @@
     return YES;
 }
 */
+
 /*
+// Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
@@ -149,6 +161,7 @@
     }   
 }
 */
+
 /*
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
@@ -166,16 +179,14 @@
 */
 
 #pragma mark - Table view delegate
-
+/*
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Navigation logic may go here. Create and push another view controller.
-    /*
      <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
      // ...
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
-     */
 }
-
+*/
 @end
