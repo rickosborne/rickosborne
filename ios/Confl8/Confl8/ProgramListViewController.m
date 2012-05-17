@@ -19,7 +19,7 @@
 
 - (void)addProgram:(id)sender
 {
-    NSLog(@"addProgram:%@", sender);
+    // NSLog(@"addProgram:%@", sender);
 	ProgramAddViewController *pavc = [[ProgramAddViewController alloc] init];
     pavc.delegate = self;
 	[self.navigationController pushViewController:pavc animated:YES];
@@ -33,11 +33,11 @@
     if (self)
     {
         self.title = @"Programs";
-        ProgramStore *ps = [ProgramStore defaultStore];
-        if (ps.count == 0)
-        {
-            [ps createProgram];
-        }
+//        ProgramStore *ps = [ProgramStore defaultStore];
+//        if (ps.count == 0)
+//        {
+//            [ps createProgram];
+//        }
     }
     return self;
 }
@@ -124,8 +124,8 @@
     Program *p = [[ProgramStore defaultStore] programAtIndex:(NSUInteger) [indexPath row]];
     if (p)
     { // what race condition?
-        cell.textLabel.text = p.key;
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@", p.lastSyncDate];
+        cell.textLabel.text = p.name;
+        cell.detailTextLabel.text = p.key; // [NSString stringWithFormat:@"%@", p.lastSyncDate];
     }
     return cell;
 }
@@ -181,7 +181,7 @@
 
 - (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL
 {
-    NSLog(@"saveProgram:%@:%@", name, repoURL);
+    // NSLog(@"saveProgram:%@:%@", name, repoURL);
     [[ProgramStore defaultStore] createProgram:name withRepoURL:repoURL];
     [self.tableView reloadData];
 }

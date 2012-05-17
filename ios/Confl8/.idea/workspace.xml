@@ -36,7 +36,7 @@
       <file leaf-file-name="ProgramStore.h" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="27" selection-start="287" selection-end="287" vertical-scroll-proportion="0.0">
+            <state line="15" column="0" selection-start="207" selection-end="207" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -45,7 +45,7 @@
       <file leaf-file-name="ProgramStore.m" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.m">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="40" column="13" selection-start="767" selection-end="767" vertical-scroll-proportion="0.0">
+            <state line="47" column="27" selection-start="1029" selection-end="1029" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#76#100#0" expanded="true" />
               </folding>
@@ -56,7 +56,7 @@
       <file leaf-file-name="ProgramListViewController.m" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.m">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="185" column="32" selection-start="5579" selection-end="5579" vertical-scroll-proportion="0.0">
+            <state line="183" column="7" selection-start="5456" selection-end="5456" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#89#126#0" expanded="true" />
               </folding>
@@ -67,7 +67,7 @@
       <file leaf-file-name="ProgramAddViewController.m" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.m">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="88" column="0" selection-start="2051" selection-end="2051" vertical-scroll-proportion="0.49304175">
+            <state line="20" column="7" selection-start="398" selection-end="398" vertical-scroll-proportion="0.24652088">
               <folding />
             </state>
           </provider>
@@ -88,8 +88,8 @@
         <option value="$PROJECT_DIR$/Confl8/Program.m" />
         <option value="$PROJECT_DIR$/Confl8/ProgramListViewController.h" />
         <option value="$PROJECT_DIR$/Confl8/ProgramAddViewController.h" />
-        <option value="$PROJECT_DIR$/Confl8/ProgramStore.m" />
         <option value="$PROJECT_DIR$/Confl8/ProgramStore.h" />
+        <option value="$PROJECT_DIR$/Confl8/ProgramStore.m" />
         <option value="$PROJECT_DIR$/Confl8/ProgramListViewController.m" />
         <option value="$PROJECT_DIR$/Confl8/ProgramAddViewController.m" />
       </list>
@@ -298,6 +298,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="0" selection-start="273" selection-end="273" vertical-scroll-proportion="0.27906978">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.h">
       <provider selected="true" editor-type-id="text-editor">
         <state line="13" column="0" selection-start="265" selection-end="265" vertical-scroll-proportion="0.0">
@@ -307,41 +314,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="0" selection-start="207" selection-end="207" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="13" selection-start="767" selection-end="767" vertical-scroll-proportion="0.0">
+        <state line="47" column="27" selection-start="1029" selection-end="1029" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#76#100#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Confl8/ProgramStore.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="27" selection-start="287" selection-end="287" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramListViewController.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="185" column="32" selection-start="5579" selection-end="5579" vertical-scroll-proportion="0.0">
+        <state line="183" column="7" selection-start="5456" selection-end="5456" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#89#126#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="0" selection-start="273" selection-end="273" vertical-scroll-proportion="0.27906978">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Confl8/ProgramAddViewController.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="88" column="0" selection-start="2051" selection-end="2051" vertical-scroll-proportion="0.49304175">
+        <state line="20" column="7" selection-start="398" selection-end="398" vertical-scroll-proportion="0.24652088">
           <folding />
         </state>
       </provider>

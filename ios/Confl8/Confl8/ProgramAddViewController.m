@@ -18,7 +18,7 @@
 
 - (void)saveProgram:(id)sender
 {
-    NSLog(@"saveProgram:%@ %@", programName, repoURL);
+    // NSLog(@"saveProgram:%@ %@", programName, repoURL);
     if ((programName.length > 0) && (repoURL.length > 0))
     {
         [self.delegate saveProgram:programName withRepoURL:repoURL];

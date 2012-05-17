@@ -33,11 +33,19 @@ static ProgramStore *defaultStore = nil;
     return p;
 }
 
+- (void)reorderPrograms
+{
+    NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES];
+    NSArray *nameSorts = [[NSArray alloc] initWithObjects:nameSort, nil];
+    [allPrograms sortUsingDescriptors:nameSorts];
+}
+
 - (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL
 {
     Program *p = [self createProgram];
     p.name = [NSString stringWithString:name];
     p.repoURL = [NSString stringWithString:repoURL];
+    [self reorderPrograms];
     return p;
 }
 

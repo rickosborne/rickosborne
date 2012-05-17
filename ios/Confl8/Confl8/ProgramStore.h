@@ -11,6 +11,7 @@
 
 @interface ProgramStore : NSObject
 {
+@private
     NSMutableArray *allPrograms;
 }
 
