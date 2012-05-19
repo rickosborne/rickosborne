@@ -12,6 +12,36 @@ static ProgramStore *defaultStore = nil;
 
 @implementation ProgramStore
 
+- (NSString *)getDocPath:(NSString *)fileName
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docsPath = [paths objectAtIndex:0];
+    return [docsPath stringByAppendingPathComponent:fileName];
+}
+
+- (void)saveStore
+{
+	NSLog(@"saveStore:%@ %@", storeFileName, allPrograms);
+	NSMutableDictionary *root = [NSMutableDictionary dictionary];
+	[root setObject:allPrograms forKey:@"programs"];
+	[NSKeyedArchiver archiveRootObject:root toFile:storeFileName];
+//    [allPrograms writeToFile:storeFileName atomically:YES];
+}
+
+- (void)loadStore
+{
+//    allPrograms = [[NSMutableArray alloc] initWithContentsOfFile:storeFileName];
+	NSDictionary *root = [NSKeyedUnarchiver unarchiveObjectWithFile:storeFileName];
+	if (root)
+	{
+		allPrograms = [root objectForKey:@"programs"];
+	}
+	else
+	{
+		allPrograms = [[NSMutableArray alloc] init];
+	}
+}
+
 + (ProgramStore *)defaultStore
 {
     if (!defaultStore)
@@ -46,6 +76,7 @@ static ProgramStore *defaultStore = nil;
     p.name = [NSString stringWithString:name];
     p.repoURL = [NSString stringWithString:repoURL];
     [self reorderPrograms];
+    [self saveStore];
     return p;
 }
 
@@ -74,7 +105,8 @@ static ProgramStore *defaultStore = nil;
     self = [super init];
     if (self)
     {
-        allPrograms = [[NSMutableArray alloc] init];
+        storeFileName = [self getDocPath:@"programs.plist"];
+        [self loadStore];
     }
     return self;
 }

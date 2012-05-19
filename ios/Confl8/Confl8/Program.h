@@ -4,9 +4,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Program : NSObject
+@interface Program : NSObject <NSCoding>
 {
 }
+
+- (void)encodeWithCoder:(NSCoder *)aCoder;
+- (id)initWithCoder:(NSCoder *)aDecoder;
 
 @property (nonatomic, strong) NSString *key;
 @property (nonatomic, strong) NSDate *lastSyncDate;

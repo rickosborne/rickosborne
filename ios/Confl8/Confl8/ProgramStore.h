@@ -13,6 +13,7 @@
 {
 @private
     NSMutableArray *allPrograms;
+    NSString *storeFileName;
 }
 
 + (ProgramStore *)defaultStore;

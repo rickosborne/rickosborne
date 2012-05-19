@@ -9,6 +9,34 @@
 
 @synthesize key, lastSyncDate, name, repoURL, repoBranch, repoSSHkey, repoPassword, repoUsername;
 
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+	[coder encodeObject:key forKey:@"key"];
+	[coder encodeObject:lastSyncDate forKey:@"lastSyncDate"];
+	[coder encodeObject:name forKey:@"name"];
+	[coder encodeObject:repoURL forKey:@"repoURL"];
+	[coder encodeObject:repoBranch forKey:@"repoBranch"];
+	[coder encodeObject:repoSSHkey forKey:@"repoSSHkey"];
+	[coder encodeObject:repoPassword forKey:@"repoPassword"];
+	[coder encodeObject:repoUsername forKey:@"repoUsername"];
+}
+
+- (id)initWithCoder:(NSCoder *)decoder
+{
+	if ((self = [super init]))
+	{
+		[self setKey:[decoder decodeObjectForKey:@"key"]];
+		[self setLastSyncDate:[decoder decodeObjectForKey:@"lastSyncDate"]];
+		[self setName:[decoder decodeObjectForKey:@"name"]];
+		[self setRepoURL:[decoder decodeObjectForKey:@"repoURL"]];
+		[self setRepoBranch:[decoder decodeObjectForKey:@"repoBranch"]];
+		[self setRepoSSHkey:[decoder decodeObjectForKey:@"repoSSHkey"]];
+		[self setRepoPassword:[decoder decodeObjectForKey:@"repoPassword"]];
+		[self setRepoUsername:[decoder decodeObjectForKey:@"repoUsername"]];
+	}
+	return self;
+}
+
 - (NSString *)makeUUID
 {
     CFUUIDRef uuid = CFUUIDCreate(NULL);
