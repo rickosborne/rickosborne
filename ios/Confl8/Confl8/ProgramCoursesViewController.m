@@ -1,51 +1,28 @@
 //
-//  ProgramListViewController.m
+//  ProgramCoursesViewController.m
 //  Confl8
 //
-//  Created by rosborne on 5/16/12.
+//  Created by Rick Osborne on 05/19/12.
 //
 
-#import "ProgramListViewController.h"
-#import "ProgramStore.h"
+#import "ProgramCoursesViewController.h"
 #import "Program.h"
-#import "ProgramAddViewController.h"
-#import "ProgramViewController.h"
 
-@implementation ProgramListViewController
+@implementation ProgramCoursesViewController
 
-- (void)editPrograms:(id)sender
+- (id)initWithProgram:(Program *)program
 {
-    NSLog(@"editPrograms:%@", sender);
-}
-
-- (void)addProgram:(id)sender
-{
-    // NSLog(@"addProgram:%@", sender);
-	ProgramAddViewController *pavc = [[ProgramAddViewController alloc] init];
-    pavc.delegate = self;
-	[self.navigationController pushViewController:pavc animated:YES];
-    // [[ProgramStore defaultStore] createProgram];
-    // [self.tableView reloadData];
-}
-
-- (id)init
-{
-    self = [super initWithStyle:UITableViewStylePlain];
-    if (self)
+    if ((self = [super initWithStyle:UITableViewStylePlain]))
     {
-        self.title = @"Programs";
-//        ProgramStore *ps = [ProgramStore defaultStore];
-//        if (ps.count == 0)
-//        {
-//            [ps createProgram];
-//        }
+        _program = program;
+        self.title = [NSString stringWithFormat:@"%@ Courses", _program.name];
     }
     return self;
 }
 
 - (id)initWithStyle:(UITableViewStyle)style
-{ // Screw you guys.  I'm going home.
-    return [self init];
+{
+    return [self initWithProgram:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -61,10 +38,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editPrograms:)];
-    // UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithTitle:@"Add" style:UIBarButtonItemStylePlain target:self action:@selector(addProgram:)];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addProgram:)];
-    // self.navigationItem.rightBarButtonItem = addButton;
+
+    // Uncomment the following line to preserve selection between presentations.
+    // self.clearsSelectionOnViewWillAppear = NO;
+ 
+    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
 
 - (void)viewDidUnload
@@ -104,30 +83,27 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    // Return the number of sections.
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [[ProgramStore defaultStore] count];
+    // Return the number of rows in the section.
+    return 0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"ProgramCell";
+    static NSString *CellIdentifier = @"ProgramCourseCell";
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
     // Configure the cell...
-    Program *p = [[ProgramStore defaultStore] programAtIndex:(NSUInteger) [indexPath row]];
-    if (p)
-    { // what race condition?
-        cell.textLabel.text = p.name;
-        cell.detailTextLabel.text = p.key; // [NSString stringWithFormat:@"%@", p.lastSyncDate];
-    }
+    
     return cell;
 }
 
@@ -139,7 +115,9 @@
     return YES;
 }
 */
+
 /*
+// Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
@@ -151,6 +129,7 @@
     }   
 }
 */
+
 /*
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
@@ -178,16 +157,6 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
-    Program *p = [[ProgramStore defaultStore] programAtIndex:indexPath.row];
-    ProgramViewController *pvc = [[ProgramViewController alloc] initWithProgram:p];
-    [self.navigationController pushViewController:pvc animated:YES];
-}
-
-- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL
-{
-    // NSLog(@"saveProgram:%@:%@", name, repoURL);
-    [[ProgramStore defaultStore] createProgram:name withRepoURL:repoURL];
-    [self.tableView reloadData];
 }
 
 @end

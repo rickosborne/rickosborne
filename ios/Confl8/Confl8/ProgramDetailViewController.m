@@ -6,20 +6,26 @@
 //
 
 #import "ProgramDetailViewController.h"
+#import "Program.h"
 
 @implementation ProgramDetailViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+- (id)initWithProgram:(Program *)program
 {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self)
+    if ((self = [super initWithNibName:nil bundle:nil]))
     {
+        _program = program;
         self.title = @"About";
         UILabel *titleLabel = [[UILabel alloc] initWithFrame:self.view.frame];
-        titleLabel.text = @"Test";
+        titleLabel.text = _program.repoURL;
         [self.view addSubview:titleLabel];
     }
     return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    return [self initWithProgram:nil];
 }
 
 - (void)didReceiveMemoryWarning

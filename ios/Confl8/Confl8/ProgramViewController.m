@@ -7,21 +7,31 @@
 
 #import "ProgramViewController.h"
 #import "ProgramDetailViewController.h"
+#import "ProgramCoursesViewController.h"
+#import "Program.h"
 
 @implementation ProgramViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+- (id)initWithProgram:(Program *)program
 {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self)
+    if ((self = [super initWithNibName:nil bundle:nil]))
     {
-        self.title = @"[Program]";
+        _program = program;
         tabs = [[UITabBarController alloc] init];
         tabs.view.frame = self.view.bounds;
-        [tabs setViewControllers:[NSArray arrayWithObject:[[ProgramDetailViewController alloc] init]]];
+        [tabs setViewControllers:[NSArray arrayWithObjects:
+            [[ProgramDetailViewController alloc] initWithProgram:program],
+            [[ProgramCoursesViewController alloc] initWithProgram:program],
+            nil
+        ]];
         [self.view addSubview:tabs.view];
     }
     return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    return [self initWithProgram:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -41,13 +51,18 @@
 }
 */
 
-/*
-// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    if (_program && _program.name && _program.name.length)
+    {
+        self.title = _program.name;
+    }
+    else
+    {
+        self.title = @"[Program]";
+    }
 }
-*/
 
 - (void)viewDidUnload
 {
