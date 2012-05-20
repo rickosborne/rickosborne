@@ -9,32 +9,57 @@
 
 @synthesize key, lastSyncDate, name, repoURL, repoBranch, repoSSHkey, repoPassword, repoUsername, acronym;
 
+static NSArray *programKeys = nil;
+
+- (NSMutableDictionary *)createMutableDictionary
+{
+	NSMutableDictionary *d = [NSMutableDictionary dictionary];
+	id val;
+	for (NSString *s in programKeys)
+	{
+		if ((val = [self valueForKey:s]))
+		{
+			[d setObject:val forKey:s];
+		}
+	}
+	return d;
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	[coder encodeObject:key forKey:@"key"];
-	[coder encodeObject:lastSyncDate forKey:@"lastSyncDate"];
-	[coder encodeObject:name forKey:@"name"];
-	[coder encodeObject:repoURL forKey:@"repoURL"];
-	[coder encodeObject:repoBranch forKey:@"repoBranch"];
-	[coder encodeObject:repoSSHkey forKey:@"repoSSHkey"];
-	[coder encodeObject:repoPassword forKey:@"repoPassword"];
-	[coder encodeObject:repoUsername forKey:@"repoUsername"];
-	[coder encodeObject:acronym forKey:@"acronym"];
+	for (NSString *s in programKeys)
+	{
+		[coder encodeObject:[self valueForKey:s] forKey:s];
+	}
+}
+
++ (void)initProgramKeys
+{
+	if (!programKeys)
+	{
+		programKeys = [NSArray arrayWithObjects:
+					   PROGRAM_KEY,
+					   PROGRAM_LASTSYNC,
+					   PROGRAM_NAME,
+					   PROGRAM_REPOURL,
+					   PROGRAM_BRANCH,
+					   PROGRAM_SSHKEY,
+					   PROGRAM_PASSWORD,
+					   PROGRAM_USERNAME,
+					   PROGRAM_ACRONYM,
+					   nil];
+	}
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-	if ((self = [super init]))
+	[Program initProgramKeys];
+	if (self != nil)
 	{
-		[self setKey:[decoder decodeObjectForKey:@"key"]];
-		[self setLastSyncDate:[decoder decodeObjectForKey:@"lastSyncDate"]];
-		[self setName:[decoder decodeObjectForKey:@"name"]];
-		[self setRepoURL:[decoder decodeObjectForKey:@"repoURL"]];
-		[self setRepoBranch:[decoder decodeObjectForKey:@"repoBranch"]];
-		[self setRepoSSHkey:[decoder decodeObjectForKey:@"repoSSHkey"]];
-		[self setRepoPassword:[decoder decodeObjectForKey:@"repoPassword"]];
-		[self setRepoUsername:[decoder decodeObjectForKey:@"repoUsername"]];
-		[self setAcronym:[decoder decodeObjectForKey:@"acronym"]];
+		for (NSString *s in programKeys)
+		{
+			[self setValue:[decoder decodeObjectForKey:s] forKey:s];
+		}
 	}
 	return self;
 }
@@ -49,6 +74,7 @@
 
 - (id)init
 {
+	[Program initProgramKeys];
     if ((self = [super init]))
     {
         self.lastSyncDate = [NSDate date];

@@ -163,7 +163,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSString *CellIdentifier = [@"ProgramAddCell" stringByAppendingString:((indexPath.section == 0) ? @"Name" : @"Repo")];
+    NSString *CellIdentifier = [@"ProgramAddCell" stringByAppendingString:[labels objectAtIndex:indexPath.section]];
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {

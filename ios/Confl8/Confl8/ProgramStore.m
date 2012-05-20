@@ -40,7 +40,7 @@ static ProgramStore *defaultStore = nil;
 	{
 		allPrograms = [[NSMutableArray alloc] init];
 	}
-}
+} // storeFileName	NSPathStore2 *	0x6b55da0
 
 + (ProgramStore *)defaultStore
 {
@@ -65,7 +65,7 @@ static ProgramStore *defaultStore = nil;
 
 - (void)reorderPrograms
 {
-    NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES];
+    NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:PROGRAM_NAME ascending:YES];
     NSArray *nameSorts = [[NSArray alloc] initWithObjects:nameSort, nil];
     [allPrograms sortUsingDescriptors:nameSorts];
 }
