@@ -7,7 +7,7 @@
 
 @implementation Program
 
-@synthesize key, lastSyncDate, name, repoURL, repoBranch, repoSSHkey, repoPassword, repoUsername;
+@synthesize key, lastSyncDate, name, repoURL, repoBranch, repoSSHkey, repoPassword, repoUsername, acronym;
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
@@ -19,6 +19,7 @@
 	[coder encodeObject:repoSSHkey forKey:@"repoSSHkey"];
 	[coder encodeObject:repoPassword forKey:@"repoPassword"];
 	[coder encodeObject:repoUsername forKey:@"repoUsername"];
+	[coder encodeObject:acronym forKey:@"acronym"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
@@ -33,11 +34,12 @@
 		[self setRepoSSHkey:[decoder decodeObjectForKey:@"repoSSHkey"]];
 		[self setRepoPassword:[decoder decodeObjectForKey:@"repoPassword"]];
 		[self setRepoUsername:[decoder decodeObjectForKey:@"repoUsername"]];
+		[self setAcronym:[decoder decodeObjectForKey:@"acronym"]];
 	}
 	return self;
 }
 
-- (NSString *)makeUUID
++ (NSString *)makeUUID
 {
     CFUUIDRef uuid = CFUUIDCreate(NULL);
     NSString *s = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
@@ -50,7 +52,7 @@
     if ((self = [super init]))
     {
         self.lastSyncDate = [NSDate date];
-        self.key = [self makeUUID];
+        self.key = [Program makeUUID];
     }
     return self;
 }

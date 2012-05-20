@@ -125,8 +125,8 @@
     Program *p = [[ProgramStore defaultStore] programAtIndex:(NSUInteger) [indexPath row]];
     if (p)
     { // what race condition?
-        cell.textLabel.text = p.name;
-        cell.detailTextLabel.text = p.key; // [NSString stringWithFormat:@"%@", p.lastSyncDate];
+        cell.textLabel.text = p.acronym;
+        cell.detailTextLabel.text = p.name; // [NSString stringWithFormat:@"%@", p.lastSyncDate];
     }
     return cell;
 }
@@ -183,10 +183,10 @@
     [self.navigationController pushViewController:pvc animated:YES];
 }
 
-- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL
+- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString *)acronym
 {
     // NSLog(@"saveProgram:%@:%@", name, repoURL);
-    [[ProgramStore defaultStore] createProgram:name withRepoURL:repoURL];
+    [[ProgramStore defaultStore] createProgram:name withRepoURL:repoURL withAcronym:acronym];
     [self.tableView reloadData];
 }
 

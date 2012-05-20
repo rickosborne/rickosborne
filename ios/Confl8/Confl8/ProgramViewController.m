@@ -54,9 +54,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    if (_program && _program.name && _program.name.length)
+    if (_program && _program.acronym && _program.acronym.length)
     {
-        self.title = _program.name;
+        self.title = _program.acronym;
     }
     else
     {

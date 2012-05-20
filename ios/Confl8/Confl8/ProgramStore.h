@@ -19,8 +19,8 @@
 + (ProgramStore *)defaultStore;
 
 - (NSArray *)allPrograms;
-- (Program *)createProgram;
-- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL;
+//- (Program *)createProgram;
+- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString *)acronym;
 - (NSUInteger)count;
 - (Program *)programAtIndex:(NSUInteger)index;
 

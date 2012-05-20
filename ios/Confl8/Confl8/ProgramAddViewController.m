@@ -19,9 +19,9 @@
 - (void)saveProgram:(id)sender
 {
     // NSLog(@"saveProgram:%@ %@", programName, repoURL);
-    if ((programName.length > 0) && (repoURL.length > 0))
+    if ((programName.length > 0) && (repoURL.length > 0) && (programAcronym.length > 0))
     {
-        [self.delegate saveProgram:programName withRepoURL:repoURL];
+        [self.delegate saveProgram:programName withRepoURL:repoURL withAcronym:programAcronym];
         [self.navigationController popViewControllerAnimated:YES];
     }
 }
@@ -38,7 +38,14 @@
 
 - (void)toggleSaveButton
 {
-    self.navigationItem.rightBarButtonItem.enabled = ((programName.length > 0) && (repoURL.length > 0));
+    self.navigationItem.rightBarButtonItem.enabled = ((programName.length > 0) && (repoURL.length > 0) && (programAcronym.length > 0));
+}
+
+- (void)acronymChange:(UITextField *)sender
+{
+	// NSLog(@"nameChange:%@ %@", sender.placeholder, sender.text);
+    programAcronym = sender.text;
+    [self toggleSaveButton];
 }
 
 - (void)nameChange:(UITextField *)sender
@@ -61,6 +68,7 @@
    {
        programName = @"";
        repoURL = @"";
+	   labels = [NSArray arrayWithObjects:@"Acronym", @"Name", @"Source URL", nil];
        self.title = @"New Program";
        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(saveProgram:)];
        [self toggleSaveButton];
@@ -130,12 +138,12 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-	return (section == 0) ? @"Name" : @"Source URL";
+	return [labels objectAtIndex:section];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 2;
+    return [labels count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -158,26 +166,32 @@
 	tf.autocorrectionType = UITextAutocorrectionTypeNo;
 	tf.clearButtonMode = UITextFieldViewModeWhileEditing;
 	tf.spellCheckingType = UITextSpellCheckingTypeNo;
-    
+    tf.tag = indexPath.section;
     // Configure the cell...
-	if (indexPath.section == 0)
-	{ // name
-		tf.placeholder = @"Example Film Program M.S.";
-		[tf addTarget:self action:@selector(nameChange:) forControlEvents:UIControlEventEditingChanged];
-		tf.autocapitalizationType = UITextAutocapitalizationTypeWords;
-		tf.keyboardType = UIKeyboardTypeDefault;
-		tf.tag = 0;
-		tf.returnKeyType = UIReturnKeyNext;
-	}
-    else
-	{ // repo
-		tf.placeholder = @"http://confl8.com/film/";
-		[tf addTarget:self action:@selector(repoChange:) forControlEvents:UIControlEventEditingChanged];
-        [tf addTarget:self action:@selector(doneEditing:) forControlEvents:UIControlEventEditingDidEndOnExit];
-		tf.autocapitalizationType = UITextAutocapitalizationTypeNone;
-		tf.keyboardType = UIKeyboardTypeURL;
-		tf.tag = 1;
-		tf.returnKeyType = UIReturnKeyDone;
+	switch (indexPath.section)
+	{
+		case 0: // acronym
+			tf.placeholder = @"ABC";
+			[tf addTarget:self action:@selector(acronymChange:) forControlEvents:UIControlEventEditingChanged];
+			tf.autocapitalizationType = UITextAutocapitalizationTypeAllCharacters;
+			tf.keyboardType = UIKeyboardTypeDefault;
+			tf.returnKeyType = UIReturnKeyNext;
+			break;
+		case 1: // name
+			tf.placeholder = @"Example Film Program M.S.";
+			[tf addTarget:self action:@selector(nameChange:) forControlEvents:UIControlEventEditingChanged];
+			tf.autocapitalizationType = UITextAutocapitalizationTypeWords;
+			tf.keyboardType = UIKeyboardTypeDefault;
+			tf.returnKeyType = UIReturnKeyNext;
+			break;
+		case 2: // repo
+			tf.placeholder = @"http://confl8.com/film/";
+			[tf addTarget:self action:@selector(repoChange:) forControlEvents:UIControlEventEditingChanged];
+			[tf addTarget:self action:@selector(doneEditing:) forControlEvents:UIControlEventEditingDidEndOnExit];
+			tf.autocapitalizationType = UITextAutocapitalizationTypeNone;
+			tf.keyboardType = UIKeyboardTypeURL;
+			tf.returnKeyType = UIReturnKeyDone;
+			break;
 	}
 	[cell.contentView addSubview:tf];
     return cell;

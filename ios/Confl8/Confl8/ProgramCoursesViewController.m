@@ -15,7 +15,7 @@
     if ((self = [super initWithStyle:UITableViewStylePlain]))
     {
         _program = program;
-        self.title = [NSString stringWithFormat:@"%@ Courses", _program.name];
+        self.title = @"Courses";
     }
     return self;
 }

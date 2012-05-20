@@ -56,12 +56,12 @@ static ProgramStore *defaultStore = nil;
     return allPrograms;
 }
 
-- (Program *)createProgram
-{
-    Program *p = [[Program alloc] init];
-    [allPrograms addObject:p];
-    return p;
-}
+//- (Program *)createProgram
+//{
+//    Program *p = [[Program alloc] init];
+//    [allPrograms addObject:p];
+//    return p;
+//}
 
 - (void)reorderPrograms
 {
@@ -70,11 +70,13 @@ static ProgramStore *defaultStore = nil;
     [allPrograms sortUsingDescriptors:nameSorts];
 }
 
-- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL
+- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString *)acronym;
 {
-    Program *p = [self createProgram];
-    p.name = [NSString stringWithString:name];
-    p.repoURL = [NSString stringWithString:repoURL];
+    Program *p = [[Program alloc] init];
+    p.name = [name copy];
+    p.repoURL = [repoURL copy];
+	p.acronym = [acronym copy];
+	[allPrograms addObject:p];
     [self reorderPrograms];
     [self saveStore];
     return p;
