@@ -19,10 +19,10 @@
 		B9A7896F156499F30043EDDA /* Confl8.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B9A7896D156499F30043EDDA /* Confl8.xcdatamodeld */; };
 		B9A7897F15649D3F0043EDDA /* ProgramListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897E15649D3F0043EDDA /* ProgramListViewController.m */; };
 		B9A7897F15649D3F0043EDDC /* Program.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDDB /* Program.m */; };
-		B9A7897F15649D3F0043EDDF /* ProgramViewController.m in Sources */ = {isa = PBXBuildFile; };
+		B9A7897F15649D3F0043EDDF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		B9A7897F15649D3F0043EDE3 /* ProgramViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDE2 /* ProgramViewController.m */; };
 		B9A7897F15649D3F0043EDE6 /* ProgramDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDE5 /* ProgramDetailViewController.m */; };
-		B9A7897F15649D3F0043EDE8 /* ProgramCoursesViewController.m in Sources */ = {isa = PBXBuildFile; };
+		B9A7897F15649D3F0043EDE8 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		B9A7897F15649D3F0043EDEC /* ProgramCoursesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A7897F15649D3F0043EDEB /* ProgramCoursesViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -202,10 +202,10 @@
 				B9812D661564B45E0052A202 /* ProgramStore.m in Sources */,
 				B9A7897F15649D3F0043EDDC /* Program.m in Sources */,
 				B9812D761564CE4B0052A202 /* ProgramAddViewController.m in Sources */,
-				B9A7897F15649D3F0043EDDF /* ProgramViewController.m in Sources */,
+				B9A7897F15649D3F0043EDDF /* (null) in Sources */,
 				B9A7897F15649D3F0043EDE3 /* ProgramViewController.m in Sources */,
 				B9A7897F15649D3F0043EDE6 /* ProgramDetailViewController.m in Sources */,
-				B9A7897F15649D3F0043EDE8 /* ProgramCoursesViewController.m in Sources */,
+				B9A7897F15649D3F0043EDE8 /* (null) in Sources */,
 				B9A7897F15649D3F0043EDEC /* ProgramCoursesViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -11,7 +11,7 @@
 
 @protocol ProgramAddDelegate <NSObject>
 @required
-- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString*)acronym;
+- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString*)acronym withUsername:(NSString *)username withPassword:(NSString *)password;
 @end
 
 @interface ProgramAddViewController : UITableViewController
@@ -21,6 +21,8 @@
     NSString *programName;
     NSString *repoURL;
 	NSArray *labels;
+	NSString *username;
+	NSString *password;
 }
 @property (nonatomic, assign) id<ProgramAddDelegate> delegate;
 

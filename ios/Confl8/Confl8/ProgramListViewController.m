@@ -183,10 +183,10 @@
     [self.navigationController pushViewController:pvc animated:YES];
 }
 
-- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString *)acronym
+- (void)saveProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString *)acronym withUsername:(NSString *)username withPassword:(NSString *)password
 {
     // NSLog(@"saveProgram:%@:%@", name, repoURL);
-    [[ProgramStore defaultStore] createProgram:name withRepoURL:repoURL withAcronym:acronym];
+    [[ProgramStore defaultStore] createProgram:name withRepoURL:repoURL withAcronym:acronym withUsername:username withPassword:password];
     [self.tableView reloadData];
 }
 

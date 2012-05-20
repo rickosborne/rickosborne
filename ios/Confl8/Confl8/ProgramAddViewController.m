@@ -21,7 +21,7 @@
     // NSLog(@"saveProgram:%@ %@", programName, repoURL);
     if ((programName.length > 0) && (repoURL.length > 0) && (programAcronym.length > 0))
     {
-        [self.delegate saveProgram:programName withRepoURL:repoURL withAcronym:programAcronym];
+        [self.delegate saveProgram:programName withRepoURL:repoURL withAcronym:programAcronym withUsername:username withPassword:password];
         [self.navigationController popViewControllerAnimated:YES];
     }
 }
@@ -48,6 +48,16 @@
     [self toggleSaveButton];
 }
 
+- (void)usernameChange:(UITextField *)sender
+{
+    username = sender.text;
+}
+
+- (void)passwordChange:(UITextField *)sender
+{
+    password = sender.text;
+}
+
 - (void)nameChange:(UITextField *)sender
 {
 	// NSLog(@"nameChange:%@ %@", sender.placeholder, sender.text);
@@ -68,7 +78,7 @@
    {
        programName = @"";
        repoURL = @"";
-	   labels = [NSArray arrayWithObjects:@"Acronym", @"Name", @"Source URL", nil];
+	   labels = [NSArray arrayWithObjects:@"Acronym", @"Name", @"Source URL", @"Source Username", @"Source Password", nil];
        self.title = @"New Program";
        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(saveProgram:)];
        [self toggleSaveButton];
@@ -167,6 +177,9 @@
 	tf.clearButtonMode = UITextFieldViewModeWhileEditing;
 	tf.spellCheckingType = UITextSpellCheckingTypeNo;
     tf.tag = indexPath.section;
+	tf.returnKeyType = UIReturnKeyNext;
+	tf.keyboardType = UIKeyboardTypeDefault;
+	tf.autocapitalizationType = UITextAutocapitalizationTypeNone;
     // Configure the cell...
 	switch (indexPath.section)
 	{
@@ -174,24 +187,31 @@
 			tf.placeholder = @"ABC";
 			[tf addTarget:self action:@selector(acronymChange:) forControlEvents:UIControlEventEditingChanged];
 			tf.autocapitalizationType = UITextAutocapitalizationTypeAllCharacters;
-			tf.keyboardType = UIKeyboardTypeDefault;
-			tf.returnKeyType = UIReturnKeyNext;
 			break;
 		case 1: // name
 			tf.placeholder = @"Example Film Program M.S.";
 			[tf addTarget:self action:@selector(nameChange:) forControlEvents:UIControlEventEditingChanged];
 			tf.autocapitalizationType = UITextAutocapitalizationTypeWords;
-			tf.keyboardType = UIKeyboardTypeDefault;
-			tf.returnKeyType = UIReturnKeyNext;
 			break;
 		case 2: // repo
 			tf.placeholder = @"http://confl8.com/film/";
 			[tf addTarget:self action:@selector(repoChange:) forControlEvents:UIControlEventEditingChanged];
-			[tf addTarget:self action:@selector(doneEditing:) forControlEvents:UIControlEventEditingDidEndOnExit];
-			tf.autocapitalizationType = UITextAutocapitalizationTypeNone;
 			tf.keyboardType = UIKeyboardTypeURL;
-			tf.returnKeyType = UIReturnKeyDone;
 			break;
+		case 3: // username
+			tf.placeholder = @"gwashington";
+			[tf addTarget:self action:@selector(usernameChange:) forControlEvents:UIControlEventEditingChanged];
+			break;
+		case 4: // password
+			tf.placeholder = @"cherry3";
+			tf.secureTextEntry = YES;
+			[tf addTarget:self action:@selector(passwordChange:) forControlEvents:UIControlEventEditingChanged];
+			break;
+	}
+	if (indexPath.section == labels.count - 1)
+	{
+		[tf addTarget:self action:@selector(doneEditing:) forControlEvents:UIControlEventEditingDidEndOnExit];
+		tf.returnKeyType = UIReturnKeyDone;
 	}
 	[cell.contentView addSubview:tf];
     return cell;

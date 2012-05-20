@@ -70,12 +70,14 @@ static ProgramStore *defaultStore = nil;
     [allPrograms sortUsingDescriptors:nameSorts];
 }
 
-- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString *)acronym;
+- (Program *)createProgram:(NSString *)name withRepoURL:(NSString *)repoURL withAcronym:(NSString *)acronym withUsername:(NSString *)username withPassword:(NSString *)password;
 {
     Program *p = [[Program alloc] init];
     p.name = [name copy];
     p.repoURL = [repoURL copy];
 	p.acronym = [acronym copy];
+	p.repoUsername = [username copy];
+	p.repoPassword = [password copy];
 	[allPrograms addObject:p];
     [self reorderPrograms];
     [self saveStore];
