@@ -15,6 +15,16 @@
 		B908A28F15714BBC00FE7074 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B908A28E15714BBC00FE7074 /* main.m */; };
 		B908A29315714BBC00FE7074 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B908A29215714BBC00FE7074 /* AppDelegate.m */; };
 		B908A29615714BBC00FE7074 /* arhatfso.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B908A29415714BBC00FE7074 /* arhatfso.xcdatamodeld */; };
+		B908A29F15714D0A00FE7074 /* LogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B908A29D15714D0A00FE7074 /* LogInViewController.m */; };
+		B908A2A015714D0A00FE7074 /* LogInViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B908A29E15714D0A00FE7074 /* LogInViewController.xib */; };
+		B908A2A41571508500FE7074 /* CourseListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B908A2A21571508500FE7074 /* CourseListViewController.m */; };
+		B908A2A51571508500FE7074 /* CourseListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B908A2A31571508500FE7074 /* CourseListViewController.xib */; };
+		B97DECC115718DE000BC5C73 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B97DECBF15718DE000BC5C73 /* HomeViewController.m */; };
+		B97DECC215718DE000BC5C73 /* HomeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B97DECC015718DE000BC5C73 /* HomeViewController.xib */; };
+		B97DECC7157192DF00BC5C73 /* GradesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B97DECC5157192DF00BC5C73 /* GradesViewController.m */; };
+		B97DECC8157192DF00BC5C73 /* GradesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B97DECC6157192DF00BC5C73 /* GradesViewController.xib */; };
+		B97DECCC1571938600BC5C73 /* MediaViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B97DECCA1571938600BC5C73 /* MediaViewController.m */; };
+		B97DECCD1571938600BC5C73 /* MediaViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B97DECCB1571938600BC5C73 /* MediaViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +40,21 @@
 		B908A29115714BBC00FE7074 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		B908A29215714BBC00FE7074 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		B908A29515714BBC00FE7074 /* arhatfso.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = arhatfso.xcdatamodel; sourceTree = "<group>"; };
+		B908A29C15714D0A00FE7074 /* LogInViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogInViewController.h; sourceTree = "<group>"; };
+		B908A29D15714D0A00FE7074 /* LogInViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogInViewController.m; sourceTree = "<group>"; };
+		B908A29E15714D0A00FE7074 /* LogInViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LogInViewController.xib; sourceTree = "<group>"; };
+		B908A2A11571508500FE7074 /* CourseListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CourseListViewController.h; sourceTree = "<group>"; };
+		B908A2A21571508500FE7074 /* CourseListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CourseListViewController.m; sourceTree = "<group>"; };
+		B908A2A31571508500FE7074 /* CourseListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CourseListViewController.xib; sourceTree = "<group>"; };
+		B97DECBE15718DE000BC5C73 /* HomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
+		B97DECBF15718DE000BC5C73 /* HomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
+		B97DECC015718DE000BC5C73 /* HomeViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HomeViewController.xib; sourceTree = "<group>"; };
+		B97DECC4157192DF00BC5C73 /* GradesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradesViewController.h; sourceTree = "<group>"; };
+		B97DECC5157192DF00BC5C73 /* GradesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GradesViewController.m; sourceTree = "<group>"; };
+		B97DECC6157192DF00BC5C73 /* GradesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GradesViewController.xib; sourceTree = "<group>"; };
+		B97DECC91571938600BC5C73 /* MediaViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaViewController.h; sourceTree = "<group>"; };
+		B97DECCA1571938600BC5C73 /* MediaViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaViewController.m; sourceTree = "<group>"; };
+		B97DECCB1571938600BC5C73 /* MediaViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MediaViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +105,21 @@
 			children = (
 				B908A29115714BBC00FE7074 /* AppDelegate.h */,
 				B908A29215714BBC00FE7074 /* AppDelegate.m */,
+				B908A29C15714D0A00FE7074 /* LogInViewController.h */,
+				B908A2A11571508500FE7074 /* CourseListViewController.h */,
+				B97DECBE15718DE000BC5C73 /* HomeViewController.h */,
+				B97DECBF15718DE000BC5C73 /* HomeViewController.m */,
+				B97DECC015718DE000BC5C73 /* HomeViewController.xib */,
+				B97DECC91571938600BC5C73 /* MediaViewController.h */,
+				B97DECCA1571938600BC5C73 /* MediaViewController.m */,
+				B97DECCB1571938600BC5C73 /* MediaViewController.xib */,
+				B97DECC4157192DF00BC5C73 /* GradesViewController.h */,
+				B97DECC5157192DF00BC5C73 /* GradesViewController.m */,
+				B97DECC6157192DF00BC5C73 /* GradesViewController.xib */,
+				B908A2A21571508500FE7074 /* CourseListViewController.m */,
+				B908A2A31571508500FE7074 /* CourseListViewController.xib */,
+				B908A29D15714D0A00FE7074 /* LogInViewController.m */,
+				B908A29E15714D0A00FE7074 /* LogInViewController.xib */,
 				B908A29415714BBC00FE7074 /* arhatfso.xcdatamodeld */,
 				B908A28915714BBC00FE7074 /* Supporting Files */,
 			);
@@ -148,6 +188,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				B908A28D15714BBC00FE7074 /* InfoPlist.strings in Resources */,
+				B908A2A015714D0A00FE7074 /* LogInViewController.xib in Resources */,
+				B908A2A51571508500FE7074 /* CourseListViewController.xib in Resources */,
+				B97DECC215718DE000BC5C73 /* HomeViewController.xib in Resources */,
+				B97DECC8157192DF00BC5C73 /* GradesViewController.xib in Resources */,
+				B97DECCD1571938600BC5C73 /* MediaViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,6 +206,11 @@
 				B908A28F15714BBC00FE7074 /* main.m in Sources */,
 				B908A29315714BBC00FE7074 /* AppDelegate.m in Sources */,
 				B908A29615714BBC00FE7074 /* arhatfso.xcdatamodeld in Sources */,
+				B908A29F15714D0A00FE7074 /* LogInViewController.m in Sources */,
+				B908A2A41571508500FE7074 /* CourseListViewController.m in Sources */,
+				B97DECC115718DE000BC5C73 /* HomeViewController.m in Sources */,
+				B97DECC7157192DF00BC5C73 /* GradesViewController.m in Sources */,
+				B97DECCC1571938600BC5C73 /* MediaViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +316,7 @@
 				B908A29B15714BBC00FE7074 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
