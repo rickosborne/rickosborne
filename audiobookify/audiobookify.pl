@@ -193,7 +193,8 @@ __PODHEAD__
 		if ($isWin) {
 			$safefile =~ s/"/""/g;
 		} else {
-			$safefile =~ s/'/'\\''/g;
+			# $safefile =~ s/'/'\\''/g;
+			$safefile =~ s/"/\\"/g;
 		}
 		print BAT1 '"' . $safefile . '" ';
 		unless($track->{'SKIP'}) {
@@ -228,7 +229,7 @@ __PODHEAD__
 		print BAT1 qq!"$apps\\MP4Box.exe" -rem 3 -chap "$parttitle.chap" "$parttitle.m4a"\n!;
 		print BAT1 qq!move "$parttitle.m4a" "$partname.m4b"\n!;
 	} else {
-		print BAT1 qq! | faac $encodeQuality --artist '$safeartist' --title '$safeparttitle' --genre 'Audiobook' --album '$safealbum' ! . ($splitcount > 1 ? qq!--disc '$splitnum/$splitcount' ! : '') . qq! --year '$year' --cover-art '$safecover' -o '$partnamees.m4a' -\n!;
+		print BAT1 qq! | faac $encodeQuality --artist '$safeartist' --title '$safeparttitle' --genre 'Audiobook' --album '$safealbum' ! . ($splitcount > 1 ? qq!--disc '$splitnum/$splitcount' ! : '') . ($performer eq "" ? "" : qq! --comment "Read by $performer"!) . qq! --year '$year' --cover-art '$safecover' -o '$partnamees.m4a' -\n!;
 		print BAT1 qq!mp4chaps -i '$partnamees.m4a'\n!;
 		print BAT1 qq!mv '$partnamees.m4a' '$partnamees.m4b'\n!;
 	}
@@ -337,7 +338,7 @@ sub splitTracksAtChapters {
 			}
 			print WRAP "\n";
 		}
-		print FASTER qq! | sox -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song "$safeTitle" "faster-$splitNum-$chapZero.mp3"\n!;
+		print FASTER qq! | sox --norm -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song "$safeTitle" "faster-$splitNum-$chapZero.mp3"\n!;
 		foreach my $track (@{$chapter}) {
 			print WRAP $cmdMove . qq! "! . escapeSingle($track->{'FILE'}) . qq!" wrapped\n!;
 			print FASTER $cmdMove . qq! "! . escapeSingle($track->{'FILE'}) . qq!" notempo\n!;
@@ -393,7 +394,7 @@ sub escapeSingle {
 	if ($isWin) {
 		$s =~ s/"/""/g;
 	} else {
-		$s =~ s/'/'\\''/g;
+		$s =~ s/"/\\"/g;
 	}
 #	$s =~ s/\(/\\(/g;
 #	$s =~ s/\)/\\)/g;
