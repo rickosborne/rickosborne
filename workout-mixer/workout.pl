@@ -17,6 +17,7 @@ my $cutoff = 15;
 my $bitrate = 128;
 my $artist = '';
 my $year = (localtime())[5] + 1900;
+my $image = '';
 
 GetOptions(
     'library=s' => \$libraryPath,
@@ -26,7 +27,8 @@ GetOptions(
     'reject=s'  => \$rejectFilter,
     'artist=s'  => \$artist,
     'bitrate=i' => \$bitrate,
-    'cutoff=i'  => \$cutoff,  
+    'cutoff=i'  => \$cutoff,
+    'image=s'   => \$image,
     'verbose'   => \$verbose
 );
 
@@ -41,7 +43,7 @@ my $playlist = buildPlaylist(\@sequence, $songCache);
 my $songN = 0;
 my $wavFiles = '';
 open(CHAP,">$outputTitle.chapters.txt");
-open(FAAC,"| faac -b $bitrate -o '$outputTitle.m4a' --title '$outputTitle' --artist '$artist' --year $year -s -");
+open(FAAC,"| faac -b $bitrate -o '$outputTitle.m4a' --title '$outputTitle' --artist '$artist' --year $year -s " . (($image ne '') && (-f $image) ? "--cover-art '$image' " : '') . '-');
 select(FAAC); $|=1; select(STDOUT);
 my $place = 0;
 my $type = 'wav';
@@ -95,7 +97,9 @@ sub formatMS {
 sub buildPlaylist {
     my ($sequence, $songs) = @_;
     my @playlist = ();
+    my $totalSegments = 0;
     foreach my $segment (@$sequence) {
+        $totalSegments++;
         my $msTarget = $segment->{'seconds'} * 1000;
         my $ms = 0;
         my $minPace = $segment->{'inMin'};
@@ -106,6 +110,7 @@ sub buildPlaylist {
         my $paceRange = $finishPace - $startPace;
         while ($ms < $msTarget) {
             my $song = nextSongForPace($minPace, $maxPace, $songs);
+            bail("Ran out of songs for pace $minPace-$maxPace, $totalSegments @ " . formatMS($ms)) unless($song);
             $song->{'tempo'} = ($startPace eq '*') ? 1 : ($startPace + (($ms / $msTarget) * $paceRange)) / $song->{'pace'};
             $ms += $song->{'ms'} / $song->{'tempo'};
             push @parts, $song;
@@ -124,7 +129,6 @@ sub nextSongForPace {
     my $key = $minPace . '-' . $maxPace;
     bail("Something weird happened with the pace $minPace/$maxPace") unless (defined($songs->{$key}));
     my $song = shift(@{$songs->{$key}});
-    bail("Ran out of songs for pace $key") unless($song);
     return $song;
 } # nextSongForPace
 
@@ -134,8 +138,8 @@ sub cacheSongsForSequence {
     foreach my $segment (@$sequence) {
         my $key = $segment->{'inMin'} . '-' . $segment->{'inMax'};
         unless (defined($cache{$key})) {
-            debug("Songs for pace: $key");
             my $songs = getSongsForPaceRange($segment->{'inMin'}, $segment->{'inMax'});
+            debug("Songs for pace: $key, " . scalar(@$songs));
             $cache{$key} = $songs;
         }
     }
@@ -170,12 +174,12 @@ sub filterSong {
     my ($song) = @_;
     if (($acceptFilter eq '') && ($rejectFilter eq '')) { return 1; }
     if ($rejectFilter ne '') {
-        if (($song->album() =~ /$rejectFilter/i)
+        if (($song->album() && ($song->album() =~ /$rejectFilter/i))
          || ($song->name() =~ /$rejectFilter/i)
          || ($song->artist() =~ /$rejectFilter/i)) { return 0; }
     }
     if ($acceptFilter ne '') {
-        if (($song->album() =~ /$acceptFilter/i)
+        if (($song->album() && ($song->album() =~ /$acceptFilter/i))
          || ($song->name() =~ /$acceptFilter/i)
          || ($song->artist() =~ /$acceptFilter/i)) { return 1; }
         return 0;
