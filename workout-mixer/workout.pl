@@ -19,9 +19,20 @@ GetOptions(
 );
 
 my @sequence = sequenceFromMix($mix);
+my $songCache = cacheSongsForSequence(\@sequence);
 print Dumper(\@sequence);
 
 exit(0);
+
+sub cacheSongsForSequence {
+    my (@sequence) = @_;
+    my %cache;
+    foreach my $segment (@sequence) {
+        my $key = $segment->{'inStart'} . '-' . $segment->{'inFinish'};
+        debug("Key: $key");
+    }
+    return \%cache;
+}
 
 sub getLibrary {
     unless ($library) {
