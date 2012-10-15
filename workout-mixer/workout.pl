@@ -18,6 +18,8 @@ my $bitrate = 128;
 my $artist = '';
 my $year = (localtime())[5] + 1900;
 my $image = '';
+my $album = '';
+my $overlap = 3000;
 
 GetOptions(
     'library=s' => \$libraryPath,
@@ -26,9 +28,11 @@ GetOptions(
     'accept=s'  => \$acceptFilter,
     'reject=s'  => \$rejectFilter,
     'artist=s'  => \$artist,
+    'album=s'   => \$album,
     'bitrate=i' => \$bitrate,
     'cutoff=i'  => \$cutoff,
     'image=s'   => \$image,
+    'overlap=i' => \$overlap,
     'verbose'   => \$verbose
 );
 
@@ -43,47 +47,76 @@ my $playlist = buildPlaylist(\@sequence, $songCache);
 my $songN = 0;
 my $wavFiles = '';
 open(CHAP,">$outputTitle.chapters.txt");
-open(FAAC,"| faac -b $bitrate -o '$outputTitle.m4a' --title '$outputTitle' --artist '$artist' --year $year -s " . (($image ne '') && (-f $image) ? "--cover-art '$image' " : '') . '-');
-select(FAAC); $|=1; select(STDOUT);
+# open(FAAC,"| faac -b $bitrate -o '$outputTitle.m4a' --title '$outputTitle' --artist '$artist' --year $year -s " . (($image ne '') && (-f $image) ? "--cover-art '$image' " : '') . '-');
+# select(FAAC); $|=1; select(STDOUT);
 my $place = 0;
-my $type = 'wav';
+my $wavCount = 0;
 foreach my $song (@{$playlist}) {
     $songN++;
     my $artist = $song->{'artist'};
     my $title = $song->{'title'};
     my $album = $song->{'album'};
     my $tempo = $song->{'tempo'};
-    my $invTempo = 1.0 / $tempo;
     my $path = $song->{'path'};
     my $pace = $song->{'pace'};
     my $cut = $song->{'cut'};
     my $ms = $song->{'ms'};
-    my $startMS = int(($ms - $cut) / 2);
-    my $finishMS = $ms - $startMS;
-    my $startTime = formatMS($startMS);
-    my $finishTime = formatMS($finishMS);
-    debug("Song: $title $pace, $tempo, " . formatMS($cut) . " > " . formatMS($cut / $tempo));
+    my $newPace = $pace * $tempo;
+    # debug("Song: $title $pace > $newPace, " . formatMS($cut) . " > " . formatMS($cut / $tempo));
     # my $file = "'$tempDir/$songN.wav'";
     # $wavFiles .= " $file";
+    my ($soxLine, $startMS, $finishMS, $startTime, $finishTime);
     my $index = formatMS($place);
-    # print qq!sox --norm "$path" -t wav -c 2 -r 44100 -b 16 - trim =$startTime =$finishTime | sox -t wav - -t $type -c 2 -r 44100 -b 16 - tempo -m $tempo |!; # tempo -m $tempo
-    open(SOX, qq!sox -q -V0 --norm "$path" -t $type -c 2 -r 44100 -b 16 - trim =$startTime =$finishTime tempo -m $tempo |!); # tempo -m $tempo
-    select(SOX); $|=1; select(STDOUT);
-    while(<SOX>) { print FAAC; }
-    close(SOX);
+    $startMS = int(($ms - ($cut + ($songN == 1 ? 0 : $overlap))) / 2);
+    if ($startMS < 0) { $startMS = 0; }
+    $finishMS = $ms - $startMS;
+    $startTime = formatMS($startMS);
+    $finishTime = formatMS($finishMS);
+    my $clipTime = formatMS(($finishMS - $startMS) / $tempo);
+    debug("Song: $pace > $newPace : $clipTime : $title");
+    #$wavCount++;
+    #my $wavFile = ($songN == 1 ? '1.wav' : '2.wav');
+    #system(qq!sox -V0 --norm "$path" -t wav $wavFile trim =$startTime =$finishTime tempo -m $tempo!);
+    #if ($songN > 1) {
+    #    $finishTime = trim(`soxi -D 1.wav`);
+    #    debug("Crossfade: $finishTime");
+    #    system(qq!sox -V0 --norm 1.wav 2.wav 0.wav splice -q $finishTime,! . ($overlap / 1000));
+    #    unlink("1.wav");
+    #    unlink("2.wav");
+    #    rename("0.wav", "1.wav");
+    #}
+    #
+    if (($songN > 1) && ($overlap > 0)) {
+        my $nextWav = $wavCount + 1;
+        my $clipMS = (($finishMS - $startMS) / 8);
+        if ($clipMS < 12000) { $clipMS = 12000; }
+        my $nextFinish = $startMS + $clipMS;
+        my $nextFinishTime = formatMS($nextFinish);
+        my $prevFinishTime = trim(`soxi -D $wavCount.wav`);
+        debug("Crossfade Trim: $clipMS");
+        system(qq!sox -V0 --norm "$path" -t wav fadeIn.wav trim =$startTime =$nextFinishTime tempo -m $tempo!);
+        debug("Crossfade: $prevFinishTime");
+        system(qq!sox -V0 --norm $wavCount.wav fadeIn.wav 0.wav splice -q $prevFinishTime,! . ($overlap / 1000));
+        unlink("fadeIn.wav");
+        unlink("$wavCount.wav");
+        rename("0.wav", "$wavCount.wav");
+        $startMS = $nextFinish;
+        $startTime = formatMS($startMS);
+    }
+    $wavCount++;
+    system(qq!sox -V0 --norm "$path" -t wav $wavCount.wav trim =$startTime =$finishTime tempo -m $tempo!);
+    #
     print CHAP "CHAPTER$songN=$index\nCHAPTER${songN}NAME=$artist / $album / $title\n";
     $place += int($cut / $tempo);
-    $type = 'raw';
 }
-close(FAAC);
+# close(FAAC);
 close(CHAP);
-# system("play -t wav $wavFiles - | faac -b $bitrate -o '$tempDir/$outputTitle.m4a' -");
+my $faacLine = "sox -V0 ";
+for(my $wavN = 1; $wavN <= $wavCount; $wavN++) { $faacLine .= "$wavN.wav "; }
+system("$faacLine  -t wav -c 2 -b 16 -r 44100 - | faac -b $bitrate -o '$outputTitle.m4a' --title '$outputTitle' --artist '$artist' --album '$album' --year $year -s " . (($image ne '') && (-f $image) ? "--cover-art '$image' " : '') . ' -');
+for(my $wavN = 1; $wavN <= $wavCount; $wavN++) { unlink("$wavN.wav"); }
 system("mp4chaps -i '$outputTitle.m4a'");
-# for (my $i = 0; $i <= $songN; $i++) {
-#    unlink("$tempDir/$i.wav");
-#}
 unlink("$outputTitle.chapters.txt");
-#unlink($tempDir);
 exit(0);
 
 sub formatMS {
@@ -98,6 +131,7 @@ sub buildPlaylist {
     my ($sequence, $songs) = @_;
     my @playlist = ();
     my $totalSegments = 0;
+    my $songN = 0;
     foreach my $segment (@$sequence) {
         $totalSegments++;
         my $msTarget = $segment->{'seconds'} * 1000;
@@ -117,7 +151,8 @@ sub buildPlaylist {
         }
         my $scale = $msTarget / $ms;
         foreach my $part (@parts) {
-            $part->{'cut'} = int($part->{'ms'} * $scale);
+            $songN++;
+            $part->{'cut'} = int(($part->{'ms'} + ($songN > 1 ? $overlap : 0)) * $scale);
             push @playlist, $part;
         }
     }
