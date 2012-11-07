@@ -6,7 +6,7 @@ use Mac::iTunes::Library::XML;
 use strict;
 
 my $libraryPath = $ENV{'HOME'} . '/Music/iTunes/iTunes Music Library.xml';
-my $mix = '30'; # '5@130-150:140-150;20@150-165:160;5@130-150:150-140'
+my $mix = '30@*:*'; # '5@130-150:140-150;20@150-165:160;5@130-150:150-140'
 my $tempDir = '__workout_temp__';
 my $outputTitle = 'workout';
 my $verbose = '';
@@ -20,6 +20,7 @@ my $year = (localtime())[5] + 1900;
 my $image = '';
 my $album = '';
 my $overlap = 3000;
+my $help = 0;
 
 GetOptions(
     'library=s' => \$libraryPath,
@@ -33,8 +34,102 @@ GetOptions(
     'cutoff=i'  => \$cutoff,
     'image=s'   => \$image,
     'overlap=i' => \$overlap,
-    'verbose'   => \$verbose
+    'verbose'   => \$verbose,
+    'help'      => \$help
 );
+
+if ($help) {
+    print<<__HELP__;
+Workout Mixer by Rick Osborne
+
+Input Options:
+  --library 'path'    Path to your iTunes Library XML
+      Default: ${libraryPath}
+  --reject 'regex'    Match and reject tracks on Album, Artist, Title
+      Note: the default state is 'allow all'
+  --accept 'regex'    Match and accept (overridden by reject)
+      Note: using --accept sets up 'reject by default' state
+  --cutoff nn         Reject tracks longer than nn minutes, default: $cutoff
+  --overlap nnnn      Crossfade between tracks in ms, default: $overlap
+  --mix 'mixspec'     See the MIX SPECS section below.
+
+Output Options:
+  --title 'title'     The Title of the output MP4
+  --artist 'artist'   etc.
+  --album 'album'     etc.
+  --image 'path'      Cover art (preferably JPEG)
+  --bitrate nn        Bitrate in kbps, default: $bitrate
+
+Misc. Options:
+  --verbose           Prattle on about minutia
+  --help              This lovely text
+
+Mix Specs:
+  Mix specifications are semicolon (;) delimited strings detailing a series
+  of workout segments.  Each segment consists of:
+  
+    * Duration
+    * Input tempo range (BPM)
+    * Output tempo range
+    
+  For example, a segment might define 15 minutes at a 160bpm tempo mixed from
+  songs with an original tempo between 120 and 140 bpm.  An entire workout
+  can combine any number of segments, each with its own duration and tempos.
+
+  Each segment is in the format "dd\@tt" with ";" between segments, like so:
+    "dd\@tt;dd\@tt;dd\@tt"
+
+  The duration ("dd") parameter is a whole number that defaults to minutes
+  but can be specified in seconds, minutes, or hours with a "s", "m", or "h"
+  suffix.  For example: "45m", "90s" or "1h".
+  
+  The tempo ("tt") parameter defaults to "*" which then does not perform any
+  tempo adjustment.  Otherwise, tempo should be in an "aa:bb" format, where
+  "aa" is the input tempo range and "bb" is the output tempo range.  Each
+  range may be a single number, such as "145", or a range with a minimum and
+  maximum, such as "120-140".
+  
+  The input ("aa") filters tracks to reject those outside that BPM range.
+  
+  The output ("bb") specifies the target BPM to which the tracks will be
+  adjusted.  If this is a single number, such as "165", then all tracks in
+  that segment will be adjusted to match that tempo.  Ranges such as "160-140"
+  specify the starting and ending BPM for that segment.  Tracks will be
+  adjusted to match that range according to where they fall in the segment.
+  
+  If no output tempo is specified then no adjusment is performed.
+  
+  Examples:
+  
+    '10\@160'  (shorthand for: '10m\@160:*')
+    10 minutes of tracks with an original BPM of 160; no tempo adjustment.
+    
+    '10\@145-165'  (shorthand for: "10m\@145-165:*')
+    The same as before, but the input BPM is between 145 and 165.
+    
+    '10\@145-165:160'  (shorthand for: '10m\@145-165:160')
+    Like the last, but tempo-adjust the tracks to 160bpm.
+    
+    '10\@145-165:160-180'  (shorthand for: '10m\@145-165:160-180')
+    Like the last, but tempo-adjust the tracks to begin the segment at 160bpm
+    and end the segment at 180bpm.
+    
+    '1h'  (shorthand for: '1h\@*:*')
+    One hour of tracks of any original BPM, not tempo-adjusted.
+    
+    '10m\@*:160;25\@*:170;5\@*:160'
+    A 3-segment workout:
+      10-minute warmup, tempo-adjusted to 160bpm
+      25-minute workout, tempo-adjusted to 170bpm
+      5-minute cooldown, tempo-adjusted to 160bpm
+
+    '10m\@110-170:160;25\@120-180:170;5\@110-170:160'
+    The same as before, but filtering out tracks that would be too slow or
+    too fast and might not sound good when tempo-adjusted.  (Subjective!)
+
+__HELP__
+    exit(-1);
+}
 
 my @sequence = sequenceFromMix($mix);
 # print Dumper(\@sequence);
@@ -97,7 +192,6 @@ foreach my $song (@{$playlist}) {
     $place += 1000 * trim(`soxi -D $wavCount.wav`);
 }
 my $faacLine = "sox -V0 ";
-my $place = 0;
 open(CHAP,">$outputTitle.chapters.txt");
 for(my $wavN = 1; $wavN <= $wavCount; $wavN++) {
     $faacLine .= "$wavN.wav ";
@@ -134,7 +228,7 @@ sub buildPlaylist {
         my $startPace = $segment->{'outStart'};
         my $finishPace = $segment->{'outFinish'};
         my @parts = ();
-        my $paceRange = $finishPace - $startPace;
+        my $paceRange = ($startPace eq $finishPace) ? 0 : $finishPace - $startPace;
         while ($ms < $msTarget) {
             my $song = nextSongForPace($minPace, $maxPace, $songs);
             bail("Ran out of songs for pace $minPace-$maxPace, $totalSegments @ " . formatMS($ms)) unless($song);
