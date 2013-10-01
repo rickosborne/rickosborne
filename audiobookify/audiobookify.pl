@@ -54,7 +54,7 @@ GetOptions(
 	"year=i"      => \$year
 );
 @splitats = split(',', join(',', @splitats));
-if (($quality == 0) and ($bitrate == 0)) { $bitrate = 32; }
+if (($quality == 0) and ($bitrate == 0)) { $bitrate = 48; }
 if (($quality < 1) or ($quality > 100)) { $quality = 80; }
 if ($bitrate > 0) { $encodeQuality = "-b $bitrate"; }
 else { $encodeQuality = "-q $quality"; }
@@ -192,11 +192,12 @@ __PODHEAD__
 		my $safefile = $track->{'FILE'};
 		if ($isWin) {
 			$safefile =~ s/"/""/g;
+			print BAT1 '"' . $safefile . '" ';
 		} else {
 			# $safefile =~ s/'/'\\''/g;
-			$safefile =~ s/"/\\"/g;
+			# $safefile =~ s/"/\\"/g;
+			print BAT1 bashEscapeSingle($safefile) . ' ';
 		}
-		print BAT1 '"' . $safefile . '" ';
 		unless($track->{'SKIP'}) {
 			if ($isWin) {
 				print POD "[Editpoint_$tracknum]\nstart=$index\nchapter=$title\ntitle=$title\n\n";
@@ -229,9 +230,9 @@ __PODHEAD__
 		print BAT1 qq!"$apps\\MP4Box.exe" -rem 3 -chap "$parttitle.chap" "$parttitle.m4a"\n!;
 		print BAT1 qq!move "$parttitle.m4a" "$partname.m4b"\n!;
 	} else {
-		print BAT1 qq! | faac $encodeQuality --artist '$safeartist' --title '$safeparttitle' --genre 'Audiobook' --album '$safealbum' ! . ($splitcount > 1 ? qq!--disc '$splitnum/$splitcount' ! : '') . ($performer eq "" ? "" : qq! --comment "Read by $performer"!) . qq! --year '$year' --cover-art '$safecover' -o '$partnamees.m4a' -\n!;
-		print BAT1 qq!mp4chaps -i '$partnamees.m4a'\n!;
-		print BAT1 qq!mv '$partnamees.m4a' '$partnamees.m4b'\n!;
+		print BAT1 qq! | faac $encodeQuality --artist ! . bashEscapeSingle($artist) . ' --title ' . bashEscapeSingle($parttitle) . " --genre 'Audiobook' --album " . bashEscapeSingle($album) . ($splitcount > 1 ? qq! --disc '$splitnum/$splitcount' ! : '') . ($performer eq "" ? "" : qq! --comment ! . bashEscapeSingle("Read by $performer")) . qq! --year '$year' --cover-art ! . bashEscapeSingle($safecover) . ' -o ' . bashEscapeSingle("$partname.m4a") . " -\n";
+		print BAT1 qq!mp4chaps -i ! . bashEscapeSingle("$partname.m4a") . "\n";
+		print BAT1 qq!mv ! . bashEscapeSingle("$partname.m4a") . " " . bashEscapeSingle("$partname.m4b") . "\n";
 	}
 	print "\tTotal Time: " . secs2index($offset) . "\n";
 }
@@ -243,7 +244,7 @@ if ($isWin) {
 close(BAT1);
 
 unless ($isWin) {
-	system(qq!chmod +x 'Encode ! . escapeSingle($parentdir) . qq!.sh'!);
+	system(qq!chmod +x ! . bashEscapeSingle("Encode $parentdir.sh"));
 	system(qq!chmod +x 'Faster Chapters.sh'!);
 	system(qq!chmod +x 'Wrap Chapters.sh'!);
 }
@@ -325,23 +326,26 @@ sub splitTracksAtChapters {
 		}
 		$counts->[-1]++;
 		my $chapZero = substr("00$chapterNum", -2);
-		my $safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
+		my $safeTitle = bashEscapeSingle($chapter->[0]->{'TITLE'});
+		if ($isWin) {
+			$safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
+		}
 		print FASTER qq!\necho "Adjusting tempo for $safeTitle"\nmadplay -q -o wave:- !;
 		if (scalar(@{$chapter}) == 1) {
-			print WRAP $cmdCopy . ' "' . escapeSingle($chapter->[0]->{'FILE'}) . qq!" "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
-			print FASTER ' "' . escapeSingle($chapter->[0]->{'FILE'}) . '"';
+			print WRAP $cmdCopy . ' ' . bashEscapeSingle($chapter->[0]->{'FILE'}) . qq! "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
+			print FASTER ' ' . bashEscapeSingle($chapter->[0]->{'FILE'});
 		} elsif (scalar(@{$chapter}) > 1) {
 			print WRAP qq!$mp3wrap "$splitNum-$chapZero"!;
 			foreach my $track (@{$chapter}) {
-				print WRAP ' "' . escapeSingle($track->{'FILE'}) . '"';
-				print FASTER ' "' . escapeSingle($track->{'FILE'}) . '"';
+				print WRAP ' ' . bashEscapeSingle($track->{'FILE'});
+				print FASTER ' ' . bashEscapeSingle($track->{'FILE'});
 			}
 			print WRAP "\n";
 		}
-		print FASTER qq! | sox --norm -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song "$safeTitle" "faster-$splitNum-$chapZero.mp3"\n!;
+		print FASTER qq! | sox --norm -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song $safeTitle "faster-$splitNum-$chapZero.mp3"\n!;
 		foreach my $track (@{$chapter}) {
-			print WRAP $cmdMove . qq! "! . escapeSingle($track->{'FILE'}) . qq!" wrapped\n!;
-			print FASTER $cmdMove . qq! "! . escapeSingle($track->{'FILE'}) . qq!" notempo\n!;
+			print WRAP $cmdMove . qq! ! . bashEscapeSingle($track->{'FILE'}) . qq! wrapped\n!;
+			print FASTER $cmdMove . qq! ! . bashEscapeSingle($track->{'FILE'}) . qq! notempo\n!;
 		}
 		my $wrapFile = "$splitNum-${chapZero}.mp3";
 		print WRAP $cmdMove . qq! "$splitNum-${chapZero}_MP3WRAP.mp3" "$wrapFile"\n!;
@@ -349,8 +353,8 @@ sub splitTracksAtChapters {
 			print WRAP qq!"$apps\\tag.exe" --remove "$wrapFile"\n!;
 			print WRAP qq!"$apps\\tag.exe" --title "$safeTitle" "$wrapFile"\n!;
 		} else {
-			print WRAP qq!id3v2 --delete-all '$wrapFile'\n!;
-			print WRAP qq!id3v2 --song '$safeTitle' '$wrapFile'\n!;
+			print WRAP qq!id3v2 --delete-all ! . bashEscapeSingle($wrapFile) . "\n";
+			print WRAP qq!id3v2 --song $safeTitle ! . bashEscapeSingle($wrapFile) . "\n";
 		}
 	} # foreach chapter
 	print WRAP "$cmdMove Encode*.* wrapped\n$cmdMove *.csv wrapped\n$cmdMove *.pod wrapped\n";
@@ -387,6 +391,18 @@ sub leadzero {
 	my ($n) = @_;
 	return($n > 9 ? $n : '0' . $n);
 } # leadzero
+
+sub bashEscapeSingle {
+	my ($s) = @_;
+	return($s) unless(defined($s));
+	if (($s =~ /'/) and ($s =~ /"/)) {
+		$s =~ s/'/'"'"'/g;
+		return "'$s'";
+	} elsif ($s =~ /'/) {
+		return qq!"$s"!;
+	}
+	return "'$s'";
+}
 
 sub escapeSingle {
 	my ($s) = @_;
