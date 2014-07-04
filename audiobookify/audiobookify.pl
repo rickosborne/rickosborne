@@ -35,6 +35,7 @@ my $album = '';
 my $artist = '';
 my $year = '';
 my $verbose = 0;
+my $titleStrip = '';
 # my ($termCols, $termRows) = chars();
 my ($termCols, $termRows) = (80, 20);
 my ($termTrack, $termTime) = (4, 12);
@@ -51,7 +52,8 @@ GetOptions(
 	"bitrate=i"   => \$bitrate,
 	"album=s"     => \$album,
 	"artist=s"    => \$artist,
-	"year=i"      => \$year
+	"year=i"      => \$year,
+	"stripre=s"   => \$titleStrip
 );
 @splitats = split(',', join(',', @splitats));
 if (($quality == 0) and ($bitrate == 0)) { $bitrate = 48; }
@@ -180,6 +182,7 @@ __PODHEAD__
 	my $title = '';
 	foreach my $track (@{$part}) {
 		$title = $track->{'TITLE'};
+		$title =~ s/$titleStrip// if ($titleStrip);
 		unless($title || $track->{'SKIP'}) { $title = 'Disc ' . $track->{'ORDER'}; }
 		$tracknum++ unless($track->{'SKIP'});
 		$realnum++;
