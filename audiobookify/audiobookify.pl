@@ -19,7 +19,7 @@ my $mp3wrap = ($isWin ? qq!"$apps\\mp3wrap.exe"! : 'mp3wrap');
 my $cmdCopy = ($isWin ? 'copy' : 'cp');
 my $cmdMove = ($isWin ? 'move' : 'mv');
 my @files = sort(<*.mp3>);
-my $maxseconds = 60 * 60 * 5.5;
+my $maxseconds = 60 * 60 * 4.25;
 my @images = sort(<*.jpg>);  unless(scalar(@images)) { die "Need a cover image!"; }
 my $cover = pop(@images);
 my $margin = 1.05;
@@ -172,7 +172,7 @@ catg=music
 
 __PODHEAD__
 	} else {
-		print BAT1 qq!madplay -q -o wave:- !;
+		print BAT1 qq!part${splitnum}() {\n\tmadplay -q -o wave:- !;
 		open(CHAP,">$partname.chapters.txt");
 	}
 	my $tracknum = 0;
@@ -234,15 +234,23 @@ __PODHEAD__
 		print BAT1 qq!move "$parttitle.m4a" "$partname.m4b"\n!;
 	} else {
 		print BAT1 qq! | faac $encodeQuality --artist ! . bashEscapeSingle($artist) . ' --title ' . bashEscapeSingle($parttitle) . " --genre 'Audiobook' --album " . bashEscapeSingle($album) . ($splitcount > 1 ? qq! --disc '$splitnum/$splitcount' ! : '') . ($performer eq "" ? "" : qq! --comment ! . bashEscapeSingle("Read by $performer")) . qq! --year '$year' --cover-art ! . bashEscapeSingle($safecover) . ' -o ' . bashEscapeSingle("$partname.m4a") . " -\n";
-		print BAT1 qq!mp4chaps -i ! . bashEscapeSingle("$partname.m4a") . "\n";
-		print BAT1 qq!mv ! . bashEscapeSingle("$partname.m4a") . " " . bashEscapeSingle("$partname.m4b") . "\n";
+		print BAT1 qq!\tmp4chaps -i ! . bashEscapeSingle("$partname.m4a") . "\n";
+		print BAT1 qq!\tmv ! . bashEscapeSingle("$partname.m4a") . " " . bashEscapeSingle("$partname.m4b") . "\n";
+		print BAT1 qq!}\n!;
 	}
 	print "\tTotal Time: " . secs2index($offset) . "\n";
 }
 if ($isWin) {
 	print BAT1 qq!\nmove *.m4b q:\\Audiobooks\\\n!;
 } else {
-	print BAT1 qq!mv *.m4b ~/Audiobooks/\n!;
+	foreach my $part (1..$splitnum) {
+		if ($part > 1) {
+			print BAT1 ' & ';
+		}
+		print BAT1 qq!part${part}!;
+		
+	}
+	print BAT1 qq!\nwait\nmv *.m4b ~/Audiobooks/\n!;
 }
 close(BAT1);
 
