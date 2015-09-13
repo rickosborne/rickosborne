@@ -1,0 +1,115 @@
+#!/bin/bash
+
+source helpers.sh
+
+VFILTERS=""
+DURATION_DEFAULT="60.0"
+FRAMERATE_DEFAULT="30"
+DRY_RUN=""
+FRAMERATE="$FRAMERATE_DEFAULT"
+DURATION="$DURATION_DEFAULT"
+CROP=""
+ROTATE=""
+SRC_FILE=""
+TITLE=""
+WIDTH=""
+DEST_X=""
+DEST_Y=""
+
+function usage {
+    THIS_SCRIPT=$(basename "$0")
+    echo -e "$PROSPER_ICON Usage: $THIS_SCRIPT (video) (title)"
+    echo -e "     video    Path to the source video file"
+    echo -e "     title    Title of the destination video file (no extension)"
+    echo -e "   Options:"
+    echo -e "     -d|--dry-run          Don't actually do anything, just pretend"
+    echo -e "     -c|--crop (w:h:x:y)   Crop, in the format w:h:x:y (default: none)"
+    echo -e "     -f|--framerate (fps)  Framerate in FPS (default: $FRAMERATE_DEFAULT)"
+    echo -e "     -r|--rotate (deg)     Rotation in degrees (default: none)"
+    echo -e "     -s|--seconds (sec)    Squeeze down to # seconds (default: $DURATION_DEFAULT)"
+    echo -e "     -w|--width (px)       Crop to a width and auto-calculated height"
+    echo -e "     -x|--x (px)           Crop offset for x"
+    echo -e "     -y|--y (px)           Crop offset for y"
+    [ -z "$1" ] || echo -e "$LRED$1$NOCOLOR"
+    exit 1
+}
+
+function probe {
+    echo $(ffprobe -i "$1" -show_entries "$2" -v quiet -of csv="p=0")
+}
+
+function duration {
+    probe "$1" "format=duration"
+}
+
+function width {
+    probe "$1" "stream=width"
+}
+
+function height {
+    probe "$1" "stream=height"
+}
+
+function add_vfilter {
+    if [ -z "$VFILTERS" ] ; then
+        VFILTERS="$1"
+    else
+        VFILTERS="$VFILTERS, $1"
+    fi
+}
+
+function resize_width {
+    SRC_WIDTH=$(width "$1")
+    SRC_HEIGHT=$(height "$1")
+    SRC_ASPECT=$(echo "scale=8; $SRC_WIDTH / $SRC_HEIGHT" | bc)
+    DEST_HEIGHT=$(echo "scale = 0; $2 / $SRC_ASPECT" | bc)
+    [ -z "$DEST_X" ] && DEST_X=$(echo "scale = 0; precision=0; ($SRC_WIDTH - $2) * 0.5" | bc)
+    [ -z "$DEST_Y" ] && DEST_Y=$(echo "scale = 0; precision=0; ($SRC_HEIGHT - $DEST_HEIGHT) * 0.5" | bc)
+    echo "Crop: ${SRC_WIDTH}x${SRC_HEIGHT} ($SRC_ASPECT) to ${2}x${DEST_HEIGHT} @ $DEST_X,$DEST_Y"
+    CROP="$2:$DEST_HEIGHT:$DEST_X:$DEST_Y"
+}
+
+[ -z "$1" ] && usage
+
+get_before
+while (( "$#" )) ; do
+    [ "$1" == "-h" -o "$1" == "--help" -o "$1" == "help" ] && usage
+    get_reset
+    get_switch DRY_RUN d dry-run "$1" "\$DRYRUN_ICON \${LGREEN}Dry run.\$NOCOLOR"
+    get_option CROP c crop "$1" "$2" "\$SCISSORS_ICON Crop: \$LBLUE\$CROP\$NOCOLOR"
+    get_option ROTATE r rotate "$1" "$2" "\$SPIN_ICON Rotate: \$LBLUE\$ROTATE\$NOCOLOR"
+    get_option DURATION s seconds "$1" "$2" "\$WATCH_ICON Seconds: \$LBLUE\$DURATION\$NOCOLOR"
+    get_option FRAMERATE f framerate "$1" "$2" "\$FILM_ICON Framerate: \$LBLUE\$FRAMERATE\$NOCOLOR"
+    get_option DEST_WIDTH w width "$1" "$2" "\$LEFTRIGHT_ICON Width: \$LBLUE\$DEST_WIDTH\$NOCOLOR"
+    get_option DEST_X x x "$1" "$2" "\$LEFTRIGHT_ICON X: \$LBLUE\$DEST_X\$NOCOLOR"
+    get_option DEST_Y y y "$1" "$2" "\$LEFTRIGHT_ICON Y: \$LBLUE\$DEST_Y\$NOCOLOR"
+    get_args 1 SRC_FILE "$1" "\$FORWARD_ICON Source: \$LBLUE\$SRC_FILE\$NOCOLOR"
+    get_args 2 TITLE "$1" "\$BADGE_ICON Title: \$LBLUE\$TITLE\$NOCOLOR"
+    get_args 3 || usage "Unknown argument: $1"
+    [ -z "$GETARG_KEY" ] || eval "$GETARG_KEY=\$GETARG_VALUE"
+    [ -z "$GETARG_SHIFT" ] || shift
+    shift
+done
+
+[ -z "$FRAMERATE" ] && usage "Default framerate of $FRAMERATE_DEFAULT was overridden with blank, but is required."
+[ -z "$SRC_FILE" ] && usage "Source video file is required."
+[ -f "$SRC_FILE" ] || usage "Source video file not found: $SRC_FILE"
+[ -z "$TITLE" ] && usage "Destination title is required."
+[ -z "$CROP" -o -z "$DEST_WIDTH" ] || usage "Cannot specify a crop and a width at the same time."
+[ -z "$CROP" -o -z "$DEST_X" ] || usage "Cannot specify a crop and an x at the same time."
+[ -z "$CROP" -o -z "$DEST_Y" ] || usage "Cannot specify a crop and a y at the same time."
+
+[ -z "$DURATION" ] || add_vfilter "setpts=PTS*$DURATION/$(duration $SRC_FILE)"
+[ -z "$ROTATE" ] || add_vfilter "rotate=$(echo "$ROTATE * 4 * a(1) / 180" | bc -l)"
+[ -z "$DEST_WIDTH" ] || resize_width "$SRC_FILE" "$DEST_WIDTH"
+[ -z "$CROP" ] || add_vfilter "crop=$CROP"
+
+# echo -e "Video filters: $LCYAN$VFILTERS$NOCOLOR"
+
+FFMPEG_CMD='ffmpeg -hide_banner -loglevel quiet -i "$SRC_FILE" -r "$FRAMERATE"'
+[ -z "$VFILTERS" ] || FFMPEG_CMD="$FFMPEG_CMD -filter:v \"\$VFILTERS\""
+FFMPEG_CMD="$FFMPEG_CMD \"\$TITLE.mp4\""
+
+eval "echo -e \"$LGREEN$FFMPEG_CMD$NOCOLOR\""
+
+[ -z "$DRY_RUN" ] && eval "$FFMPEG_CMD"
