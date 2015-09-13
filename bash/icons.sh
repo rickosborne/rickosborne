@@ -1,0 +1,37 @@
+#!/bin/bash
+
+GIT_ICON="\xf0\x9f\x90\x99 " # :octopus:
+BUG_ICON="\xf0\x9f\x90\x9b " # :bug:
+ERROR_ICON="\xe2\x9b\x94 " # :no_entry:
+TICKET_ICON="\xf0\x9f\x8e\xab " # :ticket:
+DRYRUN_ICON="\xe2\x98\x94 " # :umbrella:
+SUCCESS_ICON="\xe2\x9c\x85 " # :white_check_mark:
+FAIL_ICON="\xe2\x9d\x8c " # :x:
+QUERY_ICON="\xe2\x9d\x93 " # :question:
+BANG_ICON="\xe2\x9d\x97 " # :exclamation:
+STAR_ICON="\xe2\xad\x90 " # :star:
+CIRCLE_ICON="\xe2\xad\x95 " # :o:
+JOKER_ICON="\xf0\x9f\x83\x8f " # :black_joker:
+OK_ICON="\xf0\x9f\x86\x97 " # :ok:
+USGLOBE_ICON="\xf0\x9f\x8c\x8e " # :earth_americas:
+FINISHLINE_ICON="\xf0\x9f\x8f\x81 " # :checkered_flag:
+LIKE_ICON="\xf0\x9f\x91\x8d " # :thumbsup:
+DISLIKE_ICON="\xf0\x9f\x91\x8e " # :thumbsdown:
+PERSON_ICON="\xf0\x9f\x91\xa4 " # :bust_in_silhouette:
+PEOPLE_ICON="\xf0\x9f\x91\xa5 " # :busts_in_silhouette:
+BOOM_ICON="\xf0\x9f\x92\xa5 " # :boom:
+POOP_ICON="\xf0\x9f\x92\xa9 " # :poop:
+DISK_ICON="\xf0\x9f\x92\xbe " # :floppy_disk:
+PACKAGE_ICON="\xf0\x9f\x93\xa6 " # :package:
+SHUFFLE_ICON="\xf0\x9f\x94\x80 " # :twisted_rightwards_arrows:
+REPEAT_ICON="\xf0\x9f\x94\x81 " # :repeat:
+SPIN_ICON="\xf0\x9f\x94\x84 " # :arrows_counterclockwise:
+EXCLUDE_ICON="\xf0\x9f\x9a\xab " # :no_entry_sign:
+PROSPER_ICON="\xf0\x9f\x96\x96 "
+SCISSORS_ICON="\xe2\x9c\x82 " # :scissors:
+WATCH_ICON="\xe2\x8c\x9a " # :watch:
+FILM_ICON="\xf0\x9f\x8e\xa5 " # :movie_camera:
+FORWARD_ICON="\xe2\x96\xb6 " # :arrow_forward:
+BACKWARD_ICON="\xe2\x97\x80 " # :arrow_backward:
+BADGE_ICON="\xf0\x9f\x93\x9b " # :name_badge:
+LEFTRIGHT_ICON="\xe2\x86\x94 " # :left_right_arrow:
