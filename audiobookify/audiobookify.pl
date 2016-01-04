@@ -227,13 +227,13 @@ __PODHEAD__
 	my $safeparttitle = escapeSingle($parttitle);
 	my $safecover = escapeSingle($cover);
 	if ($isWin) {
-		print BAT1 qq! | "$apps\\faac.exe" $encodeQuality --artist "$safeartist" --title "$safeparttitle" --genre "Audiobook" --album "$safealbum" ! . ($splitcount > 1 ? qq!--disc "$splitnum/$splitcount" ! : "") . qq! --year "$year" --cover-art "$safecover" -o "$partnamees.m4a" -\n!;
+		print BAT1 qq! | "$apps\\faac.exe" $encodeQuality --artist "$safeartist" --title "$safeparttitle" --genre "Audiobook" --album "$safealbum" ! . ($splitcount > 1 ? qq!--track "$splitnum/$splitcount" ! : "") . qq! --year "$year" --cover-art "$safecover" -o "$partnamees.m4a" -\n!;
 		print BAT1 qq!"$ssa" "$parttitle.pod"\n!;
-		print BAT1 qq!"$apps\\neroAacTag.exe" -meta:year="$year" -meta:album="$album" -meta:artist="$artist" -meta:title="$parttitle" -meta-user:Performer="$performer" -meta:genre=Audiobook -meta:totaltracks="$chapcount" -add-cover:front:"$cover" ! . ($splitcount > 1 ? qq!-meta:disc=$splitnum -meta:totaldiscs=$splitcount ! : '') . qq!"$parttitle.m4a"\n!;
+		print BAT1 qq!"$apps\\neroAacTag.exe" -meta:year="$year" -meta:album="$album" -meta:artist="$artist" -meta:title="$parttitle" -meta-user:Performer="$performer" -meta:genre=Audiobook -add-cover:front:"$cover" ! . ($splitcount > 1 ? qq!-meta:track=$splitnum -meta:trackcount=$splitcount ! : '') . qq!"$parttitle.m4a"\n!;
 		print BAT1 qq!"$apps\\MP4Box.exe" -rem 3 -chap "$parttitle.chap" "$parttitle.m4a"\n!;
 		print BAT1 qq!move "$parttitle.m4a" "$partname.m4b"\n!;
 	} else {
-		print BAT1 qq! | faac $encodeQuality --artist ! . bashEscapeSingle($artist) . ' --title ' . bashEscapeSingle($parttitle) . " --genre 'Audiobook' --album " . bashEscapeSingle($album) . ($splitcount > 1 ? qq! --disc '$splitnum/$splitcount' ! : '') . ($performer eq "" ? "" : qq! --comment ! . bashEscapeSingle("Read by $performer")) . qq! --year '$year' --cover-art ! . bashEscapeSingle($safecover) . ' -o ' . bashEscapeSingle("$partname.m4a") . " -\n";
+		print BAT1 qq! | faac $encodeQuality --artist ! . bashEscapeSingle($artist) . ' --title ' . bashEscapeSingle($parttitle) . " --genre 'Audiobook' --album " . bashEscapeSingle($album) . ($splitcount > 1 ? qq! --track '$splitnum/$splitcount' ! : '') . ($performer eq "" ? "" : qq! --comment ! . bashEscapeSingle("Read by $performer")) . qq! --year '$year' --cover-art ! . bashEscapeSingle($safecover) . ' -o ' . bashEscapeSingle("$partname.m4a") . " -\n";
 		print BAT1 qq!\tmp4chaps -i ! . bashEscapeSingle("$partname.m4a") . "\n";
 		print BAT1 qq!\tmv ! . bashEscapeSingle("$partname.m4a") . " " . bashEscapeSingle("$partname.m4b") . "\n";
 		print BAT1 qq!}\n!;
@@ -248,7 +248,6 @@ if ($isWin) {
 			print BAT1 ' & ';
 		}
 		print BAT1 qq!part${part}!;
-		
 	}
 	print BAT1 qq!\nwait\nmv *.m4b ~/Audiobooks/\n!;
 }
@@ -341,22 +340,22 @@ sub splitTracksAtChapters {
 		if ($isWin) {
 			$safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
 		}
-		print FASTER qq!\necho "Adjusting tempo for $safeTitle"\nmadplay -q -o wave:- !;
+		print FASTER qq!\necho "Adjusting tempo for $safeTitle"\nmadplay -q -o wave:- ! unless($isWin);
 		if (scalar(@{$chapter}) == 1) {
 			print WRAP $cmdCopy . ' ' . bashEscapeSingle($chapter->[0]->{'FILE'}) . qq! "$splitNum-${chapZero}_MP3WRAP.mp3"\n!;
-			print FASTER ' ' . bashEscapeSingle($chapter->[0]->{'FILE'});
+			print FASTER ' ' . bashEscapeSingle($chapter->[0]->{'FILE'}) unless($isWin);
 		} elsif (scalar(@{$chapter}) > 1) {
 			print WRAP qq!$mp3wrap "$splitNum-$chapZero"!;
 			foreach my $track (@{$chapter}) {
 				print WRAP ' ' . bashEscapeSingle($track->{'FILE'});
-				print FASTER ' ' . bashEscapeSingle($track->{'FILE'});
+				print FASTER ' ' . bashEscapeSingle($track->{'FILE'}) unless($isWin);
 			}
 			print WRAP "\n";
 		}
-		print FASTER qq! | sox --norm -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song $safeTitle "faster-$splitNum-$chapZero.mp3"\n!;
+		print FASTER qq! | sox --norm -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song $safeTitle "faster-$splitNum-$chapZero.mp3"\n! unless($isWin);
 		foreach my $track (@{$chapter}) {
 			print WRAP $cmdMove . qq! ! . bashEscapeSingle($track->{'FILE'}) . qq! wrapped\n!;
-			print FASTER $cmdMove . qq! ! . bashEscapeSingle($track->{'FILE'}) . qq! notempo\n!;
+			print FASTER $cmdMove . qq! ! . bashEscapeSingle($track->{'FILE'}) . qq! notempo\n! unless($isWin);
 		}
 		my $wrapFile = "$splitNum-${chapZero}.mp3";
 		print WRAP $cmdMove . qq! "$splitNum-${chapZero}_MP3WRAP.mp3" "$wrapFile"\n!;
@@ -370,7 +369,7 @@ sub splitTracksAtChapters {
 	} # foreach chapter
 	print WRAP "$cmdMove Encode*.* wrapped\n$cmdMove *.csv wrapped\n$cmdMove *.pod wrapped\n";
 	close(WRAP);
-	close(FASTER);
+	close(FASTER) unless($isWin);
 } # splitTracksAtChapters
 
 sub formatPart {
