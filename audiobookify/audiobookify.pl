@@ -131,8 +131,8 @@ my $realnum = 0;
 $splitcount = scalar(@splits);
 
 if($isWin) {
-	open(BAT1,">Encode $parentdir.bat");
-	print BAT1 "\@echo off\ncall k:\\rick\\Source\\Audiobookify\\cmdrenice.bat\n";
+	open(BAT0,">Encode $parentdir.bat");
+	print BAT0 "\@echo off\n\n"
 } else {
 	open(BAT1,">Encode $parentdir.sh");
 }
@@ -151,7 +151,9 @@ foreach my $part (@splits) {
 	my $chapcount = shift(@counts);
 	print "\n$partname\n";
 	if ($isWin) {
-		print BAT1 qq!\n"$apps\\madplay.exe" -o wave:- !;
+		open(BAT1,">Encode $partname.bat");
+		print BAT1 qq!\@echo off\ncall k:\\rick\\Source\\Audiobookify\\cmdrenice.bat\n\n"$apps\\madplay.exe" -o wave:- !;
+		print BAT0 qq!start /belownormal cmd.exe /c "Encode $partname.bat"\n!;
 		open(CHAP,">$parttitle.chap");
 		open(POD,">$parttitle.pod");
 		open(CSV,">$parttitle.csv");
@@ -231,7 +233,8 @@ __PODHEAD__
 		print BAT1 qq!"$ssa" "$parttitle.pod"\n!;
 		print BAT1 qq!"$apps\\neroAacTag.exe" -meta:year="$year" -meta:album="$album" -meta:artist="$artist" -meta:title="$parttitle" -meta-user:Performer="$performer" -meta:genre=Audiobook -add-cover:front:"$cover" ! . ($splitcount > 1 ? qq!-meta:track=$splitnum -meta:trackcount=$splitcount ! : '') . qq!"$parttitle.m4a"\n!;
 		print BAT1 qq!"$apps\\MP4Box.exe" -rem 3 -chap "$parttitle.chap" "$parttitle.m4a"\n!;
-		print BAT1 qq!move "$parttitle.m4a" "$partname.m4b"\n!;
+		print BAT1 qq!move "$parttitle.m4a" "q:\\Audiobooks\\$partname.m4b"\n!;
+		close(BAT1);
 	} else {
 		print BAT1 qq! | faac $encodeQuality --artist ! . bashEscapeSingle($artist) . ' --title ' . bashEscapeSingle($parttitle) . " --genre 'Audiobook' --album " . bashEscapeSingle($album) . ($splitcount > 1 ? qq! --track '$splitnum/$splitcount' ! : '') . ($performer eq "" ? "" : qq! --comment ! . bashEscapeSingle("Read by $performer")) . qq! --year '$year' --cover-art ! . bashEscapeSingle($safecover) . ' -o ' . bashEscapeSingle("$partname.m4a") . " -\n";
 		print BAT1 qq!\tmp4chaps -i ! . bashEscapeSingle("$partname.m4a") . "\n";
@@ -240,8 +243,9 @@ __PODHEAD__
 	}
 	print "\tTotal Time: " . secs2index($offset) . "\n";
 }
+
 if ($isWin) {
-	print BAT1 qq!\nmove *.m4b q:\\Audiobooks\\\n!;
+	close(BAT0);
 } else {
 	foreach my $part (1..$splitnum) {
 		if ($part > 1) {
@@ -250,10 +254,7 @@ if ($isWin) {
 		print BAT1 qq!part${part}!;
 	}
 	print BAT1 qq!\nwait\nmv *.m4b ~/Audiobooks/\n!;
-}
-close(BAT1);
-
-unless ($isWin) {
+	close(BAT1);
 	system(qq!chmod +x ! . bashEscapeSingle("Encode $parentdir.sh"));
 	system(qq!chmod +x 'Faster Chapters.sh'!);
 	system(qq!chmod +x 'Wrap Chapters.sh'!);
