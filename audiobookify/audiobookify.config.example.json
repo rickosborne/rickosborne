@@ -1,0 +1,9 @@
+{
+    "bin": {
+        "mp3wrap": "c:\\apps\\mp3wrap.exe",
+        "ssa": "c:\\program files (x86)\\slideshow assembler\\ssa.exe"
+    },
+    "rss": {
+        "basePath": "https://s3.amazonaws.com/rickosborne-cast/$artist/$year/$album"
+    }
+}

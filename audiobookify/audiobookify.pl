@@ -2,23 +2,30 @@
 $| = 1;
 
 use Data::Dumper;
-use POSIX qw( ceil );
+use POSIX qw( ceil strftime );
 use Cwd;
 use File::Spec;
+use File::Basename;
 use MP3::Info;
 use MP3::Tag;
+use MP4::Info;
 use Getopt::Long;
+use Config::JSON;
+use XML::RSS;
 # use Term::Size::Any qw( chars );
 use strict;
 
+my $scriptDir = dirname(Cwd::abs_path(__FILE__));
+my $configFile = $scriptDir . '/audiobookify.config.json';
+my $config = (-f $configFile) ? Config::JSON->new($configFile) : Config::JSON->create($configFile);
 my $isWin = ($^O =~ /mswin/i);
 my $cwd = getcwd();
 my $apps = $isWin ? "k:\\rick" : "";
-my $ssa = "c:\\program files (x86)\\slideshow assembler\\ssa.exe";
-my $mp3wrap = ($isWin ? qq!"$apps\\mp3wrap.exe"! : 'mp3wrap');
+my $ssa = config("bin/ssa", "ssa");
+my $mp3wrap = config("bin/mp3wrap", "mp3wrap");
 my $cmdCopy = ($isWin ? 'copy' : 'cp');
 my $cmdMove = ($isWin ? 'move' : 'mv');
-my @files = sort(<*.mp3>);
+my @files = sort((<*.mp3>, <*.m4a>, <*.m4b>));
 my $maxseconds = 60 * 60 * 4.25;
 my @images = sort(<*.jpg>);  unless(scalar(@images)) { die "Need a cover image!"; }
 my $cover = pop(@images);
@@ -71,8 +78,9 @@ my $trackcount = 0;
 my $maxTitle = 0;
 
 foreach my $file (@files) {
-	my $mp3info = get_mp3info($file);
-	my $tag = MP3::Tag->new($file);
+	my $is3 = ($file =~ /\.mp3$/i);
+	my $mp3info = $is3 ? get_mp3info($file) : get_mp4info($file);
+	my $tag = $is3 ? MP3::Tag->new($file) : MP4::Info->new($file);
 	my %track = ();
 	push(@tracks, \%track);
 	$trackcount++;
@@ -80,6 +88,7 @@ foreach my $file (@files) {
 	$track{'SECS'}    = $mp3info->{'SECS'};
 	$track{'TITLE'}   = $tag->title() || '';
 	$track{'ORDER'}   = $trackcount;
+	$track{'SIZE'}    = (-s $file);
 	$track{'CHAPLEN'} = 0;
 	if($tag->year() ne '')   { $years{$tag->year()}++; }
 	if($tag->title() ne '')  { $titles{$tag->title()}++; }
@@ -112,8 +121,46 @@ push(@splitats, $trackcount+1) if(scalar(@splitats));
 $splitcount = scalar(@splitats) if(scalar(@splitats));
 my $targetseconds = POSIX::ceil($seconds / $splitcount) * $margin;
 my $targetdur = secs2index($targetseconds);
+my %templateable = (
+	'$artist' => urlsafe($artist),
+	'$album' => urlsafe($album),
+	'$year' => urlsafe($year)
+);
 
 print "Artist:\t$artist\nAlbum:\t$album\nYear:\t$year\nTime:\t$duration ($seconds)\nTracks:\t$trackcount\nFiles:\t$splitcount\nSplits:\t$targetdur ($targetseconds)\n" . ($noempty ? "No Empties\n" : "");
+
+my $rssVersion = config('rss/version', '2.0');
+my $rssLink = config('rss/link', 'http://rickosborne.org');
+my $rssWebMaster = config('rss/webMaster', 'Rick Osborne');
+my $rssBasePath = template(config('rss/basePath', 'http://example.com'));
+my $rss = XML::RSS->new(version => $rssVersion);
+my $rssDate = pubDate();
+
+$rss->add_module(prefix => 'blogChannel', uri => 'http://backend.userland.com/blogChannelModule');
+$rss->add_module(prefix => 'itunes', uri => 'http://www.itunes.com/dtds/podcast-1.0.dtd');
+$rss->channel(
+	title => "$artist ($year) $album",
+	link => $rssLink,
+	description => "$artist ($year) $album" . ($performer ne '' ? ", read by $performer" : ''),
+	language => 'en-us',
+	copyright => "Copyright $year $artist",
+	pubDate => $rssDate,
+	lastBuildDate => $rssDate,
+	webMaster => $rssWebMaster,
+	itunes => {
+		image => "$rssBasePath/$cover",
+		author => $artist,
+		complete => 'yes',
+		owner => {
+			name => $rssWebMaster
+		}
+	}
+);
+$rss->image(
+	title => "$artist ($year) $album",
+	url => "$rssBasePath/$cover",
+	link => $rssLink
+);
 
 my @splits = ( []  );
 my @counts = ( 0 );
@@ -209,6 +256,21 @@ __PODHEAD__
 				print CSV "$index,$title\n";
 			}
 			print CHAP "CHAPTER$tracknum=$index\nCHAPTER${tracknum}NAME=$title\n";
+			$rss->add_item(
+				title => "$tracknum: $title",
+				description => "$title",
+				permaLink => "$rssBasePath/$safefile",
+				pubDate => pubDate($tracknum),
+				enclosure => {
+					url => "$rssBasePath/$safefile",
+					length => $track->{'SIZE'},
+					type => $safefile =~ /\.mp3$/i ? 'audio/mp3' : 'audio/mp4'
+				},
+				itunes => {
+					summary => "$artist ($year) $album\n\n$tracknum: $title",
+					duration => duration($track->{'SECS'})
+				}
+			);
 		}
 	}
 	if (($performer ne '') && ($splitnum == $splitcount)) {
@@ -243,6 +305,8 @@ __PODHEAD__
 	}
 	print "\tTotal Time: " . secs2index($offset) . "\n";
 }
+
+$rss->save('rss.xml');
 
 if ($isWin) {
 	close(BAT0);
@@ -439,3 +503,45 @@ sub lpad {
 	my $x = ' ' x $l;
 	return substr($x . $s, 0 - $l);
 } # lpad
+
+sub config {
+	my ($path, $default) = @_;
+	my $result = $config->get($path);
+	$result = defined($result) ? $result : $default;
+	print "Config: $path = $result\n";
+	return $result;
+} # config
+
+sub template {
+	my ($before) = @_;
+	my $after = $before;
+	while (my ($key, $value) = each %templateable) {
+		my $qk = quotemeta($key);
+        $after =~ s/$qk/$value/g;
+    }
+	return $after;
+} # template
+
+sub urlsafe {
+	my ($before) = @_;
+	my $after = lc($before);
+	$after =~ s/[^a-zA-Z0-9]+/-/g;
+	return $after;
+} # urlsafe
+
+sub pubDate {
+	my ($offset) = @_;
+	my $base = time();
+	if (defined($offset)) {
+        $base -= scalar(@files);
+		$base += $offset;
+    }
+	return strftime("%a, %d %b %Y %H:%M:%S %z", localtime($base));
+} # pubDate
+
+sub duration {
+	my ($secs) = @_;
+	my $dur = secs2index($secs);
+	$dur =~ s/\..+$//;
+	return $dur;
+} # duration
