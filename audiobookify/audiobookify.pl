@@ -12,6 +12,7 @@ use MP4::Info;
 use Getopt::Long;
 use Config::JSON;
 use XML::RSS;
+use JSON;
 # use Term::Size::Any qw( chars );
 use strict;
 
@@ -132,7 +133,18 @@ print "Artist:\t$artist\nAlbum:\t$album\nYear:\t$year\nTime:\t$duration ($second
 my $rssVersion = config('rss/version', '2.0');
 my $rssLink = config('rss/link', 'http://rickosborne.org');
 my $rssWebMaster = config('rss/webMaster', 'Rick Osborne');
+my $sshfsTmp = config('sshfs/tmp', 'sshtmp');
+my $sshfsHost = config('sshfs/host', '');
+my $sshfsBasePath = config('sshfs/basePath', '/var/www/example.com/media');
+my $sshfsRssPath = template(config('sshfs/rssPath'), '$artist/$year/$album');
+my $sshfsServer = config('sshfs/sftpServer', '');
+my $sshfsCmd = config('sshfs/cmd', "sshfs '$sshfsHost:$sshfsBasePath' '$sshfsTmp'" . ($sshfsServer eq '' ? '' : " -o sftp_server='$sshfsServer'") . ' -o defer_permissions');
+my $sshfsIndexFile = config('sshfs/index/file', 'index.php');
+my $sshfsIndexContent = config('sshfs/index/content', "<?php\n\nheader('Location: rss.xml');");
+my $s3Bucket = config('s3/bucket', '');
+my $s3Path = template(config('s3/path', '$artist/$year/$album'));
 my $rssBasePath = template(config('rss/basePath', 'http://example.com'));
+my $rssPublishPath = template(config('rss/publishPath', 'http://example.com'));
 my $rss = XML::RSS->new(version => $rssVersion);
 my $rssDate = pubDate();
 
@@ -182,6 +194,38 @@ if($isWin) {
 	print BAT0 "\@echo off\n\n"
 } else {
 	open(BAT1,">Encode $parentdir.sh");
+	open(TOS3,">Publish.sh");
+	open(SSHINDEX, ">ssh-index.txt");
+	print SSHINDEX $sshfsIndexContent;
+	close(SSHINDEX);
+	print TOS3<<__PUBLISH_HEAD__;
+#!/bin/sh
+S3_BUCKET=$s3Bucket
+S3_PATH=s3://\${S3_BUCKET}/$s3Path
+SSHFS_TMP=$sshfsTmp
+SSHFS_PATH=$sshfsRssPath
+SSHFS_WORK="\${SSHFS_TMP}/\${SSHFS_PATH}"
+# SSH
+if [ -d "\${SSHFS_TMP}" ]; then
+  umount "\${SSHFS_TMP}"
+  echo "Removing \${SSHFS_TMP}"
+  rm -R "\${SSHFS_TMP}"
+fi
+mkdir -p "\${SSHFS_TMP}"
+$sshfsCmd
+mkdir -p "\${SSHFS_WORK}"
+cp rss.xml "\${SSHFS_WORK}/rss.xml"
+cp ssh-index.txt "\${SSHFS_WORK}/$sshfsIndexFile"
+umount "\${SSHFS_TMP}"
+# S3
+send_to_s3() {
+	FILE_NAME=\$1
+	MIME_TYPE=\$2
+	s3cmd sync "\${FILE_NAME}" "\${S3_PATH}/" -m "\${MIME_TYPE}" -P --signature-v2 --skip-existing
+}
+send_to_s3 "$cover" 'image/jpeg'
+send_to_s3 rss.xml 'application/rss+xml'
+__PUBLISH_HEAD__
 }
 
 unlink(<*.pod>);
@@ -242,6 +286,7 @@ __PODHEAD__
 			$lastOffset = $offset;
 		}
 		my $safefile = $track->{'FILE'};
+		my $mimeType = ($safefile =~ /\.mp3$/i ? 'audio/mp3' : 'audio/mp4');
 		if ($isWin) {
 			$safefile =~ s/"/""/g;
 			print BAT1 '"' . $safefile . '" ';
@@ -249,6 +294,7 @@ __PODHEAD__
 			# $safefile =~ s/'/'\\''/g;
 			# $safefile =~ s/"/\\"/g;
 			print BAT1 bashEscapeSingle($safefile) . ' ';
+			print TOS3 "send_to_s3 " . bashEscapeSingle($safefile) . " $mimeType\n";
 		}
 		unless($track->{'SKIP'}) {
 			if ($isWin) {
@@ -264,7 +310,7 @@ __PODHEAD__
 				enclosure => {
 					url => "$rssBasePath/$safefile",
 					length => $track->{'SIZE'},
-					type => $safefile =~ /\.mp3$/i ? 'audio/mp3' : 'audio/mp4'
+					type => $mimeType
 				},
 				itunes => {
 					summary => "$artist ($year) $album\n\n$tracknum: $title",
@@ -319,9 +365,12 @@ if ($isWin) {
 	}
 	print BAT1 qq!\nwait\nmv *.m4b ~/Audiobooks/\n!;
 	close(BAT1);
+	print TOS3 qq!rm -R "\${SSHFS_TMP}"\necho "Published to: $rssPublishPath"!;
+	close(TOS3);
 	system(qq!chmod +x ! . bashEscapeSingle("Encode $parentdir.sh"));
 	system(qq!chmod +x 'Faster Chapters.sh'!);
 	system(qq!chmod +x 'Wrap Chapters.sh'!);
+	system(qq!chmod +x 'Publish.sh'!);
 }
 
 exit(0);
@@ -423,7 +472,7 @@ sub splitTracksAtChapters {
 			print FASTER $cmdMove . qq! ! . bashEscapeSingle($track->{'FILE'}) . qq! notempo\n! unless($isWin);
 		}
 		my $wrapFile = "$splitNum-${chapZero}.mp3";
-		print WRAP $cmdMove . qq! "$splitNum-${chapZero}_MP3WRAP.mp3" "$wrapFile"\n!;
+		print WRAP $cmdMove . qq! "$splitNum-${chapZero}_MP3WRAP.mp3" "$wrapFile"\nmp3val -f "$wrapFile"\n!;
 		if ($isWin) {
 			print WRAP qq!"$apps\\tag.exe" --remove "$wrapFile"\n!;
 			print WRAP qq!"$apps\\tag.exe" --title "$safeTitle" "$wrapFile"\n!;
