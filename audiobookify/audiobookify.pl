@@ -104,6 +104,7 @@ foreach my $file (@files) {
 	$track{'ORDER'}   = $trackcount;
 	$track{'SIZE'}    = (-s $file);
 	$track{'CHAPLEN'} = 0;
+	$track{'TITLE'} =~ s/$titleStrip// if ($titleStrip);
 	if (defined $tag) {
 		if(defined $tag->year() && $tag->year() ne '')   { $years{$tag->year()}++; }
 		if(defined $tag->title() && $tag->title() ne '')  { $titles{$tag->title()}++; }
@@ -134,7 +135,7 @@ if ($artist eq '') { $artist = (sort { $artists{$b} <=> $artists{$a} } keys %art
 if ($year eq '')   { $year   = (sort { $years{$b} <=> $years{$a} } keys %years)[0] || ''; }
 if ($month eq '') { $month = (localtime())[4] + 1; }
 if ($day eq '') { $day = (localtime())[3]; }
-my $baseDate = DateTime->new(year => $year, month => $month, day => $day, hour => 9, time_zone => $timeZone);
+my $baseDate = DateTime->new(year => $year || '', month => $month, day => $day, hour => 9, time_zone => $timeZone);
 my $duration = secs2index($seconds);
 my $splitcount = POSIX::ceil($seconds / $maxseconds);
 push(@splitats, $trackcount+1) if(scalar(@splitats));
@@ -540,6 +541,7 @@ __RETAG_HEAD__
 	my @chapterLengths;
 	my @chapterTracks;
 	push(@chapterTracks, $lastChapter);
+	my $totalSecs = 0;
 	# group tracks by chapter
 	foreach my $track (@{$tracks}) {
 		unless ($track->{'SKIP'}) {
@@ -552,14 +554,19 @@ __RETAG_HEAD__
 			} # unless no tracks yet
 		} # unless a skippable track
 		push(@{$lastChapter}, $track);
-		$chapterLength += $track->{'SECS'};
+		my $secs = $track->{'SECS'};
+		$chapterLength += $secs;
+		$totalSecs += $secs;
 	} # foreach track
 	$lastChapter->[0]->{'CHAPLEN'} = $chapterLength;
 	push(@chapterLengths, $chapterLength);
 	# group chapters into files
 	my ($splitLength, $newSplitLength, $origErr, $newErr) = (0, 0);
+	my $multipart = $totalSecs > $targetseconds;
 	my $chapterNum = 0;
 	my $splitNum = 1;
+	my $chapterCount = scalar(@chapterTracks);
+	my $zeroCount = length($chapterCount);
 	foreach my $chapter (@chapterTracks) {
 		$chapterLength = shift(@chapterLengths);
 		$newSplitLength = $splitLength + $chapterLength;
@@ -578,13 +585,13 @@ __RETAG_HEAD__
 			push(@{$splits->[-1]}, $track);
 		}
 		$counts->[-1]++;
-		my $chapZero = substr("00$chapterNum", -2);
+		my $chapZero = substr("0000$chapterNum", 0 - $zeroCount);
 		my $safeTitle = bashEscapeSingle($chapter->[0]->{'TITLE'});
 		if ($isWin) {
 			$safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
 		}
 		print FASTER qq!\necho "Adjusting tempo for $safeTitle"\nmadplay -q -o wave:- ! unless($isWin);
-		my $baseName = qq!"$splitNum-$chapZero"!;
+		my $baseName = $multipart ? qq!"$splitNum-$chapZero"! : qq!"$chapZero"!;
 		print WRAP qq!wrap $chapterNum $safeTitle $baseName!;
 		print WRAPMP4 qq!wrap $chapterNum $safeTitle $baseName!;
 		foreach my $track (@{$chapter}) {
@@ -619,10 +626,10 @@ __RETAG_HEAD__
 } # splitTracksAtChapters
 
 sub formatPart {
-	my ($n, $x) = @_;
-	if($x == 1) { return ""; }
-	if(($x > 10) and ($n < 10)) { return " 0$n"; }
-	return " $n";
+	my ($splitNum, $splitCount) = @_;
+	if($splitCount == 1) { return ""; }
+	if(($splitCount > 10) and ($splitNum < 10)) { return " 0$splitNum"; }
+	return " $splitNum";
 }
 
 sub index2secs {
@@ -706,6 +713,7 @@ sub template {
 sub urlsafe {
 	my ($before) = @_;
 	my $after = lc($before);
+	$after =~ s/'//g;
 	$after =~ s/[^a-zA-Z0-9]+/-/g;
 	return $after;
 } # urlsafe
