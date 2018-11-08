@@ -76,10 +76,14 @@ GetOptions(
 	"timezone=s"  => \$timeZone,
 );
 @splitats = split(',', join(',', @splitats));
-if (($quality == 0) and ($bitrate == 0)) { $bitrate = 48; }
+# if (($quality == 0) and ($bitrate == 0)) { $bitrate = 48; }
 if (($quality < 1) or ($quality > 100)) { $quality = 80; }
-if ($bitrate > 0) { $encodeQuality = "-b $bitrate"; }
-else { $encodeQuality = "-q $quality"; }
+if ($quality > 0) { $encodeQuality = "-q $quality"; }
+elsif ($bitrate > 0) { $encodeQuality = "-b $bitrate"; }
+else { $encodeQuality = ""; }
+if (defined($timeZone) && ($timeZone ne '') && !DateTime::TimeZone->is_valid_name($timeZone)) {
+    die("Invalid timezone: $timeZone\n");
+}
 if (!defined $timeZone || $timeZone eq '') { $timeZone = DateTime::TimeZone->new(name => 'local'); }
 
 my %titles  = ();
@@ -104,7 +108,7 @@ foreach my $file (@files) {
 	$track{'ORDER'}   = $trackcount;
 	$track{'SIZE'}    = (-s $file);
 	$track{'CHAPLEN'} = 0;
-	$track{'TITLE'} =~ s/$titleStrip// if ($titleStrip);
+	$track{'TITLE'} =~ s/$titleStrip//g if ($titleStrip);
 	if (defined $tag) {
 		if(defined $tag->year() && $tag->year() ne '')   { $years{$tag->year()}++; }
 		if(defined $tag->title() && $tag->title() ne '')  { $titles{$tag->title()}++; }
@@ -157,7 +161,22 @@ header('Content-Disposition: inline');
 readfile(\$file);
 __PHP_TEMPLATE__
 
-print "Artist:\t$artist\nAlbum:\t$album\nYear:\t$year\nMonth:\t$month\nDay:\t$day\nTime:\t$duration ($seconds)\nTracks:\t$trackcount\nFiles:\t$splitcount\nSplits:\t$targetdur ($targetseconds)\n" . ($noempty ? "No Empties\n" : "");
+print <<__DEBUG_CONFIG__;
+Artist:   $artist
+Album:    $album
+Year:     $year
+Month:    $month
+Day:      $day
+Time:     $duration ($seconds)
+Tracks:   $trackcount
+Files:    $splitcount
+Splits:   $targetdur ($targetseconds)
+No Empty: $noempty
+Series:   $series
+Grouping: $grouping
+Episode:  $episode
+TimeZone: $timeZone
+__DEBUG_CONFIG__
 
 my $rssVersion = config('rss/version', '2.0');
 my $rssLink = config('rss/link', 'http://rickosborne.org');
@@ -503,7 +522,7 @@ mp4ify() {
 	if [[ -f "\${FILE_NAME}.m4a" ]] ; then
 		rm "\${FILE_NAME}.m4a"
 	fi
-	ffmpeg -hide_banner -loglevel panic -nostats -i "\${FILE_NAME}.mp3" -metadata title="\$TITLE" -metadata year=\$YEAR -metadata artist="\$AUTHOR" -metadata album_artist="\$AUTHOR" -metadata author="\$AUTHOR" -metadata album="\$ALBUM" -metadata track="\$TRACK" -metadata comment="Read by \$PERFORMER" -metadata grouping="\$GROUPING" -metadata show="\$SERIES" -metadata episode_id="\$EPISODE" "\${FILE_NAME}.m4a"
+	ffmpeg -hide_banner -loglevel panic -nostats -i "\${FILE_NAME}.mp3" -c:a libfdk_aac -vbr 2 -metadata title="\$TITLE" -metadata year=\$YEAR -metadata artist="\$AUTHOR" -metadata album_artist="\$AUTHOR" -metadata author="\$AUTHOR" -metadata album="\$ALBUM" -metadata track="\$TRACK" -metadata comment="Read by \$PERFORMER" -metadata grouping="\$GROUPING" -metadata show="\$SERIES" -metadata episode_id="\$EPISODE" -vn "\${FILE_NAME}.m4a"
 	mv "\${FILE_NAME}.mp3" converted/
 	mp4art -o --add "\$ARTWORK" "\${FILE_NAME}.m4a"
 }
@@ -531,7 +550,7 @@ retag() {
 	set +e
 	mp4art -o -k --remove "\$FILE_NAME"
 	set -e
-	ffmpeg -hide_banner -loglevel error -nostats -i "\$FILE_NAME" -codec copy -metadata title="\$TITLE" -metadata year=\$YEAR -metadata artist="\$AUTHOR" -metadata album_artist="\$AUTHOR" -metadata author="\$AUTHOR" -metadata album="\$ALBUM" -metadata track="\$TRACK" -metadata comment="Read by \$PERFORMER" -metadata grouping="\$GROUPING" -metadata show="\$SERIES" -metadata episode_id="\$EPISODE" "retagged-\$FILE_NAME"
+	ffmpeg -hide_banner -loglevel error -nostats -i "\$FILE_NAME" -vn -codec copy -metadata title="\$TITLE" -metadata year=\$YEAR -metadata artist="\$AUTHOR" -metadata album_artist="\$AUTHOR" -metadata author="\$AUTHOR" -metadata album="\$ALBUM" -metadata track="\$TRACK" -metadata comment="Read by \$PERFORMER" -metadata grouping="\$GROUPING" -metadata show="\$SERIES" -metadata episode_id="\$EPISODE" "retagged-\$FILE_NAME"
 	mv "retagged-\$FILE_NAME" "\$FILE_NAME"
 	mp4art -o --add "\$ARTWORK" "\$FILE_NAME"
 }
@@ -696,7 +715,7 @@ sub config {
 	my ($path, $default) = @_;
 	my $result = $config->get($path);
 	$result = defined($result) ? $result : $default;
-	print "Config: $path = $result\n";
+	print("Config: $path = $result\n") unless(defined($default) && ($result eq $default));
 	return $result;
 } # config
 
