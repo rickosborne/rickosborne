@@ -9,6 +9,7 @@ use File::Basename;
 use MP3::Info;
 use MP3::Tag;
 use MP4::Info;
+use Audio::Wav;
 use Getopt::Long;
 use Config::JSON;
 use XML::RSS;
@@ -28,7 +29,7 @@ my $ssa = config("bin/ssa", "ssa");
 my $mp3wrap = config("bin/mp3wrap", "mp3wrap");
 my $cmdCopy = ($isWin ? 'copy' : 'cp');
 my $cmdMove = ($isWin ? 'move' : 'mv');
-my @files = sort((<*.mp3>, <*.m4a>, <*.m4b>));
+my @files = sort((<*.mp3>, <*.m4a>, <*.m4b>, <*.wav>));
 my $maxseconds = 60 * 60 * 4.25;
 my @images = sort(<*.jpg>);  unless(scalar(@images)) { die "Need a cover image!"; }
 my $cover = pop(@images);
@@ -96,15 +97,32 @@ my $trackcount = 0;
 my $maxTitle = 0;
 
 foreach my $file (@files) {
-	my $is3 = ($file =~ /\.mp3$/i);
-	my $mp3info = $is3 ? get_mp3info($file) : get_mp4info($file);
-	my $tag = $is3 ? MP3::Tag->new($file) : MP4::Info->new($file);
+	my $tag;
+	my $secs;
+	my $title;
+	if ($file =~ /\.wav$/i) {
+		my $wav = Audio::Wav->read($file);
+		my $info = $wav->get_info();
+		if (defined($info)) {
+            $title = $info->{'name'} || '';
+        }
+		$secs = $wav->length_seconds();
+    } else {
+		my $is3 = ($file =~ /\.mp3$/i);
+		my $mp3info = $is3 ? get_mp3info($file) : get_mp4info($file);
+		$tag = $is3 ? MP3::Tag->new($file) : MP4::Info->new($file);
+		if (defined($tag)) {
+            $title = $tag->title;
+        }
+        
+		$secs = $mp3info->{'SECS'} || 0;
+	}
 	my %track = ();
 	push(@tracks, \%track);
 	$trackcount++;
 	$track{'FILE'}    = $file;
-	$track{'SECS'}    = $mp3info->{'SECS'} || 0;
-	$track{'TITLE'}   = defined $tag ? $tag->title() || '' : '';
+	$track{'SECS'}    = $secs || 0;
+	$track{'TITLE'}   = defined $title ? $title || '' : '';
 	$track{'ORDER'}   = $trackcount;
 	$track{'SIZE'}    = (-s $file);
 	$track{'CHAPLEN'} = 0;
@@ -128,10 +146,21 @@ $termVar = ($termVar > $maxTitle ? $maxTitle : $termVar);
 
 my @dirs = File::Spec->splitdir($cwd);
 my $parentdir = pop(@dirs);
-if($parentdir =~ /^(.+?)\s+\((\d+|\d+-\d+|\d+-\d+-\d+)\)\s+(.+?)$/) {
+if($parentdir =~ /^(.+?)\s+\((\d+|\d+-\d+|\d+-\d+-\d+)\)\s+(.+?)(?:\s+\((.+?) #(\d+)\))?$/) {
 	if ($artist eq '') { $artist = $1; }
 	if ($year eq '')   { ($year, $month, $day) = split('-', $2); }
-	if ($album eq '')  { $album  = $3 };
+	if ($album eq '')  {
+		$album  = $3;
+	};
+	if ($series eq '' && defined($4) && defined($5)) {
+        $series = $4;
+		$grouping = $4;
+		$episode = $5;
+    }
+    if ($album =~ /^(.+?)\s+\(read by (.+?)\)$/) {
+        $album = $1;
+        $performer = $2;
+    }
 }
 
 if ($album eq '')  { $album  = (sort { $albums{$b} <=> $albums{$a} } keys %albums)[0] || ''; }
@@ -257,21 +286,21 @@ if($isWin) {
 #!/bin/sh
 S3_BUCKET=$s3Bucket
 S3_PATH=s3://\${S3_BUCKET}/$s3Path
-SSHFS_TMP=$sshfsTmp
-SSHFS_PATH=$sshfsRssPath
-SSHFS_WORK="\${SSHFS_TMP}/\${SSHFS_PATH}"
+#SSHFS_TMP=$sshfsTmp
+#SSHFS_PATH=$sshfsRssPath
+#SSHFS_WORK="\${SSHFS_TMP}/\${SSHFS_PATH}"
 # SSH
-if [ -d "\${SSHFS_TMP}" ]; then
-  umount "\${SSHFS_TMP}"
-  echo "Removing \${SSHFS_TMP}"
-  # rm -R "\${SSHFS_TMP}"
-fi
-mkdir -p "\${SSHFS_TMP}"
-$sshfsCmd
-mkdir -p "\${SSHFS_WORK}"
-cp rss.xml "\${SSHFS_WORK}/rss.xml"
-cp ssh-index.txt "\${SSHFS_WORK}/$sshfsIndexFile"
-umount "\${SSHFS_TMP}"
+#if [ -d "\${SSHFS_TMP}" ]; then
+#  umount "\${SSHFS_TMP}"
+#  echo "Removing \${SSHFS_TMP}"
+#  # rm -R "\${SSHFS_TMP}"
+#fi
+#mkdir -p "\${SSHFS_TMP}"
+#$sshfsCmd
+#mkdir -p "\${SSHFS_WORK}"
+#cp rss.xml "\${SSHFS_WORK}/rss.xml"
+#cp ssh-index.txt "\${SSHFS_WORK}/$sshfsIndexFile"
+#umount "\${SSHFS_TMP}"
 # S3
 send_to_s3() {
 	FILE_NAME=\$1
@@ -522,7 +551,7 @@ mp4ify() {
 	if [[ -f "\${FILE_NAME}.m4a" ]] ; then
 		rm "\${FILE_NAME}.m4a"
 	fi
-	ffmpeg -hide_banner -loglevel panic -nostats -i "\${FILE_NAME}.mp3" -c:a libfdk_aac -vbr 2 -metadata title="\$TITLE" -metadata year=\$YEAR -metadata artist="\$AUTHOR" -metadata album_artist="\$AUTHOR" -metadata author="\$AUTHOR" -metadata album="\$ALBUM" -metadata track="\$TRACK" -metadata comment="Read by \$PERFORMER" -metadata grouping="\$GROUPING" -metadata show="\$SERIES" -metadata episode_id="\$EPISODE" -vn "\${FILE_NAME}.m4a"
+	ffmpeg -hide_banner -loglevel panic -nostats -i "\${FILE_NAME}.mp3" -c:a libfdk_aac -profile:a aac_he -b:a 32k -metadata title="\$TITLE" -metadata year=\$YEAR -metadata artist="\$AUTHOR" -metadata album_artist="\$AUTHOR" -metadata author="\$AUTHOR" -metadata album="\$ALBUM" -metadata track="\$TRACK" -metadata comment="Read by \$PERFORMER" -metadata grouping="\$GROUPING" -metadata show="\$SERIES" -metadata episode_id="\$EPISODE" -vn "\${FILE_NAME}.m4a"
 	mv "\${FILE_NAME}.mp3" converted/
 	mp4art -o --add "\$ARTWORK" "\${FILE_NAME}.m4a"
 }
@@ -734,6 +763,7 @@ sub urlsafe {
 	my $after = lc($before);
 	$after =~ s/'//g;
 	$after =~ s/[^a-zA-Z0-9]+/-/g;
+    $after =~ s/^-|-$//g;
 	return $after;
 } # urlsafe
 
