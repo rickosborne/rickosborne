@@ -83,7 +83,7 @@ if ($quality > 0) { $encodeQuality = "-q $quality"; }
 elsif ($bitrate > 0) { $encodeQuality = "-b $bitrate"; }
 else { $encodeQuality = ""; }
 if (defined($timeZone) && ($timeZone ne '') && !DateTime::TimeZone->is_valid_name($timeZone)) {
-    die("Invalid timezone: $timeZone\n");
+	die("Invalid timezone: $timeZone\n");
 }
 if (!defined $timeZone || $timeZone eq '') { $timeZone = DateTime::TimeZone->new(name => 'local'); }
 
@@ -104,27 +104,27 @@ foreach my $file (@files) {
 		my $wav = Audio::Wav->read($file);
 		my $info = $wav->get_info();
 		if (defined($info)) {
-            $title = $info->{'name'} || '';
-        }
+			$title = $info->{'name'} || '';
+		}
 		$secs = $wav->length_seconds();
-    } else {
+	} else {
 		my $is3 = ($file =~ /\.mp3$/i);
 		my $mp3info = $is3 ? get_mp3info($file) : get_mp4info($file);
 		$tag = $is3 ? MP3::Tag->new($file) : MP4::Info->new($file);
 		if (defined($tag)) {
-            $title = $tag->title;
-        }
-        
+			$title = $tag->title;
+		}
+		
 		$secs = $mp3info->{'SECS'} || 0;
 	}
 	my %track = ();
 	push(@tracks, \%track);
 	$trackcount++;
-	$track{'FILE'}    = $file;
-	$track{'SECS'}    = $secs || 0;
+	$track{'FILE'}	= $file;
+	$track{'SECS'}	= $secs || 0;
 	$track{'TITLE'}   = defined $title ? $title || '' : '';
 	$track{'ORDER'}   = $trackcount;
-	$track{'SIZE'}    = (-s $file);
+	$track{'SIZE'}	= (-s $file);
 	$track{'CHAPLEN'} = 0;
 	$track{'TITLE'} =~ s/$titleStrip//g if ($titleStrip);
 	if (defined $tag) {
@@ -132,9 +132,9 @@ foreach my $file (@files) {
 		if(defined $tag->title() && $tag->title() ne '')  { $titles{$tag->title()}++; }
 		if(defined $tag->artist() && $tag->artist() ne '') { $artists{$tag->artist()}++; }
 		if(defined $tag->album() && $tag->album() ne '')  { $albums{$tag->album()}++; }
-    }
+	}
 	die("File $file has no duration") if ($track{'SECS'} == 0);
-    $seconds += $track{'SECS'};
+	$seconds += $track{'SECS'};
 	$track{'SKIP'} = (($noempty && ($track{'TITLE'} eq '')) || (($skipre ne '') && ($track{'TITLE'} =~ /$skipre/i)) || (($onlyre ne '') && !($track{'TITLE'} =~ /$onlyre/i)));
 	unless ($track{'SKIP'}) {
 		my $titleLen = length($track{'TITLE'});
@@ -146,21 +146,25 @@ $termVar = ($termVar > $maxTitle ? $maxTitle : $termVar);
 
 my @dirs = File::Spec->splitdir($cwd);
 my $parentdir = pop(@dirs);
-if($parentdir =~ /^(.+?)\s+\((\d+|\d+-\d+|\d+-\d+-\d+)\)\s+(.+?)(?:\s+\((.+?) #(\d+)\))?$/) {
+if($parentdir =~ /^(.+?)\s+\((\d+|\d+-\d+|\d+-\d+-\d+)\)\s+(.+?)$/) {
 	if ($artist eq '') { $artist = $1; }
-	if ($year eq '')   { ($year, $month, $day) = split('-', $2); }
+	if ($year eq '')   {
+		($year, $month, $day) = split('-', $2);
+	}
 	if ($album eq '')  {
 		$album  = $3;
 	};
-	if ($series eq '' && defined($4) && defined($5)) {
-        $series = $4;
-		$grouping = $4;
-		$episode = $5;
-    }
-    if ($album =~ /^(.+?)\s+\(read by (.+?)\)$/) {
-        $album = $1;
-        $performer = $2;
-    }
+	if ($performer eq '' && $album =~ /\s+\(read by (.+?)\)/) {
+		$performer = $1;
+		$album =~ s/\s+\(read by (.+?)\)//;
+		print "Perf:	 $performer\n";
+	}
+	if ($series eq '' && $album =~ /\s+\((.+?) #(\d+)\)/) {
+		$series = $1;
+		$grouping = $1;
+		$episode = $2;
+		$album =~ s/\s+\((.+?) #(\d+)\)//;
+	}
 }
 
 if ($album eq '')  { $album  = (sort { $albums{$b} <=> $albums{$a} } keys %albums)[0] || ''; }
@@ -366,7 +370,7 @@ __PODHEAD__
 		my $index = secs2index($offset);
 		$offset += $track->{'SECS'};
 		if ($verbose || !$track->{'SKIP'}) {
-			print lpad($realnum, $termTrack) . "  " . ($track->{'SKIP'} ? "     " . rpad($title, $termVar - 5) : rpad($title, $termVar)) . "  " . ($verbose ? rpad($track->{'FILE'}, $termVar) . "  " : "") . rpad(secs2index($verbose ? $track->{'SECS'} : $track->{'CHAPLEN'}), $termTime) . "\n";
+			print lpad($realnum, $termTrack) . "  " . ($track->{'SKIP'} ? "	 " . rpad($title, $termVar - 5) : rpad($title, $termVar)) . "  " . ($verbose ? rpad($track->{'FILE'}, $termVar) . "  " : "") . rpad(secs2index($verbose ? $track->{'SECS'} : $track->{'CHAPLEN'}), $termTime) . "\n";
 			$lastOffset = $offset;
 		}
 		my $safefile = $track->{'FILE'};
@@ -523,7 +527,7 @@ wrap() {
 	if [[ "\$#" -gt 1 ]] ; then
 		mp3wrap "\$FILE_NAME" "\$@"
 	else
-	    cp "\$1" "\$WRAP_FILE"
+		cp "\$1" "\$WRAP_FILE"
 	fi
 	while (( "\$#" )) ; do
 		mv "\$1" wrapped
@@ -559,6 +563,26 @@ __MP4_WRAP_HEAD__
 		open(FASTER,">Faster Chapters.sh");
 		print FASTER qq{#!/bin/sh\nTEMPO="\$1"\nif [ -z "\$TEMPO" ] ; then\n\techo "Please provide a multiplier, such as 1.2"\n\texit -1\nfi\nif [ ! -d "notempo" ] ; then\n\tmkdir "notempo"\nfi\n};
 	}
+	open(FFC, ">FFConcat.sh");
+	print FFC<<__FFC_HEADER__;
+#!/bin/sh
+export ALBUM_TITLE='$album'
+export ALBUM_ARTIST='$artist'
+export ALBUM_YEAR=$year
+export ALBUM_COVER='$cover'
+export FILE_BASE='$artist ($year) $album'
+export PERFORMER='$performer'
+
+ffconcat() {
+	TRACK_NUM=\$1
+	PART_COUNT=\$2
+    PART_TITLE=\$3
+	FILTER_EXPR=\$4
+    shift 4
+	ffmpeg \$@ -filter_complex "\${FILTER_EXPR}concat=n=\${PART_COUNT}:v=0:a=1[outa]" -map "[outa]" -c:a libfdk_aac -vbr 3 -metadata title="\${TRACK_NUM}. \${PART_TITLE}" -metadata artist="\${ALBUM_ARTIST}" -metadata album="\${ALBUM_TITLE}" -metadata year="\${ALBUM_YEAR}" -metadata track="\${TRACK_NUM}" -metadata genre="Audiobook" -metadata comment="Read by \${PERFORMER}" "\${ALBUM_ARTIST} (\${ALBUM_YEAR}) \${ALBUM_TITLE} \${TRACK_NUM}.m4a"
+}
+
+__FFC_HEADER__
 	open(RETAG, ">Retag.sh");
 	print RETAG<<__RETAG_HEAD__;
 #!/bin/sh
@@ -642,13 +666,21 @@ __RETAG_HEAD__
 		my $baseName = $multipart ? qq!"$splitNum-$chapZero"! : qq!"$chapZero"!;
 		print WRAP qq!wrap $chapterNum $safeTitle $baseName!;
 		print WRAPMP4 qq!wrap $chapterNum $safeTitle $baseName!;
+		print FFC qq!ffconcat $chapterNum ! . scalar(@{$chapter});
+		my $ffcFilter = '';
+		my $ffcInputs = '';
+		my $ffcIndex = 0;
 		foreach my $track (@{$chapter}) {
 			my $safeTrack = bashEscapeSingle($track->{'FILE'});
 			print WRAP " $safeTrack";
 			print WRAPMP4 " $safeTrack";
 			print FASTER " $safeTrack" unless($isWin);
 			print RETAG "retag $chapterNum $safeTitle $safeTrack\n";
+			$ffcFilter .= "[$ffcIndex:0]";
+			$ffcIndex++;
+			$ffcInputs .= ' -i ' . $safeTrack;
 		}
+		print FFC " $safeTitle '$ffcFilter' $ffcInputs\n\n";
 		print WRAP "\n";
 		print WRAPMP4 "\n";
 		print FASTER qq! | sox --norm -t wav - "faster-$splitNum-$chapZero.mp3" tempo -s \$TEMPO\nid3v2 --song $safeTitle "faster-$splitNum-$chapZero.mp3"\n! unless($isWin);
@@ -671,6 +703,8 @@ __RETAG_HEAD__
 	close(WRAPMP4);
 	close(FASTER) unless($isWin);
 	close(RETAG);
+	close(FFC);
+	system(qq!chmod +x 'FFConcat.sh'!);
 } # splitTracksAtChapters
 
 sub formatPart {
@@ -753,8 +787,8 @@ sub template {
 	my $after = $before;
 	while (my ($key, $value) = each %templateable) {
 		my $qk = quotemeta($key);
-        $after =~ s/$qk/$value/g;
-    }
+		$after =~ s/$qk/$value/g;
+	}
 	return $after;
 } # template
 
@@ -763,7 +797,7 @@ sub urlsafe {
 	my $after = lc($before);
 	$after =~ s/'//g;
 	$after =~ s/[^a-zA-Z0-9]+/-/g;
-    $after =~ s/^-|-$//g;
+	$after =~ s/^-|-$//g;
 	return $after;
 } # urlsafe
 
@@ -773,7 +807,7 @@ sub pubDate {
 	if (defined($offset)) {
 		# $base->subtract(seconds => scalar(@files));
 		$base->add(seconds => $offset);
-    }
+	}
 	return $base->strftime("%a, %d %b %Y %H:%M:%S %z");
 } # pubDate
 
