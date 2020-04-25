@@ -9,7 +9,7 @@ use File::Basename;
 use MP3::Info;
 use MP3::Tag;
 use MP4::Info;
-use Audio::Wav;
+#use Audio::Wav;
 use Getopt::Long;
 use Config::JSON;
 use XML::RSS;
@@ -33,7 +33,7 @@ my @files = sort((<*.mp3>, <*.m4a>, <*.m4b>, <*.wav>));
 my $maxseconds = 60 * 60 * 4.25;
 my @images = sort(<*.jpg>);  unless(scalar(@images)) { die "Need a cover image!"; }
 my $cover = pop(@images);
-my $margin = 1.05;
+my $margin = 10;
 my @splitats = ();
 my $performer = '';
 my $noempty = 0;
@@ -289,7 +289,7 @@ if($isWin) {
 	print TOS3<<__PUBLISH_HEAD__;
 #!/bin/sh
 S3_BUCKET=$s3Bucket
-S3_PATH=s3://\${S3_BUCKET}/$s3Path
+S3_PATH=$s3Path
 #SSHFS_TMP=$sshfsTmp
 #SSHFS_PATH=$sshfsRssPath
 #SSHFS_WORK="\${SSHFS_TMP}/\${SSHFS_PATH}"
@@ -309,7 +309,7 @@ S3_PATH=s3://\${S3_BUCKET}/$s3Path
 send_to_s3() {
 	FILE_NAME=\$1
 	MIME_TYPE=\$2
-	s3cmd sync "\${FILE_NAME}" "\${S3_PATH}/" -m "\${MIME_TYPE}" -P --signature-v2 --rr
+	aws s3api put-object --acl public-read --content-type "\${MIME_TYPE}" --bucket "\${S3_BUCKET}" --key "\${S3_PATH}/\${FILE_NAME}" --body "\${FILE_NAME}"
 }
 send_to_s3 "$cover" 'image/jpeg'
 send_to_s3 rss.xml 'application/rss+xml'
@@ -363,6 +363,7 @@ __PODHEAD__
 	my $title = '';
 	foreach my $track (@{$part}) {
 		$title = $track->{'TITLE'};
+		$title =~ s/, null//;
 		$title =~ s/$titleStrip// if ($titleStrip);
 		unless($title || $track->{'SKIP'}) { $title = 'Disc ' . $track->{'ORDER'}; }
 		$tracknum++ unless($track->{'SKIP'});
@@ -457,7 +458,7 @@ if ($isWin) {
 	}
 	print BAT1 qq!\nwait\nmv *.m4b ~/Audiobooks/\n!;
 	close(BAT1);
-	print TOS3 qq!#rm -R "\${SSHFS_TMP}"\necho "Published to: $rssPublishPath"!;
+	print TOS3 qq!#rm -R "\${SSHFS_TMP}"\necho "Published to: $rssPublishPath/rss.xml"!;
 	close(TOS3);
 	system(qq!chmod +x ! . bashEscapeSingle("Encode $parentdir.sh"));
 	system(qq!chmod +x 'Faster Chapters.sh'!);
@@ -658,9 +659,11 @@ __RETAG_HEAD__
 		}
 		$counts->[-1]++;
 		my $chapZero = substr("0000$chapterNum", 0 - $zeroCount);
-		my $safeTitle = bashEscapeSingle($chapter->[0]->{'TITLE'});
+		my $chapTitle = '' . $chapter->[0]->{'TITLE'};
+		$chapTitle =~ s/, null//;
+		my $safeTitle = bashEscapeSingle($chapTitle);
 		if ($isWin) {
-			$safeTitle = escapeSingle($chapter->[0]->{'TITLE'});
+			$safeTitle = escapeSingle($chapTitle);
 		}
 		print FASTER qq!\necho "Adjusting tempo for $safeTitle"\nmadplay -q -o wave:- ! unless($isWin);
 		my $baseName = $multipart ? qq!"$splitNum-$chapZero"! : qq!"$chapZero"!;
@@ -777,14 +780,14 @@ sub lpad {
 sub config {
 	my ($path, $default) = @_;
 	my $result = $config->get($path);
-	$result = defined($result) ? $result : $default;
+	$result = (defined($result) ? $result : $default) || '';
 	print("Config: $path = $result\n") unless(defined($default) && ($result eq $default));
 	return $result;
 } # config
 
 sub template {
 	my ($before) = @_;
-	my $after = $before;
+	my $after = $before || '';
 	while (my ($key, $value) = each %templateable) {
 		my $qk = quotemeta($key);
 		$after =~ s/$qk/$value/g;
